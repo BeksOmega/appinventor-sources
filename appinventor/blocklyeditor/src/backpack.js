@@ -255,8 +255,8 @@ Blockly.Backpack.prototype.dispose = function() {
 Blockly.Backpack.prototype.pasteBackpack = function() {
   var p = this;
   this.getContents(function(contentsMap) {
-    var contentsArray = contentsMap.keys();
-    if (contentsArray === undefined || contentsArray.length == 0) {
+    var contentsArray = Object.keys(contentsMap);
+    if (!contentsArray.length) {
       return;
     }
     var lastPastedBlock = null;
@@ -270,7 +270,8 @@ Blockly.Backpack.prototype.pasteBackpack = function() {
         var ok = true;
         for (var j = 0; j < arr.length; j++) {
           var type = arr[j];
-          if (!Blockly.Blocks[type] && !this.workspace_.getComponentDatabase().hasType(type)) {
+          if (!Blockly.Blocks[type] &&
+              !this.workspace_.getComponentDatabase().hasType(type)) {
             ok = false;
             break;
           }
@@ -377,9 +378,9 @@ Blockly.Backpack.prototype.addToBackpack = function(block, store) {
 Blockly.Backpack.prototype.removeFromBackpack = function(blocks) {
   var backpack = this;
   this.getContents(function(contentsMap) {
-    var contentsArray = contentsMap.keys();
+    var contentsArray = Object.keys(contentsMap);
     var deletedBlocks = 0;
-    if (contentsArray && contentsArray.length) {
+    if (contentsArray.length) {
       for (var i = 0, block; block = blocks[i]; i++) {
         var cleanedXML = this.cleanBlockXML_(Blockly.Xml.blockToDom(block));
         // If the backpack contains this block.
@@ -507,10 +508,9 @@ Blockly.Backpack.prototype.openBackpack = function(e) {
   } else {
     var p = this;
     this.getContents(function(contentsMap) {
-      var contentsArray = contentsMap.keys();
-      var len = contentsArray.length;
+      var contentsArray = Object.keys(contentsMap);
       var newBackpack = [];
-      for (var i = 0; i < len; i++) {
+      for (var i = 0; i < contentsArray.length; i++) {
         newBackpack[i] = Blockly.Xml.textToDom(contentsArray[i]).firstChild;
       }
       p.flyout_.show(newBackpack);
@@ -680,7 +680,7 @@ Blockly.Backpack.prototype.getContents = function(callback) {
       } else {
         var parsed = JSON.parse(content);
         Blockly.Backpack.contents = parsed;
-        Blockly.Backpack.contentsMap = this.contentArrayToMap(parsed);
+        Blockly.Backpack.contentsMap = this.contentArrayToMap_(parsed);
         p.resize();
         callback(Blockly.Backpack.contentsMap);
       }
@@ -697,7 +697,7 @@ Blockly.Backpack.prototype.getContents = function(callback) {
  */
 Blockly.Backpack.prototype.setContents = function(contentMap, store) {
   Blockly.Backpack.contentsMap = contentMap;
-  Blockly.Backpack.contents = contentMap.keys();
+  Blockly.Backpack.contents = Object.keys(contentMap);
   if (store) {
     if (Blockly.Backpack.backPackId) {
       top.BlocklyPanel_storeSharedBackpack(Blockly.Backpack.backPackId,
