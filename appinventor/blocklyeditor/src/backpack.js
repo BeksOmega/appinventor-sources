@@ -690,11 +690,12 @@ Blockly.Backpack.prototype.getContents = function(callback) {
 
 /**
  * Set the contents of the Backpack.
- * @param {string[]} backpack Array of XML strings to set as the new Backpack contents.
+ * @param {Object} backpack Map of XML strings to set as new backpack.
  * @param {boolean=false} store If true, store the backpack as a user file.
  */
-Blockly.Backpack.prototype.setContents = function(backpack, store) {
-  Blockly.Backpack.contents = backpack;
+Blockly.Backpack.prototype.setContents = function(contentMap, store) {
+  Blockly.Backpack.contentsMap = contentMap;
+  Blockly.Backpack.contents = contentMap.keys();
   if (store) {
     if (Blockly.Backpack.backPackId) {
       top.BlocklyPanel_storeSharedBackpack(Blockly.Backpack.backPackId,
@@ -705,7 +706,15 @@ Blockly.Backpack.prototype.setContents = function(backpack, store) {
   }
 };
 
-Blockly.Backpack.prototype.contentArrayToMap = function(contentArray) {
+/**
+ * Converts an array representing the contents into an object map
+ * representing the contents.
+ * @param {!string[]} contentArray An array of XML strings representing the
+ * contents.
+ * @returns {Object} A map of XML strings to null representing the contents.
+ * @private
+ */
+Blockly.Backpack.prototype.contentArrayToMap_ = function(contentArray) {
   var map = Object.create(null);
   for (var i = 0; i < contentArray.length; i++) {
     // No need to store values, all we need are the keys.
