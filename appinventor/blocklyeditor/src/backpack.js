@@ -328,7 +328,7 @@ Blockly.Backpack.prototype.addAllToBackpack = function() {
     } finally {
       p.NoAsync_ = saveAsync;
     }
-    p.setContents(Blockly.Backpack.contents, true);
+    p.setContents(Blockly.Backpack.contentsMap, true);
   });
 };
 
@@ -372,28 +372,30 @@ Blockly.Backpack.prototype.addToBackpack = function(block, store) {
 
 /**
  * Remove the top-level blocks with the given IDs from the backpack.
- * @param {!Array.<string>} ids The block IDs to be removed
+ * @param {Blockly.Block[]} blocks The blocks to be removed.
  */
-Blockly.Backpack.prototype.removeFromBackpack = function(ids) {
-  var p = this;
+Blockly.Backpack.prototype.removeFromBackpack = function(blocks) {
+  var backpack = this;
   this.getContents(function(contentsMap) {
-    if (contents && contents.length) {
-      for (var i = 0; i < contents.length; i++) {
-        var xml = Blockly.Xml.textToDom(contents[i]);
-        var blockID = xml.firstElementChild.getAttribute("id");
-        if (ids.indexOf(blockID) >= 0) {
-          contents.splice(i, 1);
-          i--;
+    var contentsArray = contentsMap.keys();
+    var deletedBlocks = 0;
+    if (contentsArray && contentsArray.length) {
+      for (var i = 0, block; block = blocks[i]; i++) {
+        var cleanedXML = this.cleanBlockXML_(Blockly.Xml.blockToDom(block));
+        // If the backpack contains this block.
+        if (contentsMap[cleanedXML]) {
+          delete contentsMap[cleanedXML];
+          deletedBlocks++;
         }
       }
-      p.setContents(contents, true);
-      if (contents.length === 0) {
-        p.shrink();
+      backpack.setContents(contentsMap, true);
+      if (deletedBlocks == contentsArray.length) {
+        backpack.shrink();
       }
-      if (p.flyout_.isVisible()) {
-        p.isAdded = true;
-        p.openBackpack();
-        p.isAdded = false;
+      if (backpack.flyout_.isVisible()) {
+        backpack.isAdded = true;
+        backpack.openBackpack();
+        backpack.isAdded = false;
       }
     }
   });
@@ -635,7 +637,7 @@ Blockly.Backpack.prototype.shrink = function() {
  */
 Blockly.Backpack.prototype.clear = function() {
   if (this.confirmClear()) {
-    this.setContents([], true);
+    this.setContents(Object.create(null), true);
     this.shrink();
   }
 };
