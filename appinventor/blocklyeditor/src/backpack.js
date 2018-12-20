@@ -173,6 +173,8 @@ Blockly.Backpack.prototype.top_ = 0;
  */
 Blockly.Backpack.contents = [];
 
+Blockly.Backpack.contentsMap = Object.create(null);
+
 /**
  * backPackId -- false if using non-shared backpack
  * set to the backPackId (from Ode.java) if shared backpack
@@ -252,15 +254,16 @@ Blockly.Backpack.prototype.dispose = function() {
  */
 Blockly.Backpack.prototype.pasteBackpack = function() {
   var p = this;
-  this.getContents(function(bp_contents) {
-    if (bp_contents === undefined || bp_contents.length == 0) {
+  this.getContents(function(contentsMap) {
+    var contentsArray = contentsMap.keys();
+    if (contentsArray === undefined || contentsArray.length == 0) {
       return;
     }
     var lastPastedBlock = null;
     try {
       Blockly.Events.setGroup(true);
-      for (var i = 0; i < bp_contents.length; i++) {
-        var xml = Blockly.Xml.textToDom(bp_contents[i]);
+      for (var i = 0; i < contentsArray.length; i++) {
+        var xml = Blockly.Xml.textToDom(contentsArray[i]);
         var blk = xml.childNodes[0];
         var arr = [];
         p.checkValidBlockTypes(blk, arr);
@@ -315,7 +318,7 @@ Blockly.Backpack.prototype.checkValidBlockTypes = function(block, arr) {
 Blockly.Backpack.prototype.addAllToBackpack = function() {
   var topBlocks = Blockly.mainWorkspace.getTopBlocks(false);
   var p = this;
-  this.getContents(function(contents) {
+  this.getContents(function(contentsMap) {
     var saveAsync = p.NoAsync_;
     try {
       p.NoAsync_ = true;
@@ -336,26 +339,24 @@ Blockly.Backpack.prototype.addAllToBackpack = function() {
 Blockly.Backpack.prototype.addToBackpack = function(block, store) {
   // Copy is made of the expanded block.
   var isCollapsed = block.collapsed_;
-  block.setCollapsed(false);
-  var xmlBlock = Blockly.Xml.blockToDom(block);
-  Blockly.Xml.deleteNext(xmlBlock);
-  // Encode start position in XML.
-  var xy = block.getRelativeToSurfaceXY();
-  xmlBlock.setAttribute('x', Blockly.RTL ? -xy.x : xy.x);
-  xmlBlock.setAttribute('y', xy.y);
+  var cleanXML = this.cleanBlockXML_(Blockly.Xml.domToBlock(block));
   block.setCollapsed(isCollapsed);
 
   // Add the block to the backpack
   var p = this;
-  this.getContents(function(bp_contents) {
-    if (!bp_contents) {
-      bp_contents = [];
+  this.getContents(function(contentsMap) {
+    if (!contentsMap) {
+      contentsMap = Object.create(null);
     }
-    bp_contents.push("<xml>" + Blockly.Xml.domToText(xmlBlock) + "</xml>");
+    // If the backpack already contains a block with the identical structure.
+    if (contentsMap[cleanXML]) {
+      return;
+    }
+    contentsMap.push(cleanXML);
     // We technically do not need to set the contents here since the contents are manipulated by
     // reference, but separating the setting from modifying allows us to use different, non-in-memory
     // storage in the future.
-    p.setContents(bp_contents, store);
+    p.setContents(contentsMap, store);
     p.grow();
     Blockly.getMainWorkspace().playAudio('backpack');
 
@@ -375,7 +376,7 @@ Blockly.Backpack.prototype.addToBackpack = function(block, store) {
  */
 Blockly.Backpack.prototype.removeFromBackpack = function(ids) {
   var p = this;
-  this.getContents(function(/** @type {string[]} */ contents) {
+  this.getContents(function(contentsMap) {
     if (contents && contents.length) {
       for (var i = 0; i < contents.length; i++) {
         var xml = Blockly.Xml.textToDom(contents[i]);
@@ -396,6 +397,49 @@ Blockly.Backpack.prototype.removeFromBackpack = function(ids) {
       }
     }
   });
+};
+
+/**
+ * Converts xml representing a block into text that can be stored in the
+ * content map.
+ * @param {!Element} xml An XML tree defining the block and any connected child
+ * blocks.
+ * @returns {!string} Text representing the XML tree, cleaned of all next
+ * blocks & unnecessary attributes.
+ */
+Blockly.Backpack.prototype.cleanBlockXML_ = function(xml) {
+  var xmlBlock = xml.cloneNode(true);
+  Blockly.Xml.deleteNext(xml);
+  var node = xmlBlock;
+  while (node) {
+    // Things like text inside tags are still treated as nodes, but they
+    // don't have attributes (or the removeAttribute function) so we can
+    // skip removing attributes from them.
+    if (node.removeAttribute) {
+      node.removeAttribute('x');
+      node.removeAttribute('y');
+      node.removeAttribute('id');
+    }
+
+    // Try to go down the tree
+    var nextNode = node.firstChild || node.nextSibling;
+    // If we can't go down, try to go back up the tree.
+    if (!nextNode) {
+      nextNode = node.parentNode;
+      while (nextNode) {
+        // We are valid again!
+        if (nextNode.nextSibling) {
+          nextNode = nextNode.nextSibling;
+          break;
+        }
+        // Try going up again. If parentNode is null that means we have
+        // reached the top, and we will break out of both loops.
+        nextNode = nextNode.parentNode;
+      }
+    }
+    node = nextNode;
+  }
+  return '<xml>' + Blockly.Xml.domToText(xmlBlock) + '</xml>';
 };
 
 Blockly.Backpack.prototype.hide = function() {
@@ -460,11 +504,12 @@ Blockly.Backpack.prototype.openBackpack = function(e) {
     this.flyout_.hide();
   } else {
     var p = this;
-    this.getContents(function(backpack) {
-      var len = backpack.length;
+    this.getContents(function(contentsMap) {
+      var contentsArray = contentsMap.keys();
+      var len = contentsArray.length;
       var newBackpack = [];
       for (var i = 0; i < len; i++) {
-        newBackpack[i] = Blockly.Xml.textToDom(backpack[i]).firstChild;
+        newBackpack[i] = Blockly.Xml.textToDom(contentsArray[i]).firstChild;
       }
       p.flyout_.show(newBackpack);
     });
@@ -610,7 +655,8 @@ Blockly.Backpack.prototype.count = function() {
 /**
  * Get the contents of the Backpack.
  * @param {function(string[])} callback The callback to asynchronously receive the backpack contents
- * @returns {string[]} Backpack contents encoded as an array of XML strings.
+ * @returns {Object} Backpack contents encoded as a map of XML strings to
+ * null values.
  */
 Blockly.Backpack.prototype.getContents = function(callback) {
   // If we are using a shared backpack, we need to fetch the contents
@@ -626,17 +672,19 @@ Blockly.Backpack.prototype.getContents = function(callback) {
     top.BlocklyPanel_getSharedBackpack(Blockly.Backpack.backPackId, function(content) {
       if (!content) {
         Blockly.Backpack.contents = [];
+        Blockly.Backpack.contentsMap = Object.create(null);
         p.shrink();
         callback([]);
       } else {
         var parsed = JSON.parse(content);
         Blockly.Backpack.contents = parsed;
+        Blockly.Backpack.contentsMap = this.contentArrayToMap(parsed);
         p.resize();
-        callback(parsed);
+        callback(Blockly.Backpack.contentsMap);
       }
     });
   } else {
-    callback(Blockly.Backpack.contents);
+    callback(Blockly.Backpack.contentsMap);
   }
 };
 
@@ -655,6 +703,15 @@ Blockly.Backpack.prototype.setContents = function(backpack, store) {
       top.BlocklyPanel_storeBackpack(JSON.stringify(backpack));
     }
   }
+};
+
+Blockly.Backpack.prototype.contentArrayToMap = function(contentArray) {
+  var map = Object.create(null);
+  for (var i = 0; i < contentArray.length; i++) {
+    // No need to store values, all we need are the keys.
+    map[contentArray[i]] = null;
+  }
+  return map;
 };
 
 /**
