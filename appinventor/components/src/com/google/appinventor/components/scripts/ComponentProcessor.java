@@ -198,6 +198,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final SortedMap<String, ComponentInfo> components = Maps.newTreeMap();
 
+  /**
+   * Information about every dropdown helper block. Keys are simple names, and values are the
+   * corresponding {@link ComponentProcessor.Dropdown} objects. This is constructed as a side effect
+   * of {@link #process} for use in {@link #outputResults()}.
+   */
+  protected final Map<String, Dropdown> dropdowns = Maps.newTreeMap();
+
   private final List<String> componentTypes = Lists.newArrayList();
 
   /**
@@ -225,6 +232,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected final boolean color;
 
+    protected HelperKey helper;
+
     /**
      * Constructs a Parameter.
      *
@@ -239,6 +248,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       this.name = name;
       this.type = type;
       this.color = color;
+      // helper is null by default.
     }
 
     /**
@@ -526,14 +536,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private boolean writable;
     private String componentInfoName;
     private boolean color;
+    private HelperKey helper;
 
-    protected Property(String name, String description, String longDescription,
-                       PropertyCategory category, boolean userVisible, boolean deprecated) {
+    protected Property(
+      String name,
+      String description,
+      String longDescription,
+      PropertyCategory category,
+      boolean userVisible,
+      boolean deprecated
+    ) {
       super(name, description, longDescription, "Property", userVisible, deprecated);
-      this.name = name;
       this.propertyCategory = category;
-      // type defaults to null
-      // readable and writable default to false
+      this.name = name;
+      // All other properties can be left as their defaults.
     }
 
     @Override
@@ -666,7 +682,6 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return typeKey;
     }
   }
-
 
   /**
    * A definition of a dropdown helper-block.
