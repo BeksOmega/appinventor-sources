@@ -15,15 +15,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 
 /**
- * Tool to generate simple component descriptors as JSON.
- *
- * The output is a sequence of component descriptions enclosed in square
+ * Tool to generate simple component and option list descriptors as JSON.
+ * The output is an object with two properties "components" and "optionLists".
+ * 
+ * The "components" output is a sequence of component descriptions enclosed in square
  * brackets and separated by commas. Each component description has the
  * following format:
  * { "type": "COMPONENT-TYPE",
@@ -54,25 +56,51 @@ import javax.tools.FileObject;
  *        "description": "DESCRIPTION",
  *        "type": "YAIL-TYPE",
  *        "rw": "read-only"|"read-write"|"write-only"|"invisible"},*
+ *        "helper": {
+ *          "type": "TYPE",
+ *          "key": "KEY",
+ *        }
  *   ],
  *   "events": [
  *     { "name": "EVENT-NAME",
  *       "description": "DESCRIPTION",
  *       "params": [
- *         { "name": "PARAM-NAME",
- *           "type": "YAIL-TYPE"},*
- *       ]},+
+ *         {
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": "TYPE",
+ *             "key": "KEY",
+ *           }
+ *         },*
  *   ],
  *   “methods”: [
  *     { "name": "METHOD-NAME",
  *       "description": "DESCRIPTION",
  *       "params": [
- *         { "name": "PARAM-NAME",
- *       "type": "YAIL-TYPE"},*
+ *         {
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": "TYPE",
+ *             "key": "KEY",
+ *           }
+ *         },*
  *     ]},+
  *   ],
  *   ("assets": ["FILENAME",*])?
  * }
+ * 
+ * The "optionLists" output is a map of option list description names to actual
+ * option list descriptions. The "optionLists" output has the following format:
+ * 
+ * "KEY" : {
+ *   "VALUE": {
+ *     "name": "NAME",
+ *     "description": "DESCRIPTION", 
+ *     "deprecated" : "true"|"false",
+ *   }, +
+ * }, +
  *
  * @author lizlooney@google.com (Liz Looney)
  * @author sharon@google.com (Sharon Perl) - added events, methods, non-designer
@@ -282,7 +310,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\", \"description\": ");
     sb.append(formatDescription(prop.getDescription()));
     sb.append(", \"type\": \"");
-    sb.append(javaTypeToYailType(prop.getType()));
+    sb.append(prop.getYailType());
     sb.append("\", \"rw\": \"");
     sb.append(prop.isUserVisible() ? prop.getRwString() : "invisible");
     // [lyn, 2015/12/20] Added deprecated field to JSON.
@@ -291,6 +319,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\", \"deprecated\": \"");
     sb.append(prop.isDeprecated());
     sb.append("\"");
+    outputHelper(prop.getHelperKey(), sb);
     if (alwaysSend) {
       sb.append(", \"alwaysSend\": true, \"defaultValue\": \"");
       sb.append(defaultValue.replaceAll("\"", "\\\""));
@@ -313,7 +342,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(", \"deprecated\": \"" + deprecated + "\"");
     sb.append(", \"params\": ");
     outputParameters(event.parameters, sb);
-    sb.append("}\n");
+    sb.append("}");
   }
 
   private void outputBlockMethod(String methodName, Method method, StringBuilder sb,
@@ -332,11 +361,13 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     outputParameters(method.parameters, sb);
     if (method.getReturnType() != null) {
       sb.append(", \"returnType\": \"");
-      sb.append(javaTypeToYailType(method.getReturnType()));
-      sb.append("\"}");
-    } else {
-      sb.append("}");
+      sb.append(method.getYailReturnType());
+      sb.append("\"");
     }
+    if (method.getReturnHelperKey() != null) {
+      outputHelper(method.getReturnHelperKey(), sb);
+    }
+    sb.append("}");
   }
 
   /*
@@ -351,19 +382,79 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(p.name);
       sb.append("\", \"type\": \"");
       sb.append(javaTypeToYailType(p.type));
-      sb.append("\"}");
+      sb.append("\"");
+      outputHelper(p.getHelperKey(), sb);
+      sb.append("}");
       separator = ",";
     }
     sb.append("]");
+  }
+
+  /**
+   * Outputs information about a HelperKey.
+   */
+  private void outputHelper(HelperKey key, StringBuilder sb) {
+    if (key != null) {
+      sb.append(", \"helperKey\": {");
+      sb.append("\"type\": \"");
+      sb.append(key.getType());
+      sb.append("\", \"key\": \"");
+      sb.append(key.getKey());
+      sb.append("\"}");
+    }
+  }
+
+  /**
+   * Outputs information about an option list.
+   * @param name The name/key to the option list.
+   * @param optionList The OptionList defining the option list.
+   * @param sb The string builder we are appending to.
+   */
+  private void outputOptionList(String name, OptionList optionList, StringBuilder sb) {
+    sb.append("  \"");
+    sb.append(name);
+    sb.append("\": {\n");
+    String separator = "";
+    // TODO: We may want to store this as an array of tuples instead, not sure yet.
+    sb.append("    \"class\": \"");
+    sb.append(optionList.getClassName());
+    sb.append("\",\n");
+    for (Entry<String, Option> entry : optionList.entrySet()) {
+      String value = entry.getKey();
+      Option option = entry.getValue();
+      sb.append(separator);
+      sb.append("    \"");
+      sb.append(value);
+      sb.append("\": ");
+      outputOption(option, sb);
+      sb.append("}");
+      separator = ",\n";
+    }
+    sb.append("\n  }\n");
+  }
+
+  /**
+   * Outputs an option list option.
+   * 
+   * @param option The Option defining the option to output.
+   * @param sb The string builder we are appending to.
+   */
+  private void outputOption(Option option, StringBuilder sb) {
+    sb.append("{ \"name\": \"");
+    sb.append(option.name);
+    sb.append("\", \"description\": ");
+    sb.append(formatDescription(option.getDescription()));
+    sb.append(", \"deprecated\": \"");
+    sb.append(option.isDeprecated());
+    sb.append("\"");
   }
 
   @Override
   protected void outputResults() throws IOException {
     StringBuilder sb = new StringBuilder();
 
-    sb.append('[');
+    sb.append("{\"components\": [\n");
     String separator = "";
-
     // Components are already sorted.
     for (Map.Entry<String, ComponentInfo> entry : components.entrySet()) {
       ComponentInfo component = entry.getValue();
@@ -371,8 +462,18 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       outputComponent(component, sb);
       separator = ",\n";
     }
+    sb.append("],\n");
 
-    sb.append(']');
+    sb.append("\"optionLists\": {\n");
+    separator = "";
+    for (Map.Entry<String, OptionList> entry : optionLists.entrySet()) {
+      String name = entry.getKey();
+      OptionList optionList = entry.getValue();
+      sb.append(separator);
+      outputOptionList(name, optionList, sb);
+      separator = ",\n";
+    }
+    sb.append("}\n}");
 
     FileObject src = createOutputFileObject(OUTPUT_FILE_NAME);
     Writer writer = src.openWriter();
