@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -198,6 +199,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final SortedMap<String, ComponentInfo> components = Maps.newTreeMap();
 
+  /**
+   * Information about every option list helper block. Keys are simple names, and values are the
+   * corresponding {@link ComponentProcessor.OptionList} objects. This is constructed as a side effect
+   * of {@link #process} for use in {@link #outputResults()}.
+   */
+  protected final Map<String, OptionList> optionLists = Maps.newTreeMap();
+
   private final List<String> componentTypes = Lists.newArrayList();
 
   /**
@@ -212,7 +220,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * String representation of the java type, such as "int", "double", or
    * "java.lang.String".
    */
-  protected final class Parameter {
+  protected final class Parameter implements Cloneable {
     /**
      * The parameter name
      */
@@ -221,9 +229,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The parameter's Java type, such as "int" or "java.lang.String".
      */
-    protected final String type;
+    protected final TypeMirror type;
 
     protected final boolean color;
+
+    protected HelperKey helper;
 
     /**
      * Constructs a Parameter.
@@ -231,14 +241,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @param name the parameter name
      * @param type the parameter's Java type (such as "int" or "java.lang.String")
      */
-    protected Parameter(String name, String type) {
+    protected Parameter(String name, TypeMirror type) {
       this(name, type, false);
     }
 
-    protected Parameter(String name, String type, boolean color) {
+    protected Parameter(String name, TypeMirror type, boolean color) {
       this.name = name;
       this.type = type;
       this.color = color;
+      // helper is null by default.
+    }
+
+    /**
+     * Returns the HelperKey associated with this parameter, if one exists. Null otherwise.
+     */
+    protected HelperKey getHelperKey() {
+      return helper;
     }
 
     /**
@@ -252,8 +270,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @throws RuntimeException if {@code parameter} does not have a
      *         corresponding Yail type
      */
-    protected String parameterToYailType(Parameter parameter) {
+    protected String getYailType() {
       return javaTypeToYailType(type);
+    }
+
+    @Override
+    public Parameter clone() {
+      return new Parameter(name, type, color);
     }
   }
 
@@ -416,12 +439,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       parameters = Lists.newArrayList();
     }
 
-    protected void addParameter(String name, String type) {
-      parameters.add(new Parameter(name, type));
-    }
-
-    protected void addParameter(String name, String type, boolean color) {
-      parameters.add(new Parameter(name, type, color));
+    /**
+     * Adds the given parameter to this ParameterizedFeature.
+     */
+    protected void addParameter(Parameter param) {
+      parameters.add(param);
     }
 
     /**
@@ -436,7 +458,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       StringBuilder sb = new StringBuilder();
       int count = 0;
       for (Parameter param : parameters) {
-        sb.append(param.parameterToYailType(param));
+        sb.append(param.getYailType());
         sb.append(" ");
         sb.append(param.name);
         if (++count != parameters.size()) {
@@ -462,7 +484,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Event clone() {
       Event that = new Event(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       return that;
     }
@@ -480,7 +502,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   protected final class Method extends ParameterizedFeature
       implements Cloneable, Comparable<Method> {
     // Inherits name, description, and parameters
-    private String returnType;
+    private TypeMirror returnType;
+    private HelperKey returnHelperKey;
     private boolean color;
 
     protected Method(String name, String description, String longDescription, boolean userVisible,
@@ -490,7 +513,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     protected String getReturnType() {
-      return returnType;
+      if (returnType != null) {
+        return returnType.toString();
+      }
+      return null;
+    }
+
+    protected String getYailReturnType() {
+      return javaTypeToYailType(returnType);
+    }
+
+    /**
+     * Returns the HelperKey associated with the return type of this parameter, if one exists. Null
+     * otherwise.
+     */
+    protected HelperKey getReturnHelperKey() {
+      return returnHelperKey;
     }
 
     protected boolean isColor() {
@@ -501,7 +539,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Method clone() {
       Method that = new Method(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       that.returnType = returnType;
       return that;
@@ -517,22 +555,28 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents an App Inventor component property (annotated with
    * {@link SimpleProperty}).
    */
-  protected static final class Property extends Feature implements Cloneable {
+  protected final class Property extends Feature implements Cloneable {
     protected final String name;
     private PropertyCategory propertyCategory;
-    private String type;
+    private TypeMirror type;
     private boolean readable;
     private boolean writable;
     private String componentInfoName;
     private boolean color;
+    private HelperKey helper;
 
-    protected Property(String name, String description, String longDescription,
-                       PropertyCategory category, boolean userVisible, boolean deprecated) {
+    protected Property(
+      String name,
+      String description,
+      String longDescription,
+      PropertyCategory category,
+      boolean userVisible,
+      boolean deprecated
+    ) {
       super(name, description, longDescription, "Property", userVisible, deprecated);
-      this.name = name;
       this.propertyCategory = category;
-      // type defaults to null
-      // readable and writable default to false
+      this.name = name;
+      // All other properties can be left as their defaults.
     }
 
     @Override
@@ -579,7 +623,16 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @return the feature's Java type
      */
     protected String getType() {
-      return type;
+      return type.toString();
+    }
+
+    /**
+     * Returns this property's Yail type (e.g., "number", "text", "list", etc).
+     * 
+     * @return the feature's Yail type.
+     */
+    protected String getYailType() {
+      return javaTypeToYailType(type);
     }
 
     /**
@@ -602,6 +655,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected boolean isColor() {
       return color;
+    }
+
+    /**
+     * Returns the HelperKey associated with this property, if one exists. Null otherwise.
+     */
+    protected HelperKey getHelperKey() {
+      return helper;
     }
 
     /**
@@ -628,6 +688,136 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       }
     }
   }
+
+  /**
+   * An enum specifying the available types of helper blocks aka types of helper UI.
+   */
+  protected enum HelperType { OPTION_LIST }
+
+  /**
+   * A key that allows you to access info about a helper block.
+   */
+  protected final class HelperKey {
+    private HelperType helperType;
+
+    private String key;
+
+    /**
+     * Creates a HelperKey which can be used to access data about a helper block.
+     */
+    protected HelperKey(HelperType type, String key) {
+      this.helperType = type;
+      this.key = key;
+    }
+
+    /**
+     * Returns the type of helper block, aka the type of helper UI. Eg an option list.
+     */
+    protected HelperType getType() {
+      return helperType;
+    }
+
+    /**
+     * Returns the key to the specific helper data. Eg in the case of an option list helper, this
+     * key would allow you to get the options for the block.
+     */
+    protected String getKey() {
+      return key;
+    }
+  }
+
+  /**
+   * A definition of a option list helper-block.
+   */
+  protected final class OptionList {
+    /**
+     * A map of option values (strings) to option info (features).
+     * For built-in components the key is used to look up the translated display text.
+     * For extensions, which do not support i18n, the key /is/ the display text.
+     */
+    private Map<String, Option> options;
+
+    /**
+     * The fully qualified class name this OptionList is associated with.
+     */
+    private String className;
+
+    /**
+     * Creates an OptionList (which is a definition of a option list helper-block) that can be
+     * populated with options.
+     * 
+     * @param class The fully qualified class name this OptionList is associated with.
+     */
+    protected OptionList(String className) {
+      this.className = className;
+      options = Maps.newTreeMap();
+    }
+
+    /**
+     * @return The fully qualified class name this OptionList is associated with.
+     */
+    protected String getClassName() {
+      return className;
+    }
+
+    /**
+     * Adds the given value-option pair to the OptionList.
+     */
+    protected void addOption(String optionValue, Option optionInfo) {
+        options.put(optionValue, optionInfo);
+    }
+
+    /**
+     * Returns the Option associated with the given option value if it exists. Null otherwise.
+     */
+    protected Feature getOption(String optionValue) {
+      return options.get(optionValue);
+    }
+
+    /**
+     * Returns true if this option list has an option associated with the given value.
+     */
+    protected boolean containsOption(String optionValue) {
+      return options.containsKey(optionValue);
+    }
+
+    /**
+     * Returns true if this option list has no options.
+     */
+    protected boolean isEmpty() {
+      return options.isEmpty();
+    }
+
+    /**
+     * Returns a set of Map.Entry's that make up this option list. The entries contain the
+     * Stringified value of the option and the Option itself.
+     */
+    protected Set<Map.Entry<String, Option>> entrySet() {
+      return options.entrySet();
+    }
+  }
+
+  // Option doesn't have any special properties beyond feature, but we can't instantiate a Feature
+  // directly.
+  protected final class Option extends Feature {
+    protected Option(
+      String name,
+      String description,
+      String longDescription,
+      boolean userVisible,
+      boolean deprecated
+    ) {
+      super(name, description, longDescription, "Option", userVisible, deprecated);
+    }
+
+    /**
+     * Returns the description of this option.
+     */
+    protected String getDescription() {
+      return description;
+    }
+  }
+
 
   /**
    * Represents an App Inventor component, including its designer properties,
@@ -1360,6 +1550,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         throw new RuntimeException("Property method is void and has no parameters: "
                                    + propertyName);
       }
+      property.helper = elementToHelperKey(element, ((ExecutableElement)element).getReturnType());
       if (element.getAnnotation(IsColor.class) != null) {
         property.color = true;
       }
@@ -1371,6 +1562,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                                    propertyName);
       }
       typeMirror = parameters.get(0);
+      Element param = ((ExecutableElement) element).getParameters().get(0);
+      property.helper = elementToHelperKey(param, param.asType());
       for (VariableElement ve : ((ExecutableElement) element).getParameters()) {
         if (ve.getAnnotation(IsColor.class) != null) {
           property.color = true;
@@ -1380,13 +1573,176 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // Use typeMirror to set the property's type.
     if (!typeMirror.getKind().equals(TypeKind.VOID)) {
-      property.type = typeMirror.toString();
+      property.type = typeMirror;
       updateComponentTypes(typeMirror);
     }
 
     property.componentInfoName = componentInfoName;
 
     return property;
+  }
+
+  /**
+   * Converts a varElement (representing a function element) into a HelperKey.
+   * 
+   * @return The created HelperKey if the parameter does indeed define a helper, null otherwise.
+   */
+  private HelperKey elementToHelperKey(Element elem, TypeMirror type) {
+    HelperKey key;
+    key = hasOptionListHelper(elem, type);
+    if (key != null) {
+      return key;
+    }
+    // Add more possibilities here.
+    return null;
+  }
+
+  private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
+    // Check if the elem type is an OptionList
+    if (isOptionList(type)) {
+      return optionListToHelperKey(((DeclaredType)type).asElement());
+    }
+
+    // Check if the elem has an @Options annotation.
+    // This is the backwards compat method for getting OptionLists.
+    for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
+      // Make sure we are dealing with an Options annotation.
+      if (!mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Options")) {
+        continue;
+      }
+      for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry:
+          mirror.getElementValues().entrySet()) {
+        // Make sure we are looking at the value argument.
+        if (!entry.getKey().getSimpleName().contentEquals("value")) {
+          continue;
+        }
+        // Get the AnnotationValue's value. So we are now looking at the
+        // class passed to the @Options annotation.
+        Element optionList = ((DeclaredType)entry.getValue().getValue()).asElement();
+        return optionListToHelperKey(optionList);
+      }
+    }
+    return null;
+  }
+
+  private boolean isOptionList(TypeMirror type) {
+    if (type.getKind() == TypeKind.DECLARED) {
+      TypeElement elem = (TypeElement)((DeclaredType)type).asElement();
+      for (TypeMirror parent : elem.getInterfaces()) {
+        TypeElement parentElem = (TypeElement)((DeclaredType)parent).asElement();
+        if (parentElem.getSimpleName().toString().equals("OptionList")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private HelperKey optionListToHelperKey(Element optionList) {
+    String name = optionList.getSimpleName().toString();
+    // We haven't seen this type of dropdown before, so add it.
+    if (optionLists.get(name) == null) {
+      // Couldn't add it for whatever reason.
+      if (!tryAddOptionList(optionList)) {
+        return null;
+      }
+    }
+    return new HelperKey(HelperType.OPTION_LIST, name);
+  }
+
+  /**
+   * Adds a new OptionList (based on the passed option list element) to the optionLists list.
+   * 
+   * @param optionElem The element representing the enum defining the options.
+   * 
+   * @return Returns true if the Optionlist was successfully added. False otherwise.
+   */
+  private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
+    OptionList optionList = new OptionList(optionElem.asType().toString());
+
+    // Get the class.
+    String className = optionElem.asType().toString();
+    Class clazz = null;
+    try {
+      clazz = Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException("OptionList Class: " + className + " is not available. " +
+        "Make sure that it is available to the compiler.");
+    }
+    if (clazz == null) {
+      return false;
+    }
+
+    // Get the getValue method.
+    java.lang.reflect.Method getValueMethod = null;
+    try {
+      getValueMethod = clazz.getDeclaredMethod("getValue", new Class[] {});
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("Class: " + className + " must have a getValue() method.");
+    }
+    if (getValueMethod == null) {
+      return false;
+    }
+  
+    // Create a map of enum const names -> values.
+    Map<String, String> namesToValues = Maps.newTreeMap();
+    Object[] constants = clazz.getEnumConstants();
+    for (Object constant : clazz.getEnumConstants()) {
+        try {
+          E enumConst = (E) constant;
+          namesToValues.put(
+            enumConst.name(),
+            getValueMethod.invoke(enumConst, new Object [] {}).toString());
+        } catch (Exception e) {}
+    }
+
+    // Add the options to the OptionList.
+    for (Element field : optionElem.getEnclosedElements()) {
+      String fieldName = field.getSimpleName().toString();
+      if (namesToValues.containsKey(fieldName)) {
+        optionList.addOption(namesToValues.get(fieldName), elementToOption(field));
+      }
+    }
+
+    if (!optionList.isEmpty()) {
+      optionLists.put(optionElem.getSimpleName().toString(), optionList);
+    }
+
+    return !optionList.isEmpty();
+  }
+
+  /**
+   * Converts an Element into an Option.
+   */
+  private Option elementToOption(Element field) {
+    // TODO: getDocComment doesn't seem to work on enum constants?
+    String description = elementUtils.getDocComment(field);
+    if (description == null) {
+      description = "";
+    }
+    // Read only until the first javadoc parameter
+    description = description.split("[^\\\\][@{]")[0].trim();
+
+    return new Option(
+      field.getSimpleName().toString(),
+      description,
+      description,
+      true,  // Always user visible.
+      elementUtils.isDeprecated(field)
+    );
+  }
+
+  /**
+   * Converts a VariableElement into a Parameter definition.
+   */
+  private Parameter varElemToParameter(VariableElement varElem) {
+    Parameter param = new Parameter(
+      varElem.getSimpleName().toString(),
+      varElem.asType(),
+      varElem.getAnnotation(IsColor.class) != null
+    );
+    param.helper = elementToHelperKey(varElem, varElem.asType());
+    return param;
   }
 
   // Transform an @ActivityElement into an XML element String for use later
@@ -1601,10 +1957,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           Property priorProperty = componentInfo.properties.get(propertyName);
 
           if (!priorProperty.type.equals(newProperty.type)) {
-            // The 'real' type of a property is determined by its getter, if
-            // it has one.  In theory there can be multiple setters which
-            // take different types and those types can differ from the
-            // getter.
+            // If the getter type is different than the setter type, set the type to getter.
+            // If we have multiple setters with different types, throw an error.
             if (newProperty.readable) {
               priorProperty.type = newProperty.type;
             } else if (priorProperty.writable) {
@@ -1615,6 +1969,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
             }
           }
 
+          // TODO: Should this be moved into the Property class? This was tricky for me to discover.
           // Merge newProperty into priorProperty, which is already in the properties map.
           if ((priorProperty.description.isEmpty() || priorProperty.isDefaultDescription()
                || element.getAnnotation(Override.class) != null)
@@ -1634,6 +1989,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                 priorProperty.propertyCategory + " and " +
                 newProperty.propertyCategory + " in component " +
                 componentInfo.name);
+          }
+          if (priorProperty.helper == null) {
+            priorProperty.helper = newProperty.helper;
           }
           priorProperty.readable = priorProperty.readable || newProperty.readable;
           priorProperty.writable = priorProperty.writable || newProperty.writable;
@@ -1713,9 +2071,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          event.addParameter(ve.getSimpleName().toString(),
-                             ve.asType().toString(),
-                             ve.getAnnotation(IsColor.class) != null);
+          event.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
       }
@@ -1769,15 +2125,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          method.addParameter(ve.getSimpleName().toString(),
-                              ve.asType().toString(),
-                              ve.getAnnotation(IsColor.class) != null);
+          method.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
 
         // Extract the return type.
         if (e.getReturnType().getKind() != TypeKind.VOID) {
-          method.returnType = e.getReturnType().toString();
+          method.returnType = e.getReturnType();
+          method.returnHelperKey = elementToHelperKey(e, method.returnType);
           if (e.getAnnotation(IsColor.class) != null) {
             method.color = true;
           }
@@ -1839,58 +2194,65 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @throws RuntimeException if the parameter cannot be mapped to any of the
    *         legal return values
    */
-  protected final String javaTypeToYailType(String type) {
+  protected final String javaTypeToYailType(TypeMirror type) {
     if (BOXED_TYPES.containsKey(type)) {
       throw new IllegalArgumentException(String.format(BOXED_TYPE_ERROR, type,
           BOXED_TYPES.get(type)));
     }
+
+    // Handle enums
+    if (isOptionList(type)) {
+      return ((DeclaredType)type).asElement().getSimpleName() + "Enum";
+    }
+
+    String typeString = type.toString();
     // boolean -> boolean
-    if (type.equals("boolean")) {
-      return type;
+    if (typeString.equals("boolean")) {
+      return typeString;
     }
     // String -> text
-    if (type.equals("java.lang.String")) {
+    if (typeString.equals("java.lang.String")) {
       return "text";
     }
     // {float, double, int, short, long, byte} -> number
-    if (type.equals("float") || type.equals("double") || type.equals("int") ||
-        type.equals("short") || type.equals("long") || type.equals("byte")) {
+    if (typeString.equals("float") || typeString.equals("double") || typeString.equals("int") ||
+        typeString.equals("short") || typeString.equals("long") || typeString.equals("byte")) {
       return "number";
     }
     // YailList -> list
-    if (type.equals("com.google.appinventor.components.runtime.util.YailList")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailList")) {
       return "list";
     }
     // List<?> -> list
-    if (type.startsWith("java.util.List")) {
+    if (typeString.startsWith("java.util.List")) {
       return "list";
     }
-    if (type.equals("com.google.appinventor.components.runtime.util.YailDictionary")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailDictionary")) {
       return "dictionary";
     }
-    if (type.equals("com.google.appinventor.components.runtime.util.YailObject")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailObject")) {
       return "yailobject";
     }
 
     // Calendar -> InstantInTime
-    if (type.equals("java.util.Calendar")) {
+    if (typeString.equals("java.util.Calendar")) {
       return "InstantInTime";
     }
 
-    if (type.equals("java.lang.Object")) {
+    if (typeString.equals("java.lang.Object")) {
       return "any";
     }
 
-    if (type.equals("com.google.appinventor.components.runtime.Component")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.Component")) {
       return "component";
     }
 
     // Check if it's a component.
-    if (componentTypes.contains(type)) {
+    if (componentTypes.contains(typeString)) {
       return "component";
     }
 
-    throw new IllegalArgumentException("Cannot convert Java type '" + type + "' to Yail type");
+    throw new IllegalArgumentException("Cannot convert Java type '" + typeString + "' to Yail type");
   }
 
   /**
