@@ -688,11 +688,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final class Dropdown {
     /**
-     * A map of option keys (strings) to option info (features).
+     * A map of option values (strings) to option info (features).
      * For built-in components the key is used to look up the translated display text.
      * For extensions, which do not support i18n, the key /is/ the display text.
      */
-    private Map<String, Feature> options;
+    private Map<String, Option> options;
 
     /**
      * Creates a Dropdown (which is a definition of a dropdown helper-block) that can be populated
@@ -702,20 +702,34 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       options = Maps.newTreeMap();
     }
 
-    protected void addOption(String optionKey, Feature optionValue) {
-        options.put(optionKey, optionValue);
+    protected void addOption(String optionValue, Option optionInfo) {
+        options.put(optionValue, optionInfo);
     }
 
-    protected Feature getOption(String optionKey) {
-      return options.get(optionKey);
+    protected Feature getOption(String optionValue) {
+      return options.get(optionValue);
     }
 
-    protected boolean containsOption(String optionKey) {
-      return options.containsKey(optionKey);
+    protected boolean containsOption(String optionValue) {
+      return options.containsKey(optionValue);
     }
 
-    protected void forEach(BiConsumer<String, Feature> action) {
+    protected void forEach(BiConsumer<String, Option> action) {
       options.forEach(action);
+    }
+  }
+
+  // Option doesn't have any special properties beyond feature, but we can't instantiate a Feature
+  // directly.
+  protected final class Option extends Feature {
+    protected Option(
+      String name,
+      String description,
+      String longDescription,
+      boolean userVisible,
+      boolean deprecated
+    ) {
+      super(name, description, longDescription, "Option", userVisible, deprecated);
     }
   }
 
@@ -1428,6 +1442,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     property.componentInfoName = componentInfoName;
 
     return property;
+  }
+
+  // TODO: Figure out if we can get the annotations from the parameters.
+  private HelperKey parameterToHelperKey(TypeMirror parameter) {
+    List<? extends AnnotationMirror> mirrors = parameter.getAnnotationMirrors();
+    if (mirrors.size() != 0) {
+      return new HelperKey(HelperType.DROPDOWN, "testKey");
+    }
+    return null;
   }
 
   // Transform an @ActivityElement into an XML element String for use later
