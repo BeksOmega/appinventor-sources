@@ -48,6 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import java.util.function.BiConsumer;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -515,6 +517,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents an App Inventor component property (annotated with
    * {@link SimpleProperty}).
    */
+  // TODO: Why is this guy static?
   protected static final class Property extends Feature implements Cloneable {
     protected final String name;
     private PropertyCategory propertyCategory;
@@ -626,6 +629,81 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       }
     }
   }
+
+  /**
+   * An enum specifying the available types of helper blocks aka types of helper UI.
+   */
+  protected enum HelperType { DROPDOWN }
+
+  /**
+   * A key that allows you to access info about a helper block.
+   */
+  protected final class HelperKey {
+    private HelperType helperType;
+
+    private String typeKey;
+
+    /**
+     * Creates a HelperKey which can be used to access data about a helper block.
+     */
+    protected HelperKey(HelperType type, String typeKey) {
+      this.helperType = type;
+      this.typeKey = typeKey;
+    }
+
+    /**
+     * Returns the type of helper block, aka the type of helper UI. Eg dropdown.
+     */
+    protected HelperType getHelperType() {
+      return helperType;
+    }
+
+    /**
+     * Returns the key to the specific helper data. Eg in the case of a dropdown helper, this key
+     * would allow you to get the options for the block.
+     */
+    protected String getTypeKey() {
+      return typeKey;
+    }
+  }
+
+
+  /**
+   * A definition of a dropdown helper-block.
+   */
+  protected final class Dropdown {
+    /**
+     * A map of option keys (strings) to option info (features).
+     * For built-in components the key is used to look up the translated display text.
+     * For extensions, which do not support i18n, the key /is/ the display text.
+     */
+    private Map<String, Feature> options;
+
+    /**
+     * Creates a Dropdown (which is a definition of a dropdown helper-block) that can be populated
+     * with options.
+     */
+    protected Dropdown() {
+      options = Maps.newTreeMap();
+    }
+
+    protected void addOption(String optionKey, Feature optionValue) {
+        options.put(optionKey, optionValue);
+    }
+
+    protected Feature getOption(String optionKey) {
+      return options.get(optionKey);
+    }
+
+    protected boolean containsOption(String optionKey) {
+      return options.containsKey(optionKey);
+    }
+
+    protected void forEach(BiConsumer<String, Feature> action) {
+      options.forEach(action);
+    }
+  }
+
 
   /**
    * Represents an App Inventor component, including its designer properties,
