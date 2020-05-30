@@ -291,14 +291,18 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     // we could include this field only when it is "true"
     sb.append("\", \"deprecated\": \"");
     sb.append(prop.isDeprecated());
+    sb.append("\"");
 
     HelperKey info = prop.getHelperInfo();
     if (info != null) {
-      sb.append("\", \"helperKey\": \"");
-      sb.append(info.getTypeKey());
+      sb.append(", \"helperKey\": {");
+      sb.append("\"type\": \"");
+      sb.append(info.getType());
+      sb.append("\", \"key\": \"");
+      sb.append(info.getKey());
+      sb.append("\"}");
     }
 
-    sb.append("\"");
     if (alwaysSend) {
       sb.append(", \"alwaysSend\": true, \"defaultValue\": \"");
       sb.append(defaultValue.replaceAll("\"", "\\\""));

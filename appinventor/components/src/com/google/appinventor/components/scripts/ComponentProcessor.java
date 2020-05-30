@@ -662,20 +662,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   protected final class HelperKey {
     private HelperType helperType;
 
-    private String typeKey;
+    private String key;
 
     /**
      * Creates a HelperKey which can be used to access data about a helper block.
      */
-    protected HelperKey(HelperType type, String typeKey) {
+    protected HelperKey(HelperType type, String key) {
       this.helperType = type;
-      this.typeKey = typeKey;
+      this.key = key;
     }
 
     /**
      * Returns the type of helper block, aka the type of helper UI. Eg dropdown.
      */
-    protected HelperType getHelperType() {
+    protected HelperType getType() {
       return helperType;
     }
 
@@ -683,8 +683,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns the key to the specific helper data. Eg in the case of a dropdown helper, this key
      * would allow you to get the options for the block.
      */
-    protected String getTypeKey() {
-      return typeKey;
+    protected String getKey() {
+      return key;
     }
   }
 
