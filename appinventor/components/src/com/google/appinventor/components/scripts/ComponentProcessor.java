@@ -723,8 +723,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return options.isEmpty();
     }
 
-    protected void forEach(BiConsumer<String, Option> action) {
-      options.forEach(action);
+    protected Set<Map.Entry<String, Option>> entrySet() {
+      return options.entrySet();
     }
   }
 
@@ -739,6 +739,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       boolean deprecated
     ) {
       super(name, description, longDescription, "Option", userVisible, deprecated);
+    }
+
+    protected String getDescription() {
+      return description;
     }
   }
 

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.tools.Diagnostic;
@@ -364,13 +365,42 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("]");
   }
 
+  private void outputDropdown(String name, Dropdown dropdown, StringBuilder sb) {
+    sb.append("  \"");
+    sb.append(name);
+    sb.append("\": {\n");
+    String separator = "";
+    // TODO: We may want to store this as an array of tuples instead, not sure yet.
+    for (Entry<String, Option> entry : dropdown.entrySet()) {
+      String value = entry.getKey();
+      Option option = entry.getValue();
+      sb.append(separator);
+      sb.append("    \"");
+      sb.append(value);
+      sb.append("\": ");
+      outputOption(option, sb);
+      sb.append("}");
+      separator = ",\n";
+    }
+    sb.append("\n  }\n");
+  }
+
+  private void outputOption(Option option, StringBuilder sb) {
+    sb.append("{ \"name\": \"");
+    sb.append(option.name);
+    sb.append("\", \"description\": ");
+    sb.append(formatDescription(option.getDescription()));
+    sb.append(", \"deprecated\": \"");
+    sb.append(option.isDeprecated());
+    sb.append("\"");
+  }
+
   @Override
   protected void outputResults() throws IOException {
     StringBuilder sb = new StringBuilder();
 
-    sb.append('[');
+    sb.append("{\"components\": [\n");
     String separator = "";
-
     // Components are already sorted.
     for (Map.Entry<String, ComponentInfo> entry : components.entrySet()) {
       ComponentInfo component = entry.getValue();
@@ -378,8 +408,18 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       outputComponent(component, sb);
       separator = ",\n";
     }
+    sb.append("],\n");
 
-    sb.append(']');
+    sb.append("\"dropdowns\": {\n");
+    separator = "";
+    for (Map.Entry<String, Dropdown> entry : dropdowns.entrySet()) {
+      String name = entry.getKey();
+      Dropdown dropdown = entry.getValue();
+      sb.append(separator);
+      outputDropdown(name, dropdown, sb);
+      separator = ",\n";
+    }
+    sb.append("}\n}");
 
     FileObject src = createOutputFileObject(OUTPUT_FILE_NAME);
     Writer writer = src.openWriter();
