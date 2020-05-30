@@ -1534,10 +1534,17 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   private Option elementToOption(Element field) {
+    String description = elementUtils.getDocComment(field);
+    if (description == null) {
+      description = "";
+    }
+    // Read only until the first javadoc parameter
+    description = description.split("[^\\\\][@{]")[0].trim();
+
     return new Option(
       field.getSimpleName().toString(),
-      "",
-      "",
+      description,
+      description,
       true,  // Always user visible.
       elementUtils.isDeprecated(field)
     );
