@@ -292,17 +292,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\", \"deprecated\": \"");
     sb.append(prop.isDeprecated());
     sb.append("\"");
-
-    HelperKey info = prop.getHelperInfo();
-    if (info != null) {
-      sb.append(", \"helperKey\": {");
-      sb.append("\"type\": \"");
-      sb.append(info.getType());
-      sb.append("\", \"key\": \"");
-      sb.append(info.getKey());
-      sb.append("\"}");
-    }
-
+    outputHelper(prop.getHelperKey(), sb);
     if (alwaysSend) {
       sb.append(", \"alwaysSend\": true, \"defaultValue\": \"");
       sb.append(defaultValue.replaceAll("\"", "\\\""));
@@ -325,7 +315,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(", \"deprecated\": \"" + deprecated + "\"");
     sb.append(", \"params\": ");
     outputParameters(event.parameters, sb);
-    sb.append("}\n");
+    sb.append("}");
   }
 
   private void outputBlockMethod(String methodName, Method method, StringBuilder sb,
@@ -363,10 +353,23 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(p.name);
       sb.append("\", \"type\": \"");
       sb.append(javaTypeToYailType(p.type));
-      sb.append("\"}");
+      sb.append("\"");
+      outputHelper(p.getHelperKey(), sb);
+      sb.append("}");
       separator = ",";
     }
     sb.append("]");
+  }
+
+  private void outputHelper(HelperKey key, StringBuilder sb) {
+    if (key != null) {
+      sb.append(", \"helperKey\": {");
+      sb.append("\"type\": \"");
+      sb.append(key.getType());
+      sb.append("\", \"key\": \"");
+      sb.append(key.getKey());
+      sb.append("\"}");
+    }
   }
 
   private void outputDropdown(String name, Dropdown dropdown, StringBuilder sb) {

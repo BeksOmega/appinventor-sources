@@ -252,6 +252,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       // helper is null by default.
     }
 
+    protected HelperKey getHelperKey() {
+      return helper;
+    }
+
     /**
      * Provides a Yail type for a given parameter type.  This is useful because
      * the parameter types used for {@link Event} are Simple types (e.g.,
@@ -427,12 +431,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       parameters = Lists.newArrayList();
     }
 
+    // TODO: Remove this. Better to take in parameter directly, because then the logic for creating
+    //   the parameter can be separated out easily.
     protected void addParameter(String name, String type) {
       parameters.add(new Parameter(name, type));
     }
 
+    // TODO: Remove this. Better to take in parameter directly, because then the logic for creating
+    //   the parameter can be separated out easily.
     protected void addParameter(String name, String type, boolean color) {
       parameters.add(new Parameter(name, type, color));
+    }
+
+    protected void addParameter(Parameter param) {
+      parameters.add(param);
     }
 
     /**
@@ -622,7 +634,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return color;
     }
 
-    protected HelperKey getHelperInfo() {
+    protected HelperKey getHelperKey() {
       return helper;
     }
 
@@ -1439,7 +1451,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                                    propertyName);
       }
       typeMirror = parameters.get(0);
-      property.helper = parameterToHelperKey(((ExecutableElement) element).getParameters().get(0));
+      property.helper = varElemToHelperKey(((ExecutableElement) element).getParameters().get(0));
       for (VariableElement ve : ((ExecutableElement) element).getParameters()) {
         if (ve.getAnnotation(IsColor.class) != null) {
           property.color = true;
@@ -1458,7 +1470,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return property;
   }
 
-  private HelperKey parameterToHelperKey(VariableElement parameter) {
+  private HelperKey varElemToHelperKey(VariableElement parameter) {
     for (AnnotationMirror mirror : parameter.getAnnotationMirrors()) {
       // Make sure the annotation is of type Dropdown.
       // TODO: In the future we would want to allow for more types.
@@ -1548,6 +1560,16 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       true,  // Always user visible.
       elementUtils.isDeprecated(field)
     );
+  }
+
+  private Parameter varElemToParameter(VariableElement varElem) {
+    Parameter param = new Parameter(
+      varElem.getSimpleName().toString(),
+      varElem.asType().toString(),
+      varElem.getAnnotation(IsColor.class) != null
+    );
+    param.helper = varElemToHelperKey(varElem);
+    return param;
   }
 
   // Transform an @ActivityElement into an XML element String for use later
@@ -1882,9 +1904,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          event.addParameter(ve.getSimpleName().toString(),
-                             ve.asType().toString(),
-                             ve.getAnnotation(IsColor.class) != null);
+          event.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
       }
@@ -1938,9 +1958,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          method.addParameter(ve.getSimpleName().toString(),
-                              ve.asType().toString(),
-                              ve.getAnnotation(IsColor.class) != null);
+          method.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
 
