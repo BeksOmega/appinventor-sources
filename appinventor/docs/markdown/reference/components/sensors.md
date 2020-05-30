@@ -61,7 +61,7 @@ Non-visible component that can detect shaking and measure acceleration approxima
  Once the phone starts being shaken, all further [`Shaking`](#AccelerometerSensor.Shaking) events will be ignored
  until the interval has elapsed.
 
-{:id="AccelerometerSensor.Sensitivity" .number} *Sensitivity*
+{:id="AccelerometerSensor.Sensitivity" .color} *Sensitivity*
 : Specifies the sensitivity of the accelerometer. Valid values are: `1` (weak), `2` (moderate),
  and `3` (strong).
 

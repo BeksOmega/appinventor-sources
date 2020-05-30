@@ -1486,6 +1486,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
             return null;
           }
         }
+
         return new HelperKey(HelperType.DROPDOWN, name);
       }
     }
@@ -1515,7 +1516,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       dropdowns.put(dropdownElem.getSimpleName().toString(), dropdown);
     }
 
-    return dropdown.isEmpty();
+    return !dropdown.isEmpty();
   }
 
   /**

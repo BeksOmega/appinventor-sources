@@ -51,7 +51,7 @@ Table of Contents:
 
 {:.properties}
 
-{:id="HorizontalArrangement.AlignHorizontal" .number} *AlignHorizontal*
+{:id="HorizontalArrangement.AlignHorizontal" .color} *AlignHorizontal*
 : A number that encodes how contents of the `HorizontalArrangement` are aligned horizontally. The choices
  are: `1` = left aligned, `2` = right aligned, `3` = horizontally centered. Alignment has no
  effect if the `HorizontalArrangement`'s [`Width`](#HorizontalArrangement.Width) is `Automatic`.
@@ -113,7 +113,7 @@ A formatting element in which to place components that should be displayed from 
 
 {:.properties}
 
-{:id="HorizontalScrollArrangement.AlignHorizontal" .number} *AlignHorizontal*
+{:id="HorizontalScrollArrangement.AlignHorizontal" .color} *AlignHorizontal*
 : A number that encodes how contents of the `HorizontalScrollArrangement` are aligned horizontally. The choices
  are: `1` = left aligned, `2` = right aligned, `3` = horizontally centered. Alignment has no
  effect if the `HorizontalScrollArrangement`'s [`Width`](#HorizontalScrollArrangement.Width) is `Automatic`.
@@ -263,7 +263,7 @@ None
 
 {:.properties}
 
-{:id="VerticalArrangement.AlignHorizontal" .number} *AlignHorizontal*
+{:id="VerticalArrangement.AlignHorizontal" .color} *AlignHorizontal*
 : A number that encodes how contents of the `VerticalArrangement` are aligned horizontally. The choices
  are: `1` = left aligned, `2` = right aligned, `3` = horizontally centered. Alignment has no
  effect if the `VerticalArrangement`'s [`Width`](#VerticalArrangement.Width) is `Automatic`.
@@ -325,7 +325,7 @@ A formatting element in which to place components that should be displayed one b
 
 {:.properties}
 
-{:id="VerticalScrollArrangement.AlignHorizontal" .number} *AlignHorizontal*
+{:id="VerticalScrollArrangement.AlignHorizontal" .color} *AlignHorizontal*
 : A number that encodes how contents of the `VerticalScrollArrangement` are aligned horizontally. The choices
  are: `1` = left aligned, `2` = right aligned, `3` = horizontally centered. Alignment has no
  effect if the `VerticalScrollArrangement`'s [`Width`](#VerticalScrollArrangement.Width) is `Automatic`.
