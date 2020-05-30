@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -621,6 +622,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return color;
     }
 
+    protected HelperKey getHelperInfo() {
+      return helper;
+    }
+
     /**
      * Returns a string indicating whether this property is readable and/or
      * writable.
@@ -712,6 +717,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected boolean containsOption(String optionValue) {
       return options.containsKey(optionValue);
+    }
+
+    protected boolean isEmpty() {
+      return options.isEmpty();
     }
 
     protected void forEach(BiConsumer<String, Option> action) {
@@ -1426,6 +1435,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                                    propertyName);
       }
       typeMirror = parameters.get(0);
+      property.helper = parameterToHelperKey(((ExecutableElement) element).getParameters().get(0));
       for (VariableElement ve : ((ExecutableElement) element).getParameters()) {
         if (ve.getAnnotation(IsColor.class) != null) {
           property.color = true;
@@ -1444,13 +1454,88 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return property;
   }
 
-  // TODO: Figure out if we can get the annotations from the parameters.
-  private HelperKey parameterToHelperKey(TypeMirror parameter) {
-    List<? extends AnnotationMirror> mirrors = parameter.getAnnotationMirrors();
-    if (mirrors.size() != 0) {
-      return new HelperKey(HelperType.DROPDOWN, "testKey");
+  private HelperKey parameterToHelperKey(VariableElement parameter) {
+    for (AnnotationMirror mirror : parameter.getAnnotationMirrors()) {
+      // Make sure the annotation is of type Dropdown.
+      // TODO: In the future we would want to allow for more types.
+      if (!mirror.getAnnotationType().asElement().getSimpleName()
+          .contentEquals(Dropdown.class.getSimpleName())) {
+        continue;
+      }
+
+      for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+          mirror.getElementValues().entrySet()) {
+        // Make sure we are looking at the value arguement.
+        if (!entry.getKey().getSimpleName().contentEquals("value")) {
+          continue;
+        }
+
+        // Get the AnnotationValue's value. So we are now looking at the
+        // class passed to the @Dropdown annotation.
+        Element dropdown = ((DeclaredType)entry.getValue().getValue()).asElement();
+        String name = dropdown.getSimpleName().toString();
+
+        // We haven't seen this type of dropdown before, so add it.
+        if (dropdowns.get(name) == null) {
+          // Couldn't add it for whatever reason.
+          if (!tryAddDropdown(dropdown, parameter.asType())) {
+            return null;
+          }
+        }
+        return new HelperKey(HelperType.DROPDOWN, name);
+      }
     }
     return null;
+  }
+
+  /**
+   * Adds a new Dropdown (based on the passed dropdown element) to the dropdowns list.
+   * 
+   * @param dropdown The element representing the class passed to the @Dropdown annotation.
+   * @param paramType The type of the parameter being annotated with @Dropdown. Eg string, int etc.
+   * 
+   * @return Returs true if the dropdown was successfully added. False otherwise.
+   */
+  private boolean tryAddDropdown(Element dropdownElem, TypeMirror paramType) {
+    Dropdown dropdown = new Dropdown();
+    // Now we loop over all of the elements declared in the IDropdown.
+    for (Element field : dropdownElem.getEnclosedElements()) {
+      if (isValidOption(field, paramType)) {
+        dropdown.addOption(
+            ((VariableElement)field).getConstantValue().toString(),
+            elementToOption(field));
+      }
+    }
+
+    if (!dropdown.isEmpty()) {
+      dropdowns.put(dropdownElem.getSimpleName().toString(), dropdown);
+    }
+
+    return dropdown.isEmpty();
+  }
+
+  /**
+   * Returns true if the field looks like a valid option definition.
+   * 
+   * @param field The field to check for validity.
+   * @param paramType The type of the parameter being annotated with @Dropdown. Eg string, int etc.
+   */
+  private boolean isValidOption(Element field, TypeMirror paramType) {
+    return field instanceof VariableElement &&
+        field.getModifiers().contains(Modifier.PUBLIC) &&
+        field.getModifiers().contains(Modifier.STATIC) &&
+        field.getModifiers().contains(Modifier.FINAL) &&
+        typeUtils.isSameType(field.asType(), paramType);
+  }
+
+  private Option elementToOption(Element field) {
+    return new Option(
+      field.getSimpleName().toString(),
+      "",
+      "",
+      true,  // Always user visible.
+      elementUtils.isDeprecated(field)
+    );
   }
 
   // Transform an @ActivityElement into an XML element String for use later
@@ -1665,6 +1750,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           Property priorProperty = componentInfo.properties.get(propertyName);
 
           if (!priorProperty.type.equals(newProperty.type)) {
+            // TODO: How does this work with the blockly type system? Is there an example of this
+            // in practice? If this is indeed supported I'll need to refactor some of the helper
+            // block stuff.
+
             // The 'real' type of a property is determined by its getter, if
             // it has one.  In theory there can be multiple setters which
             // take different types and those types can differ from the
@@ -1679,6 +1768,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
             }
           }
 
+          // TODO: Should this be moved into the Property class? This was tricky for me to discover.
           // Merge newProperty into priorProperty, which is already in the properties map.
           if ((priorProperty.description.isEmpty() || priorProperty.isDefaultDescription()
                || element.getAnnotation(Override.class) != null)
@@ -1698,6 +1788,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                 priorProperty.propertyCategory + " and " +
                 newProperty.propertyCategory + " in component " +
                 componentInfo.name);
+          }
+          if (priorProperty.helper == null) {
+            priorProperty.helper = newProperty.helper;
           }
           priorProperty.readable = priorProperty.readable || newProperty.readable;
           priorProperty.writable = priorProperty.writable || newProperty.writable;
