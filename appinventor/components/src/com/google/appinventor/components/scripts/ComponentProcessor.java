@@ -49,8 +49,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
-import java.util.function.BiConsumer;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -431,18 +429,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       parameters = Lists.newArrayList();
     }
 
-    // TODO: Remove this. Better to take in parameter directly, because then the logic for creating
-    //   the parameter can be separated out easily.
-    protected void addParameter(String name, String type) {
-      parameters.add(new Parameter(name, type));
-    }
-
-    // TODO: Remove this. Better to take in parameter directly, because then the logic for creating
-    //   the parameter can be separated out easily.
-    protected void addParameter(String name, String type, boolean color) {
-      parameters.add(new Parameter(name, type, color));
-    }
-
+    /**
+     * Adds the given parameter to this ParameterizedFeature.
+     */
     protected void addParameter(Parameter param) {
       parameters.add(param);
     }
@@ -1473,7 +1462,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private HelperKey varElemToHelperKey(VariableElement parameter) {
     for (AnnotationMirror mirror : parameter.getAnnotationMirrors()) {
       // Make sure the annotation is of type Dropdown.
-      // TODO: In the future we would want to allow for more types.
+      // In the future we would want to allow for more types.
       if (!mirror.getAnnotationType().asElement().getSimpleName()
           .contentEquals(Dropdown.class.getSimpleName())) {
         continue;
@@ -1784,14 +1773,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           Property priorProperty = componentInfo.properties.get(propertyName);
 
           if (!priorProperty.type.equals(newProperty.type)) {
-            // TODO: How does this work with the blockly type system? Is there an example of this
-            // in practice? If this is indeed supported I'll need to refactor some of the helper
-            // block stuff.
-
-            // The 'real' type of a property is determined by its getter, if
-            // it has one.  In theory there can be multiple setters which
-            // take different types and those types can differ from the
-            // getter.
+            // If the getter type is different than the setter type, set the type to getter.
+            // If we have multiple setters with different types, throw an error.
             if (newProperty.readable) {
               priorProperty.type = newProperty.type;
             } else if (priorProperty.writable) {

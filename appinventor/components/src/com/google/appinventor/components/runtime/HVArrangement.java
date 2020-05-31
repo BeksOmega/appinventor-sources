@@ -22,7 +22,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
 import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.Dropdown;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
@@ -237,12 +236,10 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_HORIZONTAL_ALIGNMENT,
       defaultValue = ComponentConstants.HORIZONTAL_ALIGNMENT_DEFAULT + "")
   @SimpleProperty
-  public void AlignHorizontal(
-    @Dropdown(HorizAlignment.class) int alignment
-  ) {
+  public void AlignHorizontal(int alignment) {
     try {
-      // Notice that the throw will prevent the alignment from being changed
-      // if the argument is illegal.
+      // notice that the throw will prevent the alignment from being changed
+      // if the argument is illegal
       alignmentSetter.setHorizontalAlignment(alignment);
       horizontalAlignment = alignment;
     } catch (IllegalArgumentException e) {
