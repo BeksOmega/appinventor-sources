@@ -218,7 +218,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * String representation of the java type, such as "int", "double", or
    * "java.lang.String".
    */
-  protected final class Parameter {
+  protected final class Parameter implements Cloneable {
     /**
      * The parameter name
      */
@@ -267,6 +267,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String parameterToYailType(Parameter parameter) {
       return javaTypeToYailType(type);
+    }
+
+    @Override
+    public Parameter clone() {
+      return new Parameter(name, type, color);
     }
   }
 
@@ -474,7 +479,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Event clone() {
       Event that = new Event(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       return that;
     }
@@ -513,7 +518,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Method clone() {
       Method that = new Method(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       that.returnType = returnType;
       return that;
