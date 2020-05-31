@@ -250,6 +250,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       // helper is null by default.
     }
 
+    /**
+     * Returns the HelperKey associated with this parameter, if one exists. Null otherwise.
+     */
     protected HelperKey getHelperKey() {
       return helper;
     }
@@ -628,6 +631,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return color;
     }
 
+    /**
+     * Returns the HelperKey associated with this property, if one exists. Null otherwise.
+     */
     protected HelperKey getHelperKey() {
       return helper;
     }
@@ -713,22 +719,38 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       options = Maps.newTreeMap();
     }
 
+    /**
+     * Adds the given value-option pair to the dropdown.
+     */
     protected void addOption(String optionValue, Option optionInfo) {
         options.put(optionValue, optionInfo);
     }
 
+    /**
+     * Returns the Option associated with the given option value if it exists. Null otherwise.
+     */
     protected Feature getOption(String optionValue) {
       return options.get(optionValue);
     }
 
+    /**
+     * Returns true if this dropdown has an option associated with the given value.
+     */
     protected boolean containsOption(String optionValue) {
       return options.containsKey(optionValue);
     }
 
+    /**
+     * Returns true if this dropdown has no options.
+     */
     protected boolean isEmpty() {
       return options.isEmpty();
     }
 
+    /**
+     * Returns a set of Map.Entry's that make up this dropdown. The entries contain the Stringified
+     * value of the option and the Option itself.
+     */
     protected Set<Map.Entry<String, Option>> entrySet() {
       return options.entrySet();
     }
@@ -747,6 +769,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       super(name, description, longDescription, "Option", userVisible, deprecated);
     }
 
+    /**
+     * Returns the description of this option.
+     */
     protected String getDescription() {
       return description;
     }
@@ -1464,6 +1489,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return property;
   }
 
+  /**
+   * Converts a varElement (representing a function element) into a HelperKey.
+   * 
+   * @return The created HelperKey if the parameter does indeed define a helper, null otherwise.
+   */
   private HelperKey varElemToHelperKey(VariableElement parameter) {
     for (AnnotationMirror mirror : parameter.getAnnotationMirrors()) {
       // Make sure the annotation is of type Dropdown.
@@ -1539,6 +1569,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         typeUtils.isSameType(field.asType(), paramType);
   }
 
+  /**
+   * Converts an Element into a Dropdown Option.
+   */
   private Option elementToOption(Element field) {
     String description = elementUtils.getDocComment(field);
     if (description == null) {
@@ -1556,6 +1589,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     );
   }
 
+  /**
+   * Converts a VariableElement into a Parameter definition.
+   */
   private Parameter varElemToParameter(VariableElement varElem) {
     Parameter param = new Parameter(
       varElem.getSimpleName().toString(),

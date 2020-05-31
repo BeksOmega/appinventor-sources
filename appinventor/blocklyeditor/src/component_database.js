@@ -19,14 +19,6 @@ Blockly.PROPERTY_WRITEABLE = 2;
 Blockly.PROPERTY_READWRITEABLE = 3;
 
 /**
- * @typedef ComponentData
- * @type {object}
- * @property {ComponentInfo[]} components
- * @property {object} dropdowns
- */
-ComponentData = function() {}
-
-/**
  * @typedef ComponentInfo
  * @type {object}
  * @property {string} type

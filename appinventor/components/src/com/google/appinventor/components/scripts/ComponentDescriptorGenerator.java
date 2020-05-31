@@ -22,9 +22,10 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 
 /**
- * Tool to generate simple component descriptors as JSON.
- *
- * The output is a sequence of component descriptions enclosed in square
+ * Tool to generate simple component and dropdown descriptors as JSON.
+ * The output is an object with two properties "components" and "dropdowns".
+ * 
+ * The "components" output is a sequence of component descriptions enclosed in square
  * brackets and separated by commas. Each component description has the
  * following format:
  * { "type": "COMPONENT-TYPE",
@@ -55,25 +56,51 @@ import javax.tools.FileObject;
  *        "description": "DESCRIPTION",
  *        "type": "YAIL-TYPE",
  *        "rw": "read-only"|"read-write"|"write-only"|"invisible"},*
+ *        "helper": {
+ *          "type": "TYPE",
+ *          "key": "KEY",
+ *        }
  *   ],
  *   "events": [
  *     { "name": "EVENT-NAME",
  *       "description": "DESCRIPTION",
  *       "params": [
- *         { "name": "PARAM-NAME",
- *           "type": "YAIL-TYPE"},*
- *       ]},+
+ *         {
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": "TYPE",
+ *             "key": "KEY",
+ *           }
+ *         },*
  *   ],
  *   “methods”: [
  *     { "name": "METHOD-NAME",
  *       "description": "DESCRIPTION",
  *       "params": [
- *         { "name": "PARAM-NAME",
- *       "type": "YAIL-TYPE"},*
+ *         {
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": "TYPE",
+ *             "key": "KEY",
+ *           }
+ *         },*
  *     ]},+
  *   ],
  *   ("assets": ["FILENAME",*])?
  * }
+ * 
+ * The "dropdowns" output is a map of dropdown description names to actual
+ * dropdown descriptions. The "dropdowns" output has the following format:
+ * 
+ * "KEY" : {
+ *   "VALUE": {
+ *     "name": "NAME",
+ *     "description": "DESCRIPTION", 
+ *     "deprecated" : "true"|"false",
+ *   }, +
+ * }, +
  *
  * @author lizlooney@google.com (Liz Looney)
  * @author sharon@google.com (Sharon Perl) - added events, methods, non-designer
@@ -361,6 +388,9 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("]");
   }
 
+  /**
+   * Outputs information about a HelperKey.
+   */
   private void outputHelper(HelperKey key, StringBuilder sb) {
     if (key != null) {
       sb.append(", \"helperKey\": {");
@@ -372,6 +402,12 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     }
   }
 
+  /**
+   * Outputs information about a dropdown.
+   * @param name The name/key to the dropdown.
+   * @param dropdown The Dropdown defining the dropdown.
+   * @param sb The string builder we are appending to.
+   */
   private void outputDropdown(String name, Dropdown dropdown, StringBuilder sb) {
     sb.append("  \"");
     sb.append(name);
@@ -392,6 +428,12 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\n  }\n");
   }
 
+  /**
+   * Outputs a dropdown option.
+   * 
+   * @param option The Option defining the option to output.
+   * @param sb The string builder we are appending to.
+   */
   private void outputOption(Option option, StringBuilder sb) {
     sb.append("{ \"name\": \"");
     sb.append(option.name);
