@@ -19,6 +19,14 @@ Blockly.PROPERTY_WRITEABLE = 2;
 Blockly.PROPERTY_READWRITEABLE = 3;
 
 /**
+ * @typedef ComponentData
+ * @type {object}
+ * @property {ComponentInfo[]} components
+ * @property {object} dropdowns
+ */
+ComponentData = function() {}
+
+/**
  * @typedef ComponentInfo
  * @type {object}
  * @property {string} type
@@ -294,10 +302,11 @@ Blockly.ComponentDatabase.prototype.getComponentNamesByType = function(component
 /**
  * Populate the types database.
  *
- * @param {ComponentInfo[]} componentInfos
+ * @param {ComponentData} componentData
  */
-Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
+Blockly.ComponentDatabase.prototype.populateTypes = function(componentData) {
   var j, event, method, property;
+  var componentInfos = componentData.component;
   for (var i = 0, componentInfo; componentInfo = componentInfos[i]; ++i) {
     var info = this.types_[componentInfo.name] = {
       type: componentInfo.type,
