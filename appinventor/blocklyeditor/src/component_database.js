@@ -302,11 +302,10 @@ Blockly.ComponentDatabase.prototype.getComponentNamesByType = function(component
 /**
  * Populate the types database.
  *
- * @param {ComponentData} componentData
+ * @param {ComponentInfo[]} componentInfos
  */
-Blockly.ComponentDatabase.prototype.populateTypes = function(componentData) {
+Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
   var j, event, method, property;
-  var componentInfos = componentData.component;
   for (var i = 0, componentInfo; componentInfo = componentInfos[i]; ++i) {
     var info = this.types_[componentInfo.name] = {
       type: componentInfo.type,
