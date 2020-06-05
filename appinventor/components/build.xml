@@ -51,6 +51,7 @@
     <mkdir dir="${CommonConstants-class.dir}" />
 
     <ai.javac destdir="${CommonConstants-class.dir}">
+      <include name="${src.dir}/**/helpers/*.java" />
       <include name="${components.pkg}/common/*.java" />
       <exclude name="${components.pkg}/common/HtmlEntities.java" />
     </ai.javac>
