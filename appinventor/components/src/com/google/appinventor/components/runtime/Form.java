@@ -189,8 +189,8 @@ public class Form extends AppInventorCompatActivity
   private int verticalAlignment;
 
   // String representing the transition animation type
-  private String openAnimType;
-  private String closeAnimType;
+  private ScreenAnimation openAnimType;
+  private ScreenAnimation closeAnimType;
 
   // Syle information
   private int primaryColor = DEFAULT_PRIMARY_COLOR;
@@ -1611,7 +1611,7 @@ public class Form extends AppInventorCompatActivity
     description = "The animation for switching to another screen. Valid" +
     " options are default, fade, zoom, slidehorizontal, slidevertical, and none"    )
   public String OpenScreenAnimation() {
-    return openAnimType;
+    return openAnimType.getValue();
   }
 
   /**
@@ -1623,10 +1623,9 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ANIMATION,
     defaultValue = "default")
   @SimpleProperty
-  public void OpenScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+  public void OpenScreenAnimation(/* @EnumeratedBy(ScreenAnimation.class)*/String animType) {
+    ScreenAnimation anim = ScreenAnimation.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
@@ -1645,7 +1644,7 @@ public class Form extends AppInventorCompatActivity
     " to the previous screen. Valid options are default, fade, zoom, slidehorizontal, " +
     "slidevertical, and none")
   public String CloseScreenAnimation() {
-    return closeAnimType;
+    return closeAnimType.getValue();
   }
 
   /**
@@ -1658,9 +1657,8 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void CloseScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+    ScreenAnimation anim = ScreenAniamtion.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
