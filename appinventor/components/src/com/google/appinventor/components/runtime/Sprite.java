@@ -486,14 +486,12 @@ public abstract class Sprite extends VisibleComponent
           "bounce off of the edge it reached. Edge here is represented as an integer that " +
           "indicates one of eight directions north (1), northeast (2), east (3), southeast (4), " +
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
-  public void EdgeReached(int edge) {
-    if (edge == Component.DIRECTION_NONE
-        || edge < Component.DIRECTION_MIN
-        || edge > Component.DIRECTION_MAX) {
-      // This should never be reached.
+  public void EdgeReached(/* @EnumeratedBy(Direction.class) */ int edge) {
+    Direction dir = Direction.get(edge);
+    if (edge == null) {
       return;
     }
-    postEvent(this, "EdgeReached", edge);
+    postEvent(this, "EdgeReached", edge.getValue());
   }
 
   /**
@@ -607,7 +605,11 @@ public abstract class Sprite extends VisibleComponent
   @SimpleFunction(
     description = "Makes the %type% bounce, as if off a wall. " +
         "For normal bouncing, the edge argument should be the one returned by EdgeReached.")
-  public void Bounce (int edge) {
+  public void Bounce (/* @EnumeratedBy(Direction.class)*/ int edge) {
+    Direction dir = Direction.get(edge);
+    if (dir == null) {
+      return;
+    }
     MoveIntoBounds();
 
     // Normalize heading to [0, 360)
@@ -620,22 +622,22 @@ public abstract class Sprite extends VisibleComponent
 
     // Only transform heading if sprite was moving in that direction.
     // This avoids oscillations.
-    if ((edge == Component.DIRECTION_EAST
+    if ((edge == Direction.East
          && (normalizedAngle < 90 || normalizedAngle > 270))
-        || (edge == Component.DIRECTION_WEST
+        || (edge == Direction.West
             && (normalizedAngle > 90 && normalizedAngle < 270))) {
       Heading(180 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTH
+    } else if ((edge == Direction.North
                 && normalizedAngle > 0 && normalizedAngle < 180)
-               || (edge == Component.DIRECTION_SOUTH && normalizedAngle > 180)) {
+               || (edge == Direction.South && normalizedAngle > 180)) {
       Heading(360 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTHEAST
+    } else if ((edge == Direction.Northeast
                 && normalizedAngle > 0 && normalizedAngle < 90)
-              || (edge == Component.DIRECTION_NORTHWEST
+              || (edge == Direction.Northwest
                   && normalizedAngle > 90 && normalizedAngle < 180)
-              || (edge == Component.DIRECTION_SOUTHWEST
+              || (edge == Direction.Southwest
                   && normalizedAngle > 180 && normalizedAngle < 270)
-              || (edge == Component.DIRECTION_SOUTHEAST && normalizedAngle > 270)) {
+              || (edge == Direction.Southeast && normalizedAngle > 270)) {
       Heading(180 + normalizedAngle);
     }
   }
@@ -866,35 +868,39 @@ public abstract class Sprite extends VisibleComponent
     MoveIntoBounds();
 
     // Determine the appropriate return value.
+    Direction dir = null;
     if (west) {
       if (north) {
-        return Component.DIRECTION_NORTHWEST;
+        dir = Direction.Northwest;
       } else if (south) {
-        return Component.DIRECTION_SOUTHWEST;
+        dir = Direction.Southwest;
       } else {
-        return Component.DIRECTION_WEST;
+        dir = Direction.West;
       }
     }
 
     if (east) {
       if (north) {
-        return Component.DIRECTION_NORTHEAST;
+        dir = Direction.Northeast;
       } else if (south) {
-        return Component.DIRECTION_SOUTHEAST;
+        dir = Direction.Southeast;
       } else {
-        return Component.DIRECTION_EAST;
+        dir = Direction.East
       }
     }
 
     if (north) {
-      return Component.DIRECTION_NORTH;
+      dir = Direction.North;
     }
     if (south) {
-      return Component.DIRECTION_SOUTH;
+      dir = Direction.South;
     }
 
     // This should never be reached.
-    return Component.DIRECTION_NONE;
+    if (dir == null) {
+      return 0;
+    }
+    return dir.getValue();
   }
 
   /**
