@@ -1656,7 +1656,7 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ANIMATION,
     defaultValue = "default")
   @SimpleProperty
-  public void CloseScreenAnimation(String animType) {
+  public void CloseScreenAnimation(/* @EnumeratedBy(ScreenAnimation.class)*/ String animType) {
     ScreenAnimation anim = ScreenAniamtion.get(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
