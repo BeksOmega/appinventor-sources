@@ -39,6 +39,7 @@ import java.io.Writer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -729,11 +730,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final class OptionList {
     /**
-     * A map of option values (strings) to option info (features).
-     * For built-in components the key is used to look up the translated display text.
-     * For extensions, which do not support i18n, the key /is/ the display text.
+     * A list of option values (Strings) and option info (Options).
+     * For built-in components the Option name is used to look up the translated display text.
+     * For extensions, which do not support i18n, the Option name /is/ the display text.
      */
-    private Map<String, Option> options;
+    private ArrayList<Map.Entry<String, Option>> options;
 
     /**
      * The fully qualified class name this OptionList is associated with.
@@ -748,7 +749,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected OptionList(String className) {
       this.className = className;
-      options = Maps.newTreeMap();
+      options = new ArrayList();
     }
 
     /**
@@ -762,21 +763,26 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Adds the given value-option pair to the OptionList.
      */
     protected void addOption(String optionValue, Option optionInfo) {
-        options.put(optionValue, optionInfo);
+        options.add(Maps.immutableEntry(optionValue, optionInfo));
     }
 
     /**
      * Returns the Option associated with the given option value if it exists. Null otherwise.
      */
     protected Feature getOption(String optionValue) {
-      return options.get(optionValue);
+      for (Map.Entry<String, Option> entry : options) {
+        if (entry.getKey() == optionValue) {
+          return entry.getValue();
+        }
+      }
+      return null;
     }
 
     /**
      * Returns true if this option list has an option associated with the given value.
      */
     protected boolean containsOption(String optionValue) {
-      return options.containsKey(optionValue);
+      return getOption(optionValue) != null;
     }
 
     /**
@@ -790,8 +796,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns a set of Map.Entry's that make up this option list. The entries contain the
      * Stringified value of the option and the Option itself.
      */
-    protected Set<Map.Entry<String, Option>> entrySet() {
-      return options.entrySet();
+    protected Collection<Map.Entry<String, Option>> entrySet() {
+      return options;
     }
   }
 
