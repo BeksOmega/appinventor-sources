@@ -522,6 +522,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return null;
     }
 
+    /**
+     * Returns this method's Yail return type (e.g., "number", "text", "list", etc).
+     * 
+     * @return the method's Yail return type.
+     */
     protected String getYailReturnType() {
       return javaTypeToYailType(returnType);
     }
@@ -773,7 +778,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns the Option associated with the given option value if it exists. Null otherwise.
+     * @return the Option associated with the given option value if it exists. Null otherwise.
      */
     protected Feature getOption(String optionValue) {
       for (Map.Entry<String, Option> entry : options) {
@@ -785,21 +790,21 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns true if this option list has an option associated with the given value.
+     * @return true if this option list has an option associated with the given value.
      */
     protected boolean containsOption(String optionValue) {
       return getOption(optionValue) != null;
     }
 
     /**
-     * Returns true if this option list has no options.
+     * @return true if this option list has no options.
      */
     protected boolean isEmpty() {
       return options.isEmpty();
     }
 
     /**
-     * Returns a set of Map.Entry's that make up this option list. The entries contain the
+     * @return a set of Map.Entry's that make up this option list. The entries contain the
      * Stringified value of the option and the Option itself.
      */
     protected Collection<Map.Entry<String, Option>> entrySet() {
@@ -1607,6 +1612,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return null;
   }
 
+  /**
+   * @return the associated helper key if the element has an OptionList assciated with it.
+   *    Null otherwise.
+   */
   private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
     // Check if the elem type is an OptionList
     if (isOptionList(type)) {
@@ -1635,6 +1644,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return null;
   }
 
+  /**
+   * @return true if the given type implements OptionList. False otherwise.
+   */
   private boolean isOptionList(TypeMirror type) {
     if (type.getKind() == TypeKind.DECLARED) {
       TypeElement elem = (TypeElement)((DeclaredType)type).asElement();
@@ -1648,6 +1660,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return false;
   }
 
+  /**
+   * @return the HelperKey associated with the given element. The element must describe a class
+   *    which implements OptionList.
+   */
   private HelperKey optionListToHelperKey(Element optionList) {
     String name = optionList.getSimpleName().toString();
     // We haven't seen this type of dropdown before, so add it.

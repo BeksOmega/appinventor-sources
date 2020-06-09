@@ -119,8 +119,8 @@ public class Polygon extends PolygonBase implements MapPolygon {
 
   @Override
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "Returns the type of the feature. For polygons, this returns the text "
-          + "\"Polygon\".")
+      description = "Returns the type of the feature. For polygons, this returns "
+          + "MapFeature.Polygon (\"Polygon\").")
   public @Options(MapFeature.class) String Type() {
     return MapFeature.Rectangle.getValue();
   }

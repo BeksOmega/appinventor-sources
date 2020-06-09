@@ -10,6 +10,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation to mark a parameter/return type as accepting an enum value. This should *only* be
+ * used to upgrade old components. New components that want to accept or return an enum should just
+ * use that enum type as the parameter type. E.g:
+ * 
+ * @SimpleProperty
+ * public void FavoriteAnimal (Animal anim) { }
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.TYPE_USE})
 public @interface Options {

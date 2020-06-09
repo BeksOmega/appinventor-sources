@@ -9,6 +9,10 @@ import com.google.appinventor.components.annotations.OptionList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Defines a ScreenAnimation type used by the Form component to specify its open and close
+ * animations.
+ */
 public enum ScreenAnimation implements OptionList {
   // @Default
   Default("default"),
