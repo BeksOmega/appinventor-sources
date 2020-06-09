@@ -123,7 +123,7 @@ public class Circle extends PolygonBase implements MapCircle {
 
   @Override
   @SimpleProperty(description = "Returns the type of the feature. For Circles, "
-      + "this returns the text \"Circle\".")
+      + "this returns MapFeature.Circle (\"Circle\").")
   public @Options(MapFeature.class) String Type() {
     return MapFeature.Circle.getValue();
   }

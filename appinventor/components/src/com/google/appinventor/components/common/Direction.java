@@ -9,6 +9,9 @@ import com.google.appinventor.components.annotations.OptionList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Defines a Direction type used by the Sprite component (and subclasses).
+ */
 public enum Direction implements OptionList {
   North(1),
   Northeast(2),
