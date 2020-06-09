@@ -595,15 +595,8 @@ public abstract class Sprite extends VisibleComponent
    * be the one returned by {@link #EdgeReached}.
    *
    * @param edge the direction of the object (real or imaginary) to bounce off
-   *             of; this should be one of
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTH},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTHEAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_EAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTHEAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTH},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTHWEST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_WEST}, or
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTHWEST}.
+   *             of; this should be one of the values of
+   *             {@link com.google.appinventor.components.common.Direction}.
    */
   @SimpleFunction(
     description = "Makes the %type% bounce, as if off a wall. " +
@@ -749,7 +742,7 @@ public abstract class Sprite extends VisibleComponent
    * Specifies which edge of the canvas has been hit by the Sprite, if
    * any, moving the sprite back in bounds.
    *
-   * @return {@link DIRECTION_NONE} if no edge has been hit, or a
+   * @return {@link DIRECTION_NONE} if no edge has been hit, or the value of a
    *         {@link Direction}  if that edge of the canvas has been hit
    */
   protected int hitEdge() {

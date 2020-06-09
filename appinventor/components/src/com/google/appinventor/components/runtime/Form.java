@@ -46,6 +46,7 @@ import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.IsColor;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
@@ -55,6 +56,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.ScreenAnimation;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.collect.Lists;
 import com.google.appinventor.components.runtime.collect.Maps;
@@ -188,9 +190,9 @@ public class Form extends AppInventorCompatActivity
   private int horizontalAlignment;
   private int verticalAlignment;
 
-  // String representing the transition animation type
-  private String openAnimType;
-  private String closeAnimType;
+  // Represents the transition animation type.
+  private ScreenAnimation openAnimType;
+  private ScreenAnimation closeAnimType;
 
   // Syle information
   private int primaryColor = DEFAULT_PRIMARY_COLOR;
@@ -1611,7 +1613,7 @@ public class Form extends AppInventorCompatActivity
     description = "The animation for switching to another screen. Valid" +
     " options are default, fade, zoom, slidehorizontal, slidevertical, and none"    )
   public String OpenScreenAnimation() {
-    return openAnimType;
+    return openAnimType.getValue();
   }
 
   /**
@@ -1623,15 +1625,14 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ANIMATION,
     defaultValue = "default")
   @SimpleProperty
-  public void OpenScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+  public void OpenScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    ScreenAnimation anim = ScreenAnimation.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
-    openAnimType = animType;
+    openAnimType = anim;
   }
 
  /**
@@ -1645,7 +1646,7 @@ public class Form extends AppInventorCompatActivity
     " to the previous screen. Valid options are default, fade, zoom, slidehorizontal, " +
     "slidevertical, and none")
   public String CloseScreenAnimation() {
-    return closeAnimType;
+    return closeAnimType.getValue();
   }
 
   /**
@@ -1657,15 +1658,14 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ANIMATION,
     defaultValue = "default")
   @SimpleProperty
-  public void CloseScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+  public void CloseScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    ScreenAnimation anim = ScreenAnimation.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
-    closeAnimType = animType;
+    closeAnimType = anim;
   }
 
   /*
@@ -1673,7 +1673,7 @@ public class Form extends AppInventorCompatActivity
    * animation
    */
   public String getOpenAnimType() {
-    return openAnimType;
+    return openAnimType.getValue();
   }
 
   /**
