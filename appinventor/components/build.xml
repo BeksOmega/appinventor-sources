@@ -51,8 +51,8 @@
     <mkdir dir="${CommonConstants-class.dir}" />
 
     <ai.javac destdir="${CommonConstants-class.dir}">
-      <include name="${components.pkg}/annotations/*.java" />
-      <include name="${components.pkg}/annotations/androidmanifest/*.java" />
+      <include name="${components.pkg}/annotations/Options.java" />
+      <include name="${components.pkg}/annotations/OptionList.java" />
       <include name="${components.pkg}/common/*.java" />
       <exclude name="${components.pkg}/common/HtmlEntities.java" />
     </ai.javac>
