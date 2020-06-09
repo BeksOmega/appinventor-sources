@@ -331,6 +331,8 @@ public final class GeoJSONUtil {
 
   private static MapFeature processCoordinates(final MapFeatureContainer container,
       final String type, final YailList coordinates) {
+    // TODO: Doesn't  handle circle? Also we can't update this to use enums because
+    //   multipolygon is handled differently than polygon.
     if (MapFactory.MapFeatureType.TYPE_POINT.equals(type)) {
       return markerFromGeoJSON(container, coordinates);
     } else if (MapFactory.MapFeatureType.TYPE_LINESTRING.equals(type)) {

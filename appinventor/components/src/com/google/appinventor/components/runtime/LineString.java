@@ -18,10 +18,12 @@ import org.osmdroid.util.GeoPoint;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.MapFeature;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.MapFactory.MapCircle;
@@ -110,8 +112,8 @@ public class LineString extends MapFeatureBase implements MapLineString {
       description = "Returns the type of the map feature. For LineString, this returns "
           + "the text \"LineString\".")
   @Override
-  public String Type() {
-    return MapFactory.MapFeatureType.TYPE_LINESTRING;
+  public @Options(MapFeature.class) String Type() {
+    return MapFeature.LineString.getValue();
   }
 
   @SimpleProperty(category = PropertyCategory.APPEARANCE,
