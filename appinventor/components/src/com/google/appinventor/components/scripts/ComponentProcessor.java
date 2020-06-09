@@ -41,6 +41,7 @@ import java.io.Writer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -216,9 +217,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private final Set<String> visitedTypes = new HashSet<>();
 
   /**
-   * Represents a parameter consisting of a name and a type.  The type is a
-   * String representation of the java type, such as "int", "double", or
-   * "java.lang.String".
+   * Represents a parameter consisting of a name and a type.
    */
   protected final class Parameter implements Cloneable {
     /**
@@ -227,19 +226,25 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     protected final String name;
 
     /**
-     * The parameter's Java type, such as "int" or "java.lang.String".
+     * The parameter's Java type, such as int or java.lang.String.
      */
     protected final TypeMirror type;
 
+    /**
+     * Is this parameter an integer which represents a color?
+     */
     protected final boolean color;
 
+    /**
+     * The helper key associated with this parameter, if any.
+     */
     protected HelperKey helper;
 
     /**
      * Constructs a Parameter.
      *
      * @param name the parameter name
-     * @param type the parameter's Java type (such as "int" or "java.lang.String")
+     * @param type the parameter's Java type (such as int or java.lang.String)
      */
     protected Parameter(String name, TypeMirror type) {
       this(name, type, false);
@@ -254,19 +259,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns the HelperKey associated with this parameter, if one exists. Null otherwise.
+     * @return the HelperKey associated with this parameter.
      */
     protected HelperKey getHelperKey() {
       return helper;
     }
 
     /**
-     * Provides a Yail type for a given parameter type.  This is useful because
-     * the parameter types used for {@link Event} are Simple types (e.g.,
-     * "Single"), while the parameter types used for {@link Method} are
-     * Java types (e.g., "int".
-     *
-     * @param parameter a parameter
-     * @return the string representation of the corresponding Yail type
+     * Returns the string representation of the Yail type for this parameter.
+     * @return the string representation of the Yail type for this parameter.
      * @throws RuntimeException if {@code parameter} does not have a
      *         corresponding Yail type
      */
@@ -276,7 +277,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     @Override
     public Parameter clone() {
-      return new Parameter(name, type, color);
+      Parameter param = new Parameter(name, type, color);
+      param.helper = helper;
+      return param;
     }
   }
 
@@ -441,6 +444,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Adds the given parameter to this ParameterizedFeature.
+     * @param param The parameter to add to this ParameterizedFeature.
      */
     protected void addParameter(Parameter param) {
       parameters.add(param);
@@ -501,17 +505,28 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final class Method extends ParameterizedFeature
       implements Cloneable, Comparable<Method> {
-    // Inherits name, description, and parameters
+    /**
+     * The method's Java return type. Null if the method is a void method.
+     */
     private TypeMirror returnType;
+    /**
+     * The helper key associated with this method's return type.
+     */
     private HelperKey returnHelperKey;
+    /**
+     * Is this method's return type an integer which represents a color?
+     */
     private boolean color;
 
     protected Method(String name, String description, String longDescription, boolean userVisible,
         boolean deprecated) {
       super(name, description, longDescription, "Method", userVisible, deprecated);
-      // returnType defaults to null
     }
 
+    /**
+     * Returns the string representation of this method's Java return type, or null of this method
+     * is a void method.
+     */
     protected String getReturnType() {
       if (returnType != null) {
         return returnType.toString();
@@ -519,18 +534,29 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return null;
     }
 
+    /**
+     * Returns this method's Yail return type (e.g., "number", "text", "list", etc).
+     * @return the method's Yail return type.
+     */
     protected String getYailReturnType() {
       return javaTypeToYailType(returnType);
     }
 
     /**
-     * Returns the HelperKey associated with the return type of this parameter, if one exists. Null
+     * Returns the HelperKey associated with the return type of this method, if one exists. Null
      * otherwise.
+     * 
+     * @return the helper key associated with the return type of this method.
      */
     protected HelperKey getReturnHelperKey() {
       return returnHelperKey;
     }
 
+    /**
+     * Returns true if this method's return type is an integer which represents a color.
+     * 
+     * @return true if this method's return type is an integer which represents a color.
+     */
     protected boolean isColor() {
       return color;
     }
@@ -542,6 +568,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         that.addParameter(p.clone());
       }
       that.returnType = returnType;
+      that.returnHelperKey = returnHelperKey;
       return that;
     }
 
@@ -588,6 +615,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       that.writable = writable;
       that.componentInfoName = componentInfoName;
       that.color = color;
+      that.helper = helper;
       return that;
     }
 
@@ -618,18 +646,19 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns this property's Java type (e.g., "int", "double", or "java.lang.String").
-     *
-     * @return the feature's Java type
+     * Returns the string representaiton of this property's java type.
+     * 
+     * @return the string representaiton of this property's java type.
      */
     protected String getType() {
+      // Type should always be non-null.
       return type.toString();
     }
 
     /**
      * Returns this property's Yail type (e.g., "number", "text", "list", etc).
      * 
-     * @return the feature's Yail type.
+     * @return this property's Yail type (e.g., "number", "text", "list", etc).
      */
     protected String getYailType() {
       return javaTypeToYailType(type);
@@ -659,6 +688,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns the HelperKey associated with this property, if one exists. Null otherwise.
+     * @return the HelperKey associated with this property, if one exists.
      */
     protected HelperKey getHelperKey() {
       return helper;
@@ -712,6 +742,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns the type of helper block, aka the type of helper UI. Eg an option list.
+     * @return the type of helper block.
      */
     protected HelperType getType() {
       return helperType;
@@ -719,23 +750,26 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns the key to the specific helper data. Eg in the case of an option list helper, this
-     * key would allow you to get the options for the block.
+     * key could be used to look up values in the optionLists Map.
+     * @return key to the helper data.
      */
     protected String getKey() {
       return key;
     }
   }
 
+
   /**
-   * A definition of a option list helper-block.
+   * Represents a list of Options associated with some (enum) class. The data in this OptionList
+   * is used to create OptionList helper blocks. 
    */
   protected final class OptionList {
     /**
-     * A map of option values (strings) to option info (features).
-     * For built-in components the key is used to look up the translated display text.
-     * For extensions, which do not support i18n, the key /is/ the display text.
+     * A list of option values (Strings) and option info (Options).
+     * For built-in components the Option name is used to look up the translated display text.
+     * For extensions, which do not support i18n, the Option name /is/ the display text.
      */
-    private Map<String, Option> options;
+    private ArrayList<Option> options;
 
     /**
      * The fully qualified class name this OptionList is associated with.
@@ -743,78 +777,129 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String className;
 
     /**
+     * The tag name this OptionList is associated with. This goes in front of the dropdown in the
+     * blocks editor. It is usually the simplified class name.
+     */
+    private String tagName;
+
+    /**
+     * The Option.name of the default option associated with this OptionList.
+     */
+    private String defaultOpt;
+
+    /**
      * Creates an OptionList (which is a definition of a option list helper-block) that can be
      * populated with options.
      * 
-     * @param class The fully qualified class name this OptionList is associated with.
+     * @param className The fully qualified class name this OptionList is associated with.
+     * @param tagName The tag name this OptionList is associated with. This goes in front of the
+     *     dropdown in the blocks editor. It is usually the simplified class name.
      */
-    protected OptionList(String className) {
+    protected OptionList(String className, String tagName) {
       this.className = className;
-      options = Maps.newTreeMap();
+      this.tagName = tagName;
+      options = new ArrayList();
     }
 
     /**
-     * @return The fully qualified class name this OptionList is associated with.
+     * Returns the fully qualified class name this OptionList is associated with.
+     * @return the fully qualified class name this OptionList is associated with.
      */
     protected String getClassName() {
       return className;
     }
 
     /**
-     * Adds the given value-option pair to the OptionList.
+     * The tag name, which is used in the dropdown block UI, of this OptionList. It is usually the
+     * simplified class name.
+     * @return The tag name of this OptionList.
      */
-    protected void addOption(String optionValue, Option optionInfo) {
-        options.put(optionValue, optionInfo);
+    protected String getTagName() {
+      return tagName;
     }
 
     /**
-     * Returns the Option associated with the given option value if it exists. Null otherwise.
+     * Sets the default option of this OptionList.
+     * @param defaultOpt the Option.name of the default option to set.
      */
-    protected Feature getOption(String optionValue) {
-      return options.get(optionValue);
+    public void setDefault(String defaultOpt) {
+      this.defaultOpt = defaultOpt;
     }
 
     /**
-     * Returns true if this option list has an option associated with the given value.
+     * Returns the Option.name of the default option associated with this OptionList.
+     * @return the Option.name of the default option associated with this OptionList.
      */
-    protected boolean containsOption(String optionValue) {
-      return options.containsKey(optionValue);
+    protected String getDefault() {
+      return defaultOpt;
+    }
+
+    /**
+     * Adds the given Option to the OptionList.
+     * @param option the option to add to this OptionList.
+     */
+    protected void addOption(Option option) {
+        options.add(option);
+    }
+
+    /**
+     * Returns true if this OptionList contains the given option.
+     * @return true if this OptionList contains the given option.
+     */
+    protected boolean containsOption(Option option) {
+      return options.contains(option);
     }
 
     /**
      * Returns true if this option list has no options.
+     * @return true if this option list has no options.
      */
     protected boolean isEmpty() {
       return options.isEmpty();
     }
 
     /**
-     * Returns a set of Map.Entry's that make up this option list. The entries contain the
-     * Stringified value of the option and the Option itself.
+     * Returns a collection of Options that make up this option list.
+     * @return a collection of Options that make up this option list.
      */
-    protected Set<Map.Entry<String, Option>> entrySet() {
-      return options.entrySet();
+    protected Collection<Option> asCollection() {
+      return options;
     }
   }
 
-  // Option doesn't have any special properties beyond feature, but we can't instantiate a Feature
-  // directly.
+  /**
+   * Represents an option (enum constant) with a name and backing value.
+   */
   protected final class Option extends Feature {
+    /**
+     * The value this option is associated with.
+     */
+    private String value;
+
     protected Option(
       String name,
+      String value,
       String description,
-      String longDescription,
-      boolean userVisible,
       boolean deprecated
     ) {
-      super(name, description, longDescription, "Option", userVisible, deprecated);
+      super(name, description, description, "Option", true, deprecated);
+      this.value = value;
     }
 
     /**
      * Returns the description of this option.
+     * @return the description of this option.
      */
     protected String getDescription() {
       return description;
+    }
+
+    /**
+     * Returns the value this option is associated with.
+     * @return the value this option is associated with.
+     */
+    protected String getValue() {
+      return value;
     }
   }
 
@@ -1583,9 +1668,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * Converts a varElement (representing a function element) into a HelperKey.
+   * Converts an element representing a function (for return types) or a parameter into a HelperKey.
    * 
-   * @return The created HelperKey if the parameter does indeed define a helper, null otherwise.
+   * @param elem the Element which represents a function (for return types) or a parameter.
+   * @param type the TypeMirror representing the type of that element.
+   * @return The created HelperKey if the element does indeed define a helper, null otherwise.
    */
   private HelperKey elementToHelperKey(Element elem, TypeMirror type) {
     HelperKey key;
@@ -1597,6 +1684,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return null;
   }
 
+  /**
+   * Returns the associated helper key if the element has an OptionList assciated with it.
+   * Null otherwise.
+   *
+   * @param elem the Element which represents a function (for return types) or a parameter.
+   * @param type the TypeMirror representing the type of that element.
+   * @return the associated helper key if the element has an OptionList assciated with it.
+   */
   private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
     // Check if the elem type is an OptionList
     if (isOptionList(type)) {
@@ -1625,6 +1720,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return null;
   }
 
+  /**
+   * Returns true if the given type implements OptionList. False otherwise.
+   * @param type the type to check if it implements OptionList.
+   * @return true if the given type implements OptionList. False otherwise.
+   */
   private boolean isOptionList(TypeMirror type) {
     if (type.getKind() == TypeKind.DECLARED) {
       TypeElement elem = (TypeElement)((DeclaredType)type).asElement();
@@ -1638,12 +1738,17 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return false;
   }
 
+  /**
+   * Returns the OptionList HelperKey associated with the given element.
+   * @param element the Element describing a class which implements the OptionList interface.
+   * @return the HelperKey associated with the given element.
+   */
   private HelperKey optionListToHelperKey(Element optionList) {
     String name = optionList.getSimpleName().toString();
-    // We haven't seen this type of dropdown before, so add it.
+    // We haven't seen this type of option list before, so add it.
     if (optionLists.get(name) == null) {
-      // Couldn't add it for whatever reason.
       if (!tryAddOptionList(optionList)) {
+        // Couldn't add it for whatever reason.
         return null;
       }
     }
@@ -1654,14 +1759,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Adds a new OptionList (based on the passed option list element) to the optionLists list.
    * 
    * @param optionElem The element representing the enum defining the options.
-   * 
    * @return Returns true if the Optionlist was successfully added. False otherwise.
    */
   private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
-    OptionList optionList = new OptionList(optionElem.asType().toString());
+    String className = optionElem.asType().toString();
+    String tagName = optionElem.getSimpleName().toString();
+    OptionList optionList = new OptionList(className, tagName);
 
     // Get the class.
-    String className = optionElem.asType().toString();
     Class clazz = null;
     try {
       clazz = Class.forName(className);
@@ -1700,7 +1805,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     for (Element field : optionElem.getEnclosedElements()) {
       String fieldName = field.getSimpleName().toString();
       if (namesToValues.containsKey(fieldName)) {
-        optionList.addOption(namesToValues.get(fieldName), elementToOption(field));
+        String value = namesToValues.get(fieldName);
+        optionList.addOption(elementToOption(field, value));
+
+        // Set the default to be the first option, or the option tagged with @Default.
+        if (optionList.getDefault() == null || isDefault(field)) {
+          optionList.setDefault(fieldName);
+        }
       }
     }
 
@@ -1712,9 +1823,25 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * Converts an Element into an Option.
+   * Returns true if the leement is tagged with the @Default annotation.
+   * @return true if the element is tagged with the @Default annotation.
    */
-  private Option elementToOption(Element field) {
+  private boolean isDefault(Element field) {
+    for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
+      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Default")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Converts an Element into an Option.
+   * @param field the field to convert into an option.
+   * @param value the backing value associated with that field.
+   * @return the option constructed from the field and value.
+   */
+  private Option elementToOption(Element field, String value) {
     // TODO: getDocComment doesn't seem to work on enum constants?
     String description = elementUtils.getDocComment(field);
     if (description == null) {
@@ -1725,15 +1852,16 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     return new Option(
       field.getSimpleName().toString(),
+      value,
       description,
-      description,
-      true,  // Always user visible.
       elementUtils.isDeprecated(field)
     );
   }
 
   /**
    * Converts a VariableElement into a Parameter definition.
+   * @param varElem the element to convert.
+   * @return the parameter constructed from the variable element.
    */
   private Parameter varElemToParameter(VariableElement varElem) {
     Parameter param = new Parameter(
@@ -2185,12 +2313,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   protected abstract void outputResults() throws IOException;
 
   /**
-   * Returns the appropriate Yail type (e.g., "number" or "text") for a
-   * given Java type (e.g., "float" or "java.lang.String").  All component
-   * names are converted to "component".
+   * Returns the appropriate Yail type for a given Java type.
    *
-   * @param type a type name, as returned by {@link TypeMirror#toString()}
-   * @return one of "boolean", "text", "number", "list", or "component".
+   * @param type a TypeMirror representing the Java type.
+   * @return the equivalent Yail type. All component names are converted to "component".
    * @throws RuntimeException if the parameter cannot be mapped to any of the
    *         legal return values
    */
@@ -2202,7 +2328,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // Handle enums
     if (isOptionList(type)) {
-      return ((DeclaredType)type).asElement().getSimpleName() + "Enum";
+      return type.toString() + "Enum";
     }
 
     String typeString = type.toString();

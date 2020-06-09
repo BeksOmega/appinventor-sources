@@ -490,6 +490,7 @@ public abstract class Sprite extends VisibleComponent
           "indicates one of eight directions north (1), northeast (2), east (3), southeast (4), " +
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
   public void EdgeReached(@Options(Direction.class) int edge) {
+    // Make sure that "edge" is a valid Direction.
     Direction dir = Direction.get(edge);
     if (dir == null) {
       return;
@@ -610,12 +611,11 @@ public abstract class Sprite extends VisibleComponent
     description = "Makes the %type% bounce, as if off a wall. " +
         "For normal bouncing, the edge argument should be the one returned by EdgeReached.")
   public void Bounce (@Options(Direction.class) int edge) {
+    // Make sure that "edge" is a valid Direction.
     Direction dir = Direction.get(edge);
     if (dir == null) {
       return;
     }
-<<<<<<< HEAD
-=======
     BounceAbstract(dir);
   }
 
@@ -634,35 +634,32 @@ public abstract class Sprite extends VisibleComponent
    *        The correct direction would be `Direction.East`.
    */
   public void BounceAbstract(Direction edge) {
->>>>>>> 8bc6e486e... Cleanup Sprite
     MoveIntoBounds();
 
     // Normalize heading to [0, 360)
     double normalizedAngle = userHeading % 360;
-    // The following step is necessary because Java's modulus operation yields a
-    // negative number if the dividend is negative and the divisor is positive.
     if (normalizedAngle < 0) {
       normalizedAngle += 360;
     }
 
     // Only transform heading if sprite was moving in that direction.
     // This avoids oscillations.
-    if ((dir == Direction.East
+    if ((edge == Direction.East
          && (normalizedAngle < 90 || normalizedAngle > 270))
-        || (dir == Direction.West
+        || (edge == Direction.West
             && (normalizedAngle > 90 && normalizedAngle < 270))) {
       Heading(180 - normalizedAngle);
-    } else if ((dir == Direction.North
+    } else if ((edge == Direction.North
                 && normalizedAngle > 0 && normalizedAngle < 180)
-               || (dir == Direction.South && normalizedAngle > 180)) {
+               || (edge == Direction.South && normalizedAngle > 180)) {
       Heading(360 - normalizedAngle);
-    } else if ((dir == Direction.Northeast
+    } else if ((edge == Direction.Northeast
                 && normalizedAngle > 0 && normalizedAngle < 90)
-              || (dir == Direction.Northwest
+              || (edge == Direction.Northwest
                   && normalizedAngle > 90 && normalizedAngle < 180)
-              || (dir == Direction.Southwest
+              || (edge == Direction.Southwest
                   && normalizedAngle > 180 && normalizedAngle < 270)
-              || (dir == Direction.Southeast && normalizedAngle > 270)) {
+              || (edge == Direction.Southeast && normalizedAngle > 270)) {
       Heading(180 + normalizedAngle);
     }
   }

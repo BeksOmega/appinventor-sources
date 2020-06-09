@@ -85,6 +85,9 @@ public final class AnimationUtil {
 
   /**
    * Applies a specific animation for transitioning to a new Screen.
+   *
+   * @param activity - the form which is calling another screen
+   * @param animType - the animation type
    */
   public static void ApplyOpenScreenAnimation(Activity activity, ScreenAnimation animType) {
     if (animType == null) {
@@ -139,6 +142,9 @@ public final class AnimationUtil {
 
   /**
    * Applies a specific animation for transitioning back a screen.
+   *
+   * @param activity - the form which is closing
+   * @param animType - the animation type
    */
   public static void ApplyCloseScreenAnimation(Activity activity, ScreenAnimation animType) {
     if (animType == null) {

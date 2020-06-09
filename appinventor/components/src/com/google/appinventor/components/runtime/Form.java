@@ -1635,6 +1635,7 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void OpenScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    // Make sure that "animType" is a valid ScreenAnimation.
     ScreenAnimation anim = ScreenAnimation.get(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
@@ -1650,7 +1651,7 @@ public class Form extends AppInventorCompatActivity
    * @param anim the type of animation to use for the transition
    */
   public void OpenScreenAnimationAbstract(ScreenAnimation animType) {
-    openAnimType = animType;
+   openAnimType = animType;
   }
 
  /**
@@ -1687,6 +1688,7 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void CloseScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    // Make sure that "animType" is a valid ScreenAnimation.
     ScreenAnimation anim = ScreenAnimation.get(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",

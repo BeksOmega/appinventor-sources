@@ -193,8 +193,9 @@ public class Marker extends MapFeatureBaseWithFill implements MapMarker {
    * Return the type of the map feature. For Marker, this returns the text "Marker".
    * @return the type of the feature
    */
-  @SimpleProperty
   @Override
+  @SimpleProperty(description = "Returns the type of the feature. For Markers, "
+      + "this returns MapFeature.Marker (\"Marker\").")
   public @Options(MapFeature.class) String Type() {
     return TypeAbstract().getValue();
   }

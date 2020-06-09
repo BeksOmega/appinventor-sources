@@ -5,10 +5,12 @@
 
 package com.google.appinventor.components.common;
 
-import com.google.appinventor.components.annotations.OptionList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Defines a MapFeature type used by various components than can be added to a map.
+ */
 public enum MapFeature implements OptionList {
   Circle("Circle"),
   LineString("LineString"),

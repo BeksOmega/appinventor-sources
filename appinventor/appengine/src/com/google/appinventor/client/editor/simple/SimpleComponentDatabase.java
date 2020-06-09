@@ -12,8 +12,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.TextResource;
 
-import com.google.appinventor.shared.properties.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,10 +61,7 @@ public final class SimpleComponentDatabase extends ComponentDatabase {
   private static final ComponentResource componentResources = GWT.create(ComponentResource.class);
 
   private SimpleComponentDatabase() {
-    super(new ClientJsonParser().parse(componentResources.getSimpleComponents().getText())
-        .asObject()
-        .getProperties()
-        .get("components")
-        .asArray());
+    super(new ClientJsonParser().parse(
+        componentResources.getSimpleComponents().getText()).asArray());
   }
 }
