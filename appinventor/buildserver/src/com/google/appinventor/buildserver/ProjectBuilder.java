@@ -315,10 +315,8 @@ public final class ProjectBuilder {
       throws IOException, JSONException {
     Map<String, String> nameTypeMap = Maps.newHashMap();
 
-    JSONArray simpleCompsJson = new JSONObject(
-        Resources.toString(ProjectBuilder.class.getResource("/files/simple_components.json"),
-        Charsets.UTF_8))
-            .getJSONArray("components");
+    JSONArray simpleCompsJson = new JSONArray(Resources.toString(ProjectBuilder.
+        class.getResource("/files/simple_components.json"), Charsets.UTF_8));
     for (int i = 0; i < simpleCompsJson.length(); ++i) {
       JSONObject simpleCompJson = simpleCompsJson.getJSONObject(i);
       nameTypeMap.put(simpleCompJson.getString("name"),
