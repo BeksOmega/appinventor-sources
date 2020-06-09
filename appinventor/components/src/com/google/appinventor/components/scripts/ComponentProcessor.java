@@ -277,7 +277,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     @Override
     public Parameter clone() {
-      return new Parameter(name, type, color);
+      Parameter param = new Parameter(name, type, color);
+      param.helper = helper;
+      return param;
     }
   }
 
@@ -543,6 +545,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         that.addParameter(p.clone());
       }
       that.returnType = returnType;
+      that.returnHelperKey = returnHelperKey;
       return that;
     }
 
@@ -589,6 +592,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       that.writable = writable;
       that.componentInfoName = componentInfoName;
       that.color = color;
+      that.helper = helper;
       return that;
     }
 
