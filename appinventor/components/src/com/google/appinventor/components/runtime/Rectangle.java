@@ -7,11 +7,13 @@ package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.MapFeature;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -99,8 +101,8 @@ public class Rectangle extends PolygonBase implements MapRectangle {
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
       description = "Returns the type of the feature. For rectangles, this returns the text "
           + "\"Rectangle\".")
-  public String Type() {
-    return MapFactory.MapFeatureType.TYPE_RECTANGLE;
+  public @Options(MapFeature.class) String Type() {
+    return MapFeature.Rectangle.getValue();
   }
 
   /**
