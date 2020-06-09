@@ -12,7 +12,9 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.Direction;
 import com.google.appinventor.components.runtime.errors.AssertionFailure;
 import com.google.appinventor.components.runtime.errors.IllegalArgumentError;
 import com.google.appinventor.components.runtime.util.BoundingBox;
@@ -43,6 +45,7 @@ public abstract class Sprite extends VisibleComponent
   private static final float DEFAULT_SPEED = 0.0f;   // pixels per interval
   private static final boolean DEFAULT_VISIBLE = true;
   private static final double DEFAULT_Z = 1.0;
+  private static final int DIRECTION_NONE = 0;
   protected static final boolean DEFAULT_ORIGIN_AT_CENTER = false;
 
   protected final Canvas canvas;              // enclosing Canvas
@@ -486,14 +489,12 @@ public abstract class Sprite extends VisibleComponent
           "bounce off of the edge it reached. Edge here is represented as an integer that " +
           "indicates one of eight directions north (1), northeast (2), east (3), southeast (4), " +
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
-  public void EdgeReached(int edge) {
-    if (edge == Component.DIRECTION_NONE
-        || edge < Component.DIRECTION_MIN
-        || edge > Component.DIRECTION_MAX) {
-      // This should never be reached.
+  public void EdgeReached(@Options(Direction.class) int edge) {
+    Direction dir = Direction.get(edge);
+    if (dir == null) {
       return;
     }
-    postEvent(this, "EdgeReached", edge);
+    postEvent(this, "EdgeReached", dir.getValue());
   }
 
   /**
@@ -607,7 +608,11 @@ public abstract class Sprite extends VisibleComponent
   @SimpleFunction(
     description = "Makes the %type% bounce, as if off a wall. " +
         "For normal bouncing, the edge argument should be the one returned by EdgeReached.")
-  public void Bounce (int edge) {
+  public void Bounce (@Options(Direction.class) int edge) {
+    Direction dir = Direction.get(edge);
+    if (dir == null) {
+      return;
+    }
     MoveIntoBounds();
 
     // Normalize heading to [0, 360)
@@ -620,22 +625,22 @@ public abstract class Sprite extends VisibleComponent
 
     // Only transform heading if sprite was moving in that direction.
     // This avoids oscillations.
-    if ((edge == Component.DIRECTION_EAST
+    if ((dir == Direction.East
          && (normalizedAngle < 90 || normalizedAngle > 270))
-        || (edge == Component.DIRECTION_WEST
+        || (dir == Direction.West
             && (normalizedAngle > 90 && normalizedAngle < 270))) {
       Heading(180 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTH
+    } else if ((dir == Direction.North
                 && normalizedAngle > 0 && normalizedAngle < 180)
-               || (edge == Component.DIRECTION_SOUTH && normalizedAngle > 180)) {
+               || (dir == Direction.South && normalizedAngle > 180)) {
       Heading(360 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTHEAST
+    } else if ((dir == Direction.Northeast
                 && normalizedAngle > 0 && normalizedAngle < 90)
-              || (edge == Component.DIRECTION_NORTHWEST
+              || (dir == Direction.Northwest
                   && normalizedAngle > 90 && normalizedAngle < 180)
-              || (edge == Component.DIRECTION_SOUTHWEST
+              || (dir == Direction.Southwest
                   && normalizedAngle > 180 && normalizedAngle < 270)
-              || (edge == Component.DIRECTION_SOUTHEAST && normalizedAngle > 270)) {
+              || (dir == Direction.Southeast && normalizedAngle > 270)) {
       Heading(180 + normalizedAngle);
     }
   }
@@ -734,7 +739,7 @@ public abstract class Sprite extends VisibleComponent
       return;
     }
     int edge = hitEdge();
-    if (edge != Component.DIRECTION_NONE) {
+    if (edge != DIRECTION_NONE) {
       EdgeReached(edge);
     }
     canvas.registerChange(this);
@@ -744,13 +749,12 @@ public abstract class Sprite extends VisibleComponent
    * Specifies which edge of the canvas has been hit by the Sprite, if
    * any, moving the sprite back in bounds.
    *
-   * @return {@link Component#DIRECTION_NONE} if no edge has been hit, or a
-   *         direction (e.g., {@link Component#DIRECTION_NORTHEAST}) if that
-   *         edge of the canvas has been hit
+   * @return {@link DIRECTION_NONE} if no edge has been hit, or a
+   *         {@link Direction}  if that edge of the canvas has been hit
    */
   protected int hitEdge() {
     if (!canvas.ready()) {
-      return Component.DIRECTION_NONE;
+      return DIRECTION_NONE;
     }
 
     return hitEdge(canvas.Width(), canvas.Height());
@@ -857,7 +861,7 @@ public abstract class Sprite extends VisibleComponent
 
     // If no edge was hit, return.
     if (!(north || south || east || west)) {
-      return Component.DIRECTION_NONE;
+      return DIRECTION_NONE;
     }
 
     // Move the sprite back into bounds.  Note that we don't just reverse the
@@ -866,35 +870,39 @@ public abstract class Sprite extends VisibleComponent
     MoveIntoBounds();
 
     // Determine the appropriate return value.
+    Direction dir = null;
     if (west) {
       if (north) {
-        return Component.DIRECTION_NORTHWEST;
+        dir = Direction.Northwest;
       } else if (south) {
-        return Component.DIRECTION_SOUTHWEST;
+        dir = Direction.Southwest;
       } else {
-        return Component.DIRECTION_WEST;
+        dir = Direction.West;
       }
     }
 
     if (east) {
       if (north) {
-        return Component.DIRECTION_NORTHEAST;
+        dir = Direction.Northeast;
       } else if (south) {
-        return Component.DIRECTION_SOUTHEAST;
+        dir = Direction.Southeast;
       } else {
-        return Component.DIRECTION_EAST;
+        dir = Direction.East;
       }
     }
 
     if (north) {
-      return Component.DIRECTION_NORTH;
+      dir = Direction.North;
     }
     if (south) {
-      return Component.DIRECTION_SOUTH;
+      dir = Direction.South;
     }
 
-    // This should never be reached.
-    return Component.DIRECTION_NONE;
+    if (dir == null) {
+      // This should never be reached.
+      return DIRECTION_NONE;
+    }
+    return dir.getValue();
   }
 
   /**
