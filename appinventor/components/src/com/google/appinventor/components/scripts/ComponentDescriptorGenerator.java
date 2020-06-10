@@ -379,7 +379,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
 
   private void outputOptionList(String key, StringBuilder sb) {
     OptionList optList = optionLists.get(key);
-    sb.append("      \"class\": \"");
+    sb.append("      \"clazz\": \"");
     sb.append(optList.getClassName());
     sb.append("\",\n");
     sb.append("      \"name\": \"");
