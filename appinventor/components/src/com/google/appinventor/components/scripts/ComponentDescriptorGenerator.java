@@ -291,6 +291,7 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\", \"deprecated\": \"");
     sb.append(prop.isDeprecated());
     sb.append("\"");
+    outputHelper(prop.getHelperKey(), sb);
     if (alwaysSend) {
       sb.append(", \"alwaysSend\": true, \"defaultValue\": \"");
       sb.append(defaultValue.replaceAll("\"", "\\\""));
@@ -334,10 +335,10 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     if (method.getReturnType() != null) {
       sb.append(", \"returnType\": \"");
       sb.append(method.getYailReturnType());
-      sb.append("\"}");
-    } else {
-      sb.append("}");
+      sb.append("\"");
     }
+    outputHelper(method.getReturnHelperKey(), sb);
+    sb.append("}");
   }
 
   /*
@@ -352,10 +353,56 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(p.name);
       sb.append("\", \"type\": \"");
       sb.append(javaTypeToYailType(p.type));
-      sb.append("\"}");
+      sb.append("\"");
+      outputHelper(p.getHelperKey(), sb);
+      sb.append("}");
       separator = ",";
     }
     sb.append("]");
+  }
+
+  private void outputHelper(HelperKey helper, StringBuilder sb) {
+    if (helper == null) {
+      return;
+    }
+    sb.append(", \"helper\": {\n");
+    sb.append("    \"type\": \"");
+    sb.append(helper.getType());
+    sb.append("\",\n");
+    sb.append("    \"data\": {\n");
+    switch (helper.getType()) {
+      case OPTION_LIST:
+        outputOptionList(helper.getKey(), sb);
+    }
+    sb.append("    }\n}");
+  }
+
+  private void outputOptionList(String key, StringBuilder sb) {
+    OptionList optList = optionLists.get(key);
+    sb.append("      \"class\": \"");
+    sb.append(optList.getClassName());
+    sb.append("\",\n");
+    sb.append("      \"name\": \"");
+    sb.append(key);
+    sb.append("\",\n");
+    sb.append("      \"options\": [\n");
+    String separator = "";
+    for (Map.Entry<String, Option> entry : optList.entrySet()) {
+      sb.append(separator);
+      sb.append("        [ \"");
+      sb.append(entry.getKey());
+      sb.append("\", ");
+      Option opt = entry.getValue();
+      sb.append("{ \"name\": \"");
+      sb.append(opt.name);
+      sb.append("\", \"description\": ");
+      sb.append(formatDescription(opt.getDescription()));
+      sb.append(", \"deprecated\": \"");
+      sb.append(opt.isDeprecated());
+      sb.append("\" } ]");
+      separator = ",\n";
+    }
+    sb.append("\n      ]\n");
   }
 
   @Override
