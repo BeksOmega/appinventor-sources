@@ -1043,7 +1043,6 @@
 ;;; Be sure to check any components whose methods are type 'any' to make sure they can handle the
 ;;; values they will receive.
 
-
 (define (call-component-method component-name method-name arglist typelist)
   (let ((coerced-args (coerce-args method-name arglist typelist)))
     (let ((result
@@ -1354,7 +1353,22 @@
      ((equal? type 'key) (coerce-to-key arg))
      ((equal? type 'dictionary) (coerce-to-dictionary arg))
      ((equal? type 'any) arg)
+     ((enum-type? type) (coerce-to-enum arg type))
      (else (coerce-to-component-of-type arg type)))))
+
+(define (enum-type? type)
+  (string-contains (symbol->string type) "Enum"))
+
+(define (enum? arg)
+  (instance? arg com.google.appinventor.components.common.OptionList))
+
+(define (coerce-to-enum arg type)
+  (if (and (enum? arg)
+        ;; We have to trick the Kawa compiler into not open-coding "instance?"
+        ;; or else we get a ClassCastException here.
+        (apply instance? (list arg (string->symbol (string-replace-all (symbol->string type) "Enum" "")))))
+      arg 
+      *non-coercible-value*))
 
 ;;; We can coerce *the-null-value* to a string for printing in error messages
 ;;; but we don't consider it to be a Yail text for use in
@@ -1406,10 +1420,16 @@
    ((number? arg) arg)
    ((string? arg)
     (or (padded-string->number arg) *non-coercible-value*))
+   ((enum? arg)
+    (let ((val (arg:getValue)))
+      (if (number? val)
+        val
+        *non-coercible-value*)))
    (else *non-coercible-value*)))
 
 (define (coerce-to-key arg)
   (cond
+   ;;; TODO: I don't understand why these values have to be coerced.
    ((number? arg) (coerce-to-number arg))
    ((string? arg) (coerce-to-string arg))
    ((instance? arg com.google.appinventor.components.runtime.Component) arg)
@@ -1433,6 +1453,11 @@
                (string-append "[" (join-strings pieces ", ") "]"))
              (let ((pieces (map coerce-to-string arg)))
                (call-with-output-string (lambda (port) (display pieces port))))))
+        ((enum? arg)
+          (let ((val (arg:getValue)))
+            (if (string? val)
+              val
+              *non-coercible-value*)))
         (else (call-with-output-string (lambda (port) (display arg port))))))
 
 ;;; This is very similar to coerce-to-string, but is intended for places where we
@@ -1655,6 +1680,9 @@
    ;; Uncomment these two lines to use string=? on strings
    ;; ((and (string? x1) (string? x2))
    ;;  (equal? x1 x2))
+
+   ((and (enum? x1) (not (enum? x2))) (equal? (x1:getValue) x2))
+   ((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:getValue)))
 
    ;; If the x1 and x2 are not equal?, try comparing coverting x1 and x2 to numbers
    ;; and comparing them numerically
