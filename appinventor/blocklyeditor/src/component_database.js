@@ -374,7 +374,6 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         delete method['params'];
       }
       if (method['helper']) {
-        console.log('processing method helper');
         method['helper'] = this.processHelper(method['helper']);
       }
       info.methodDictionary[method.name] = method;
@@ -412,6 +411,13 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
   }
 };
 
+/**
+ * Processes the given array of parameters (from simple_components.json, not
+ * Parameters) and returns an array of Parameters.
+ * @param {!Array.<!Object>} paramData An array of data from
+ *     simple_components.json defining the parameters.
+ * @return {!Array.<!Parameter>} An array of parameters.
+ */
 Blockly.ComponentDatabase.prototype.processParameters = function(paramData) {
   params = [];
   for (var i = 0, datum; datum = paramData[i]; i++) {
@@ -424,6 +430,13 @@ Blockly.ComponentDatabase.prototype.processParameters = function(paramData) {
   return params;
 }
 
+/**
+ * Processes a helper (from simple_components.json) and returns a HelperKey if
+ * possible.
+ * @param {Object} helper The (possibly null) helper definition.
+ * @return {HelperKey} The helper key associated with the helper (if it is
+ *     possible) to create one.
+ */
 Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
   if (!helper) {
     return null;
@@ -435,7 +448,13 @@ Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
   return null;
 }
 
-Blockly.ComponentDatabase.prototype.processOptionList = function (data) {
+/**
+ * Processes data defining an OptionList (from simple_components.json) and
+ * returns a HelperKey associated with the OptionList.
+ * @param {!Object} data The data defining the OptionList.
+ * @return {!HelperKey} The key associated with the OptionList.
+ */
+Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
   if (!this.optionLists_[data.name]) {
     this.optionLists_[data.name] = {
       clazz: data.clazz,
@@ -590,6 +609,16 @@ Blockly.ComponentDatabase.prototype.getGetterNamesForType = function(typeName) {
   }
   return null;
 };
+
+/**
+ * Returns the OptionList associated with the given key.
+ * @param {!string} key The dictionary key for the OptionList.
+ * @return {OptionList} The associated option list, or undefined if one is not
+ *     found.
+ */
+Blockly.ComponentDatabase.prototype.getOptionList = function(key) {
+  return this.optionLists_[key];
+}
 
 /**
  * Get the internationalized string for the given component type.

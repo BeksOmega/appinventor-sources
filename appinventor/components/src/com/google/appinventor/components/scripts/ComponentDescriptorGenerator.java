@@ -53,22 +53,43 @@ import javax.tools.FileObject;
  *     { "name": "PROPERTY-NAME",
  *        "description": "DESCRIPTION",
  *        "type": "YAIL-TYPE",
+ *        "helper": {
+ *          "type": HELPER-TYPE,
+ *          "data": { ARBITRARY-DATA } 
+ *        },
  *        "rw": "read-only"|"read-write"|"write-only"|"invisible"},*
  *   ],
  *   "events": [
  *     { "name": "EVENT-NAME",
  *       "description": "DESCRIPTION",
  *       "params": [
- *         { "name": "PARAM-NAME",
- *           "type": "YAIL-TYPE"},*
+ *         { 
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": HELPER-TYPE,
+ *             "data": { ARBITRARY-DATA } 
+ *           }
+ *         },*
  *       ]},+
  *   ],
  *   “methods”: [
  *     { "name": "METHOD-NAME",
  *       "description": "DESCRIPTION",
+ *       "returnType": "RETURN-TYPE",
+ *       "helper": {
+ *         "type": HELPER-TYPE,
+ *         "data": { ARBITRARY-DATA } 
+ *       },
  *       "params": [
- *         { "name": "PARAM-NAME",
- *       "type": "YAIL-TYPE"},*
+ *         {
+ *           "name": "PARAM-NAME",
+ *           "type": "YAIL-TYPE"
+ *           "helper": {
+ *             "type": HELPER-TYPE,
+ *             "data": { ARBITRARY-DATA } 
+ *           }
+ *         },*
  *     ]},+
  *   ],
  *   ("assets": ["FILENAME",*])?
@@ -361,6 +382,9 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("]");
   }
 
+  /**
+   * Outputs the json for the given helper key.
+   */
   private void outputHelper(HelperKey helper, StringBuilder sb) {
     if (helper == null) {
       return;
@@ -377,6 +401,9 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("    }\n}");
   }
 
+  /**
+   * Outputs the json for the OptionList associated with the given key.
+   */
   private void outputOptionList(String key, StringBuilder sb) {
     OptionList optList = optionLists.get(key);
     sb.append("      \"clazz\": \"");
