@@ -166,6 +166,7 @@
     './src/blocks/colors.js',
     './src/blocks/components.js',
     './src/blocks/dictionaries.js',
+    './src/blocks/helpers.js',
 
     //generator files
     "./src/generators/yail.js",
