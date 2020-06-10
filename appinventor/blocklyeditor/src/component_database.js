@@ -420,6 +420,7 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
       });
     }
   }
+  console.log(this.optionLists_);
 };
 
 /**
