@@ -126,7 +126,10 @@ Option = function() {};
  * @property {!string} className
  * @property {!string} tag
  * @property {!string} defaultOpt
+<<<<<<< HEAD
  * @property {!string} underlyingType
+=======
+>>>>>>> Add communication from Java to Blockly via JSON
  * @property {!Array.<!Option>} options
  */
 OptionList = function() {};
