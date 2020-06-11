@@ -44,8 +44,14 @@ Blockly.Blocks.Utilities.OUTPUT = 1;
 Blockly.Blocks.Utilities.INPUT = 0;
 
 Blockly.Blocks.Utilities.YailTypeToBlocklyType = function(yail,inputOrOutput) {
+    if (yail.indexOf('Enum') != -1) {
+      return yail;
+    }
 
-    var inputOrOutputName = (inputOrOutput == Blockly.Blocks.Utilities.OUTPUT ? "output" : "input");
+    // TODO: Might be better to just swith OUTPUT and INPUT to strings. Would
+    //   require investigation.
+    var inputOrOutputName = (inputOrOutput == Blockly.Blocks.Utilities.OUTPUT) ?
+        "output" : "input";
     var bType = Blockly.Blocks.Utilities.YailTypeToBlocklyTypeMap[yail][inputOrOutputName];
 
     if (bType !== null || yail == 'any') {
@@ -54,6 +60,22 @@ Blockly.Blocks.Utilities.YailTypeToBlocklyType = function(yail,inputOrOutput) {
         throw new Error("Unknown Yail type: " + yail + " -- YailTypeToBlocklyType");
     }
 };
+
+Blockly.Blocks.Utilities.helperKeyToBlocklyType = function(helperKey) {
+  if (!helperKey) {
+    return null;
+  }
+  var utils = Blockly.Blocks.Utilities;
+  switch (helperKey.type) {
+    case "OPTION_LIST":
+      return utils.optionListKeyToBlocklyType(helperKey.key);
+  }
+  return null;
+}
+
+Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key) {
+  return key + 'Enum';
+}
 
 
 // Blockly doesn't wrap tooltips, so these can get too wide.  We'll create our own tooltip setter

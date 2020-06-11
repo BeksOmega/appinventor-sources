@@ -54,7 +54,10 @@ Blockly.Blocks['helpers_dropdown'] = {
 
   domToMutation: function(xml) {
     this.key_ = xml.getAttribute('key');
-    this.setOutput(true, this.key_ + 'Enum');
+    var type = Blockly.Blocks.Utilities.helperKeyToBlocklyType(
+      { type: 'OPTION_LIST', key: this.key_ });
+
+    this.setOutput(true, type);
     this.appendDummyInput()
         .appendField(this.key_)
         .appendField(new Blockly.FieldDropdown(this.getDropdownData()));
