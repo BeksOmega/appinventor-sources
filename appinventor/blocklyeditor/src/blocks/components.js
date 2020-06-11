@@ -625,7 +625,8 @@ Blockly.Blocks.component_method = {
     if(!this.isGeneric) {
       container.setAttribute('instance_name', this.instanceName);//instance name not needed
     }
-    if (!this.isGeneric && this.typeName == "Clock" && Blockly.ComponentBlock.isClockMethodName(this.methodName)) {
+    if (!this.isGeneric && this.typeName == "Clock" &&
+        Blockly.ComponentBlock.isClockMethodName(this.methodName)) {
       var timeUnit = this.getFieldValue('TIME_UNIT');
       container.setAttribute('method_name', 'Add' + timeUnit);
       container.setAttribute('timeUnit', timeUnit);
@@ -741,10 +742,14 @@ Blockly.Blocks.component_method = {
     }
     oldInputValues.splice(0, oldInputValues.length - params.length);
     for (var i = 0, param; param = params[i]; i++) {
-      var newInput = this.appendValueInput("ARG" + i).appendField(componentDb.getInternationalizedParameterName(param.name));
-      newInput.setAlign(Blockly.ALIGN_RIGHT);
-      var blockyType = Blockly.Blocks.Utilities.YailTypeToBlocklyType(param.type,Blockly.Blocks.Utilities.INPUT);
-      newInput.connection.setCheck(blockyType);
+      var name = componentDb.getInternationalizedParameterName(param.name);
+      var check = this.getParamBlocklyType(param);
+
+      this.appendValueInput("ARG" + i)
+          .appendField(name)
+          .setAlign(Blockly.ALIGN_RIGHT)
+          .setCheck(check);
+
       if (oldInputValues[i] && newInput.connection) {
         Blockly.Mutator.reconnect(oldInputValues[i].outputConnection, this, 'ARG' + i);
       }
@@ -801,7 +806,21 @@ Blockly.Blocks.component_method = {
    * @returns {(MethodDescriptor|undefined)}
    */
   getMethodTypeObject : function() {
-    return this.getTopWorkspace().getComponentDatabase().getMethodForType(this.typeName, this.methodName);
+    return this.getTopWorkspace().getComponentDatabase()
+        .getMethodForType(this.typeName, this.methodName);
+  },
+
+  getParamBlocklyType : function(param) {
+    var blocklyType = Blockly.Blocks.Utilities.YailTypeToBlocklyType(
+        param.type, Blockly.Blocks.Utilities.Input);
+    var check = Array.isArray(blocklyType) ? blocklyType : [blocklyType];
+
+    var helperType = Blockly.Blocks.Utilities
+        .helperKeyToBlocklyType(param.helperKey);
+    if (helperType && helperType != blocklyType) {
+      check.push(helperType);
+    }
+    return check;
   },
 
   /**
@@ -904,8 +923,8 @@ Blockly.Blocks.component_method = {
               modifiedParameters = true;
               break; // invalid input or connection
             }
-            var blockyType = Blockly.Blocks.Utilities.YailTypeToBlocklyType(param.type,Blockly.Blocks.Utilities.INPUT);
-            input.connection.setCheck(blockyType); // correct type
+            var check = this.getParamBlocklyType(param);
+            input.setCheck(check);
             found = true;
             break;
           }
@@ -1145,15 +1164,14 @@ Blockly.Blocks.component_set_get = {
   },
 
   setTypeCheck : function() {
-
     var inputOrOutput = Blockly.Blocks.Utilities.OUTPUT;
     if(this.setOrGet == "set") {
       inputOrOutput = Blockly.Blocks.Utilities.INPUT;
     }
 
     var newType = this.getPropertyBlocklyType(this.propertyName,inputOrOutput);
-    // this will disconnect the block if the new outputType doesn't match the
-    // socket the block is plugged into
+    // This will disconnect the block if the new outputType doesn't match the
+    // socket the block is plugged into.
     if(this.setOrGet == "get") {
       this.outputConnection.setCheck(newType);
     } else {
@@ -1162,12 +1180,28 @@ Blockly.Blocks.component_set_get = {
   },
 
   getPropertyBlocklyType : function(propertyName,inputOrOutput) {
-    var yailType = "any"; // necessary for undefined propertyObject
-    if (this.getPropertyObject(propertyName)) {
-      yailType = this.getPropertyObject(propertyName).type;
+    var yailType = "any"; // Necessary for undefined propertyObject.
+    var property = this.getPropertyObject(propertyName);
+    if (property) {
+      yailType = property.type;
     }
-    return Blockly.Blocks.Utilities.YailTypeToBlocklyType(yailType,inputOrOutput);
+    var blocklyType = Blockly.Blocks.Utilities
+        .YailTypeToBlocklyType(yailType, inputOrOutput);
+    var check = Array.isArray(blocklyType) ? blocklyType : [blocklyType];
+
+    // Aka if this is a setter. We don't want blockly to think properties that
+    //    return strings but accept options actually return options.
+    if (inputOrOutput == Blockly.Blocks.Utilities.INPUT) {
+      var helperType = Blockly.Blocks.Utilities
+          .helperKeyToBlocklyType(property.helperKey);
+      if (helperType && helperType != blocklyType) {
+          check.push(helperType);
+      }
+    }
+
+    return check;
   },
+
   getPropertyDropDownList : function() {
     var componentDb = this.getTopWorkspace().getComponentDatabase();
     var dropDownList = [];
