@@ -1632,7 +1632,7 @@ public class Form extends AppInventorCompatActivity
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
-    OpenScreenAnimation(anim);
+    OpenScreenAnimation2(anim);
   }
 
   /**
@@ -1640,7 +1640,7 @@ public class Form extends AppInventorCompatActivity
    *
    * @param anim the type of animation to use for the transition
    */
-  public void OpenScreenAnimation(ScreenAnimation anim) {
+  public void OpenScreenAnimation2(ScreenAnimation anim) {
     openAnimType = anim;
   }
 
@@ -1675,7 +1675,7 @@ public class Form extends AppInventorCompatActivity
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
-    CloseScreenAnimation(anim);
+    CloseScreenAnimation2(anim);
   }
 
   /**
@@ -1684,7 +1684,7 @@ public class Form extends AppInventorCompatActivity
    * 
    * @param anim the type of animation to use for the transition.
    */
-  public void CloseScreenAnimation(ScreenAnimation anim) {
+  public void CloseScreenAnimation2(ScreenAnimation anim) {
     closeAnimType = anim;
   }
 
