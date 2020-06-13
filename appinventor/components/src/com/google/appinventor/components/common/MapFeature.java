@@ -5,7 +5,6 @@
 
 package com.google.appinventor.components.common;
 
-import com.google.appinventor.components.annotations.OptionList;
 import java.util.HashMap;
 import java.util.Map;
 

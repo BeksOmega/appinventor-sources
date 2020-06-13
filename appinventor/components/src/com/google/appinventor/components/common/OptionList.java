@@ -3,8 +3,7 @@
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
-// TODO: What package should this go in?
-package com.google.appinventor.components.annotations;
+package com.google.appinventor.components.common;
 
 /**
  * A marker interface for defining option list helper blocks via the Java scripting language.
