@@ -1617,8 +1617,7 @@ public class Form extends AppInventorCompatActivity
   }
 
   /**
-   * The animation for switching to another screen. Valid options are `default`, `fade`, `zoom`,
-   * `slidehorizontal`, `slidevertical`, and `none`.
+   * Sets the animation type for the transition of this form opening.
    *
    * @param animType the type of animation to use for the transition
    */
@@ -1626,12 +1625,22 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void OpenScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    // Make sure that "animType" is a valid ScreenAnimation.
     ScreenAnimation anim = ScreenAnimation.get(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
+    OpenScreenAnimation(anim);
+  }
+
+  /**
+   * Sets the animation type for the transition of this form opening.
+   *
+   * @param anim the type of animation to use for the transition
+   */
+  public void OpenScreenAnimation(ScreenAnimation anim) {
     openAnimType = anim;
   }
 
@@ -1659,12 +1668,23 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void CloseScreenAnimation(@Options(ScreenAnimation.class) String animType) {
+    // Make sure that "animType" is a valid ScreenAnimation.
     ScreenAnimation anim = ScreenAnimation.get(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
+    CloseScreenAnimation(anim);
+  }
+
+  /**
+   * Sets the animation type for the transition of this form closing and returning to a form behind
+   * it on the activity stack.
+   * 
+   * @param anim the type of animation to use for the transition.
+   */
+  public void CloseScreenAnimation(ScreenAnimation anim) {
     closeAnimType = anim;
   }
 
