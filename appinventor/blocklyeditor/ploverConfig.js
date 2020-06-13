@@ -180,6 +180,7 @@
     "./src/generators/yail/variables.js",
     "./src/generators/yail/procedures.js",
     "./src/generators/yail/dictionaries.js",
+    './src/generators/yail/helpers.js',
 
     // Repl
     "./src/replmgr.js",
