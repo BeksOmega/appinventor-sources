@@ -415,6 +415,9 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("      \"tag\": \"");
     sb.append(optList.getTagName());
     sb.append("\",\n");
+    sb.append("      \"defaultOpt\": \"");
+    sb.append(optList.getDefault());
+    sb.append("\",\n");
     sb.append("      \"options\": [\n");
     String separator = "";
     for (Option opt : optList.asCollection()) {

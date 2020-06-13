@@ -124,6 +124,7 @@ Option = function() {};
  * @type {object}
  * @property {!string} className
  * @property {!string} tag
+ * @property {!string} defaultOpt
  * @property {!Array.<!Array>} options
  */
 OptionList = function() {};
@@ -466,6 +467,7 @@ Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
     this.optionLists_[data.key] = {
       className: data.className,
       tag: data.tag,
+      defaultOpt: data.defaultOpt,
       options: options
     };
   }
