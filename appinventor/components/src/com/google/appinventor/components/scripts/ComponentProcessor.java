@@ -743,7 +743,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * For built-in components the Option name is used to look up the translated display text.
      * For extensions, which do not support i18n, the Option name /is/ the display text.
      */
-    private ArrayList<Map.Entry<String, Option>> options;
+    private ArrayList<Option> options;
 
     /**
      * The fully qualified class name this OptionList is associated with.
@@ -751,13 +751,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String className;
 
     /**
+     * The tag name this OptionList is associated with. This goes in front of the dropdown in the
+     * blocks editor. It is usually the simplified class name.
+     */
+    private String tagName;
+
+    /**
      * Creates an OptionList (which is a definition of a option list helper-block) that can be
      * populated with options.
      * 
-     * @param class The fully qualified class name this OptionList is associated with.
+     * @param className The fully qualified class name this OptionList is associated with.
+     * @param tagName The tag name this OptionList is associated with. This goes in front of the
+     *     dropdown in the blocks editor. It is usually the simplified class name.
      */
-    protected OptionList(String className) {
+    protected OptionList(String className, String tagName) {
       this.className = className;
+      this.tagName = tagName;
       options = new ArrayList();
     }
 
@@ -769,29 +778,25 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Adds the given value-option pair to the OptionList.
+     * @return The tag name (which is usually the simplified class name) this OptionList is
+     * associated with.
      */
-    protected void addOption(String optionValue, Option optionInfo) {
-        options.add(Maps.immutableEntry(optionValue, optionInfo));
+    protected String getTagName() {
+      return tagName;
     }
 
     /**
-     * @return the Option associated with the given option value if it exists. Null otherwise.
+     * Adds the given Option to the OptionList.
      */
-    protected Feature getOption(String optionValue) {
-      for (Map.Entry<String, Option> entry : options) {
-        if (entry.getKey() == optionValue) {
-          return entry.getValue();
-        }
-      }
-      return null;
+    protected void addOption(Option option) {
+        options.add(option);
     }
 
     /**
-     * @return true if this option list has an option associated with the given value.
+     * @return true if this option list contains the given option.
      */
-    protected boolean containsOption(String optionValue) {
-      return getOption(optionValue) != null;
+    protected boolean containsOption(Option option) {
+      return options.contains(option);
     }
 
     /**
@@ -802,25 +807,27 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * @return a set of Map.Entry's that make up this option list. The entries contain the
-     * Stringified value of the option and the Option itself.
+     * @return a collection of Options's that make up this option list.
      */
-    protected Collection<Map.Entry<String, Option>> entrySet() {
+    protected Collection<Option> asCollection() {
       return options;
     }
   }
 
-  // Option doesn't have any special properties beyond feature, but we can't instantiate a Feature
-  // directly.
   protected final class Option extends Feature {
+    /**
+     * The value this option is associated with.
+     */
+    private String value;
+
     protected Option(
       String name,
+      String value,
       String description,
-      String longDescription,
-      boolean userVisible,
       boolean deprecated
     ) {
-      super(name, description, longDescription, "Option", userVisible, deprecated);
+      super(name, description, description, "Option", true, deprecated);
+      this.value = value;
     }
 
     /**
@@ -828,6 +835,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String getDescription() {
       return description;
+    }
+
+    protected String getValue() {
+      return value;
     }
   }
 
@@ -1632,10 +1643,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @return Returns true if the Optionlist was successfully added. False otherwise.
    */
   private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
-    OptionList optionList = new OptionList(optionElem.asType().toString());
+    String className = optionElem.asType().toString();
+    String tagName = optionElem.getSimpleName().toString();
+    OptionList optionList = new OptionList(className, tagName);
 
     // Get the class.
-    String className = optionElem.asType().toString();
     Class clazz = null;
     try {
       clazz = Class.forName(className);
@@ -1674,7 +1686,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     for (Element field : optionElem.getEnclosedElements()) {
       String fieldName = field.getSimpleName().toString();
       if (namesToValues.containsKey(fieldName)) {
-        optionList.addOption(namesToValues.get(fieldName), elementToOption(field));
+        optionList.addOption(elementToOption(field, namesToValues.get(fieldName)));
       }
     }
 
@@ -1688,7 +1700,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   /**
    * Converts an Element into an Option.
    */
-  private Option elementToOption(Element field) {
+  private Option elementToOption(Element field, String value) {
     // TODO: getDocComment doesn't seem to work on enum constants?
     String description = elementUtils.getDocComment(field);
     if (description == null) {
@@ -1699,9 +1711,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     return new Option(
       field.getSimpleName().toString(),
+      value,
       description,
-      description,
-      true,  // Always user visible.
       elementUtils.isDeprecated(field)
     );
   }
