@@ -122,7 +122,8 @@ Option = function() {};
 /**
  * @typedef OptionList
  * @type {object}
- * @property {!string} class
+ * @property {!string} className
+ * @property {!string} tag
  * @property {!Array.<!Array>} options
  */
 OptionList = function() {};
@@ -409,6 +410,7 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
       });
     }
   }
+  console.log(this.optionLists_);
 };
 
 /**
@@ -455,15 +457,30 @@ Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
  * @return {!HelperKey} The key associated with the OptionList.
  */
 Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
-  if (!this.optionLists_[data.name]) {
-    this.optionLists_[data.name] = {
-      clazz: data.clazz,
-      options: data.options
+  if (!this.optionLists_[data.key]) {
+    var options = [];
+    for (var i = 0, option; option = data.options[i]; i++) {
+      options[i] = this.processOption(option);
+    }
+
+    this.optionLists_[data.key] = {
+      className: data.className,
+      tag: data.tag,
+      options: options
     };
   }
   return {
     type: "OPTION_LIST",
-    key: data.name
+    key: data.key
+  };
+}
+
+Blockly.ComponentDatabase.prototype.processOption = function(option) {
+  return {
+    name: option.name,
+    value: option.value,
+    description: option.description,
+    deprecated: option.deprecated == "true"
   };
 }
 

@@ -406,27 +406,28 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
    */
   private void outputOptionList(String key, StringBuilder sb) {
     OptionList optList = optionLists.get(key);
-    sb.append("      \"clazz\": \"");
+    sb.append("      \"className\": \"");
     sb.append(optList.getClassName());
     sb.append("\",\n");
-    sb.append("      \"name\": \"");
+    sb.append("      \"key\": \"");
     sb.append(key);
+    sb.append("\",\n");
+    sb.append("      \"tag\": \"");
+    sb.append(optList.getTagName());
     sb.append("\",\n");
     sb.append("      \"options\": [\n");
     String separator = "";
-    for (Map.Entry<String, Option> entry : optList.entrySet()) {
+    for (Option opt : optList.asCollection()) {
       sb.append(separator);
-      sb.append("        [ \"");
-      sb.append(entry.getKey());
-      sb.append("\", ");
-      Option opt = entry.getValue();
-      sb.append("{ \"name\": \"");
+      sb.append("        { \"name\": \"");
       sb.append(opt.name);
+      sb.append("\", \"value\": \"");
+      sb.append(opt.getValue());
       sb.append("\", \"description\": ");
       sb.append(formatDescription(opt.getDescription()));
       sb.append(", \"deprecated\": \"");
       sb.append(opt.isDeprecated());
-      sb.append("\" } ]");
+      sb.append("\" }");
       separator = ",\n";
     }
     sb.append("\n      ]\n");
