@@ -108,6 +108,8 @@ public interface Component {
   static final int TYPEFACE_SERIF = 2;
   static final int TYPEFACE_MONOSPACE = 3;
 
+  static final int DIRECTION = 3;
+
   /*
    * Length constants (for width and height).
    */

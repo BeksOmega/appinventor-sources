@@ -4,10 +4,10 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 Blockly.Yail['helpers_dropdown'] = function(block) {
-  var optionList = block.workspace.getComponentDatabase()
-      .getOptionList(block.key_);
+  //var optionList = block.workspace.getComponentDatabase()
+      //.getOptionList(block.key_);
   //var code = optionList.className + ":" +
       //block.getFieldValue('OPTION');
-  var code = "com.google.appinventor.components.runtime.Component:TYPEFACE_MONOSPACE";
+  var code = "com.google.appinventor.components.runtime.Component:DIRECTION";
   return [code, Blockly.Yail.ORDER_ATOMIC]
 }
