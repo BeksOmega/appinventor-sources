@@ -5,7 +5,6 @@
 
 package com.google.appinventor.components.common;
 
-import com.google.appinventor.components.annotations.OptionList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ import java.util.Map;
 public enum Direction implements OptionList {
   North(1),
   Northeast(2),
-  // @Default
+  @Default
   East(3),
   Southeast(4),
   South(-1),

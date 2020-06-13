@@ -757,16 +757,23 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String tagName;
 
     /**
+     * The Option.name of the default option associated with this OptionList.
+     */
+    private String defaultOpt;
+
+    /**
      * Creates an OptionList (which is a definition of a option list helper-block) that can be
      * populated with options.
      * 
      * @param className The fully qualified class name this OptionList is associated with.
      * @param tagName The tag name this OptionList is associated with. This goes in front of the
      *     dropdown in the blocks editor. It is usually the simplified class name.
+     * @param default The Option.name of the default option.
      */
-    protected OptionList(String className, String tagName) {
+    protected OptionList(String className, String tagName, String defaultOpt) {
       this.className = className;
       this.tagName = tagName;
+      this.defaultOpt = defaultOpt;
       options = new ArrayList();
     }
 
@@ -783,6 +790,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String getTagName() {
       return tagName;
+    }
+
+    /**
+     * @return The Option.name of the default option associated with this OptionList.
+     */
+    protected String getDefault() {
+      return defaultOpt;
     }
 
     /**
@@ -1645,7 +1659,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
     String className = optionElem.asType().toString();
     String tagName = optionElem.getSimpleName().toString();
-    OptionList optionList = new OptionList(className, tagName);
+    String defaultOpt = getDefaultOption(optionElem);
+    OptionList optionList = new OptionList(className, tagName, defaultOpt);
 
     // Get the class.
     Class clazz = null;
@@ -1695,6 +1710,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     return !optionList.isEmpty();
+  }
+
+  /**
+   * Finds the default option for an OptionList.
+   */
+  private String getDefaultOption(Element optionElem) {
+    for (Element field : optionElem.getEnclosedElements()) {
+      for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
+        // Make sure the annotation is of type default.
+        if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Default")) {
+          return field.getSimpleName().toString();
+        }
+      }
+    }
+    // Return the first option if there is no explicit default.
+    return optionElem.getEnclosedElements().get(0).getSimpleName().toString();
   }
 
   /**
