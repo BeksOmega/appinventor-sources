@@ -1043,6 +1043,9 @@
 ;;; Be sure to check any components whose methods are type 'any' to make sure they can handle the
 ;;; values they will receive.
 
+;;; (define-enum colors (red blue green))
+;;; (define favorite-color colors:green)
+
 
 (define (call-component-method component-name method-name arglist typelist)
   (let ((coerced-args (coerce-args method-name arglist typelist)))
@@ -1354,7 +1357,21 @@
      ((equal? type 'key) (coerce-to-key arg))
      ((equal? type 'dictionary) (coerce-to-dictionary arg))
      ((equal? type 'any) arg)
+     ((enum-type? type) (coerce-to-enum arg type))
      (else (coerce-to-component-of-type arg type)))))
+
+(define (enum-type? type)
+  (string-contains (symbol->string type) "Enum"))
+
+(define (enum? arg)
+  (instance? arg com.google.appinventor.components.common.OptionList))
+
+(define (coerce-to-enum arg type)
+  (if (enum? arg)
+      ;;; This shouldn't be a problem because Blockly will prevent enums from
+      ;;; being connected to the wrong enum input.
+      arg 
+      *non-coercible-value*))
 
 ;;; We can coerce *the-null-value* to a string for printing in error messages
 ;;; but we don't consider it to be a Yail text for use in
@@ -1406,6 +1423,11 @@
    ((number? arg) arg)
    ((string? arg)
     (or (padded-string->number arg) *non-coercible-value*))
+   ((enum? arg)
+    (let ((val (arg:getValue)))
+      (if (number? val)
+        val
+        *non-coercible-value*)))
    (else *non-coercible-value*)))
 
 (define (coerce-to-key arg)

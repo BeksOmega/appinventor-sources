@@ -19,20 +19,6 @@ goog.require('Blockly.Blocks.Utilities');
 
 Blockly.COLOUR_HELPERS = "#BF4343";
 
-/*Blockly.Blocks['helper'] = {
-  // Numeric value.
-  category: 'Math',
-  helpUrl: Blockly.Msg.LANG_MATH_NUMBER_HELPURL,
-  init: function () {
-    this.setColour(Blockly.COLOUR_HELPERS);
-    this.appendDummyInput().appendField(
-        new Blockly.FieldTextInput('0', Blockly.Blocks.math_number.validator), 'NUM');
-    this.setOutput(true, Blockly.Blocks.Utilities.YailTypeToBlocklyType("number", Blockly.Blocks.Utilities.OUTPUT));
-    this.setTooltip(Blockly.Msg.LANG_MATH_NUMBER_TOOLTIP);
-  },
-  typeblock: [{translatedName: Blockly.Msg.LANG_MATH_MUTATOR_ITEM_INPUT_NUMBER}]
-};*/
-
 Blockly.Blocks['helpers_dropdown'] = {
   init: function() {
     /**
@@ -56,21 +42,22 @@ Blockly.Blocks['helpers_dropdown'] = {
     this.key_ = xml.getAttribute('key');
     var type = Blockly.Blocks.Utilities.helperKeyToBlocklyType(
       { type: 'OPTION_LIST', key: this.key_ });
+      var dropdown = new Blockly.FieldDropdown(this.getDropdownData());
 
     this.setOutput(true, type);
     this.appendDummyInput()
         .appendField(this.key_)
-        .appendField(new Blockly.FieldDropdown(this.getDropdownData()));
+        .appendField(dropdown, 'OPTION');
   },
 
   getDropdownData: function() {
     var optionList = this.workspace.getComponentDatabase()
         .getOptionList(this.key_);
     var options = [];
-    for (var i = 0, option; option = optionList.options[i]; i++) {
-      var value = option[0];
-      var details = option[1];
-      options.push([details.name, value]);
+    for (var i = 0, pair; pair = optionList.options[i]; i++) {
+      var option = pair[1];
+      // TODO: First will eventually be the translated name.
+      options.push([option.name, pair[0]]);
     }
     return options;
   }
