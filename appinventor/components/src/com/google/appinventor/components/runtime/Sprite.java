@@ -490,11 +490,21 @@ public abstract class Sprite extends VisibleComponent
           "indicates one of eight directions north (1), northeast (2), east (3), southeast (4), " +
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
   public void EdgeReached(@Options(Direction.class) int edge) {
+    // Make sure that "edge" is a valid Direction.
     Direction dir = Direction.get(edge);
     if (dir == null) {
       return;
     }
-    postEvent(this, "EdgeReached", dir.getValue());
+
+    EdgeReached2(dir);
+  }
+
+  /**
+   * Called when the sprite hits an edge of the screen.
+   */
+  public void EdgeReached2(Direction edge) {
+    // We have to post the edge as an int for backwards compatibility.
+    postEvent(this, "EdgeReached", edge.getValue());
   }
 
   /**
@@ -608,7 +618,7 @@ public abstract class Sprite extends VisibleComponent
       return;
     }
 
-    Bounce(dir);
+    Bounce2(dir);
   }
 
   /**
@@ -625,7 +635,7 @@ public abstract class Sprite extends VisibleComponent
    *        ----------  
    *        The correct direction would be `Direction.East`.
    */
-  public void Bounce(Direction edge) {
+  public void Bounce2(Direction edge) {
     MoveIntoBounds();
 
     // Normalize heading to [0, 360)
