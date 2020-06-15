@@ -61,20 +61,22 @@ Blockly.Blocks.Utilities.YailTypeToBlocklyType = function(yail,inputOrOutput) {
     }
 };
 
-Blockly.Blocks.Utilities.helperKeyToBlocklyType = function(helperKey) {
+Blockly.Blocks.Utilities.helperKeyToBlocklyType = function(helperKey, block) {
   if (!helperKey) {
     return null;
   }
   var utils = Blockly.Blocks.Utilities;
   switch (helperKey.type) {
     case "OPTION_LIST":
-      return utils.optionListKeyToBlocklyType(helperKey.key);
+      return utils.optionListKeyToBlocklyType(helperKey.key, block);
   }
   return null;
 }
 
-Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key) {
-  return key + 'Enum';
+Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key, block) {
+  var optionList = block.getTopWorkspace().getComponentDatabase()
+      .getOptionList(key);
+  return optionList.className + 'Enum';
 }
 
 

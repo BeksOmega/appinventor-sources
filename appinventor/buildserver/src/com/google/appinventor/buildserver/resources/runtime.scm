@@ -1367,7 +1367,10 @@
   (instance? arg com.google.appinventor.components.common.OptionList))
 
 (define (coerce-to-enum arg type)
-  (if (enum? arg)
+  (if (and (enum? arg)
+        ;; We have to trick the Kawa compiler into not open-coding "instance?"
+        ;; or else we get a ClassCastException here.
+        (apply instance? (list arg (string->symbol (string-replace-all (symbol->string type) "Enum" "")))))
       arg 
       *non-coercible-value*))
 
