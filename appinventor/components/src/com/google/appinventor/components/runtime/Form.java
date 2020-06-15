@@ -1613,7 +1613,10 @@ public class Form extends AppInventorCompatActivity
     description = "The animation for switching to another screen. Valid" +
     " options are default, fade, zoom, slidehorizontal, slidevertical, and none"    )
   public String OpenScreenAnimation() {
-    return openAnimType.getValue();
+    if (openAnimType != null) {
+      return openAnimType.getValue();
+    }
+    return null;
   }
 
   /**
@@ -1655,7 +1658,10 @@ public class Form extends AppInventorCompatActivity
     " to the previous screen. Valid options are default, fade, zoom, slidehorizontal, " +
     "slidevertical, and none")
   public String CloseScreenAnimation() {
-    return closeAnimType.getValue();
+    if (closeAnimType != null) {
+      return closeAnimType.getValue();
+    }
+    return null;
   }
 
   /**
