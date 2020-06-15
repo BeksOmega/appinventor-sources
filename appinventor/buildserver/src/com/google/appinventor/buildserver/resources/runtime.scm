@@ -1686,6 +1686,9 @@
    ;; ((and (string? x1) (string? x2))
    ;;  (equal? x1 x2))
 
+   ((and (enum? x1) (not (enum? x2))) (equal? (x1:getValue) x2))
+   ((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:getValue)))
+
    ;; If the x1 and x2 are not equal?, try comparing coverting x1 and x2 to numbers
    ;; and comparing them numerically
    ;; Note that equal? is not sufficient for numbers
