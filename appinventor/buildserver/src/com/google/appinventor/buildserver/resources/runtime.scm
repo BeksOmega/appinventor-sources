@@ -1368,8 +1368,6 @@
 
 (define (coerce-to-enum arg type)
   (if (enum? arg)
-      ;;; This shouldn't be a problem because Blockly will prevent enums from
-      ;;; being connected to the wrong enum input.
       arg 
       *non-coercible-value*))
 
@@ -1432,6 +1430,7 @@
 
 (define (coerce-to-key arg)
   (cond
+   ;;; TODO: I don't understand why these values have to be coerced.
    ((number? arg) (coerce-to-number arg))
    ((string? arg) (coerce-to-string arg))
    ((instance? arg com.google.appinventor.components.runtime.Component) arg)
@@ -1455,6 +1454,11 @@
                (string-append "[" (join-strings pieces ", ") "]"))
              (let ((pieces (map coerce-to-string arg)))
                (call-with-output-string (lambda (port) (display pieces port))))))
+        ((enum? arg)
+          (let ((val (arg:getValue)))
+            (if (string? val)
+              val
+              *non-coercible-value*)))
         (else (call-with-output-string (lambda (port) (display arg port))))))
 
 ;;; This is very similar to coerce-to-string, but is intended for places where we
