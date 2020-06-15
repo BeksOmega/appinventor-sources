@@ -745,12 +745,12 @@ Blockly.Blocks.component_method = {
       var name = componentDb.getInternationalizedParameterName(param.name);
       var check = this.getParamBlocklyType(param);
 
-      this.appendValueInput("ARG" + i)
+      var input = this.appendValueInput("ARG" + i)
           .appendField(name)
           .setAlign(Blockly.ALIGN_RIGHT)
           .setCheck(check);
 
-      if (oldInputValues[i] && newInput.connection) {
+      if (oldInputValues[i] && input.connection) {
         Blockly.Mutator.reconnect(oldInputValues[i].outputConnection, this, 'ARG' + i);
       }
     }
