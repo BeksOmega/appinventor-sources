@@ -2218,7 +2218,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // Handle enums
     if (isOptionList(type)) {
-      return ((DeclaredType)type).asElement().getSimpleName() + "Enum";
+      return type.toString() + "Enum";
     }
 
     String typeString = type.toString();
