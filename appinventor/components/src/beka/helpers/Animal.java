@@ -1,6 +1,7 @@
-package com.google.appinventor.components.common;
+package beka.helpers;
 
 import com.google.appinventor.components.common.OptionList;
+import com.google.appinventor.components.common.Default;
 
 public enum Animal implements OptionList {
     Lion("lion"),

@@ -4,7 +4,7 @@
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
-package com.google.appinventor.components.runtime;
+package beka;
 
 import android.os.Build;
 import android.support.v4.content.FileProvider;
@@ -19,7 +19,8 @@ import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
-import com.google.appinventor.components.common.Animal;
+import com.google.appinventor.components.runtime.*;
+import beka.helpers.Animal;
 
  @DesignerComponent(version = 1,
    description = "This is my custom zoo component",
