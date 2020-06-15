@@ -28,7 +28,7 @@ public enum Direction implements OptionList {
     this.value = dir;
   }
 
-  public int getValue() {
+  public Integer getValue() {
     return value;
   }
 
