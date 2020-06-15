@@ -376,7 +376,7 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         delete method['params'];
       }
       if (method['helper']) {
-        method['helper'] = this.processHelper(method['helper']);
+        method['returnHelperKey'] = this.processHelper(method['helper']);
       }
       info.methodDictionary[method.name] = method;
     }
@@ -387,7 +387,7 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         if (property['deprecated']) continue;
       }
       if (property['helper']) {
-        property['helper'] = this.processHelper(property['helper']);
+        property['helperKey'] = this.processHelper(property['helper']);
       }
       if (property['rw'] == 'read-write') {
         property.mutability = Blockly.PROPERTY_READWRITEABLE;
