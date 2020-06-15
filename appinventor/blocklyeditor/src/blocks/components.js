@@ -816,7 +816,7 @@ Blockly.Blocks.component_method = {
     var check = Array.isArray(blocklyType) ? blocklyType : [blocklyType];
 
     var helperType = Blockly.Blocks.Utilities
-        .helperKeyToBlocklyType(param.helperKey);
+        .helperKeyToBlocklyType(param.helperKey, this);
     if (helperType && helperType != blocklyType) {
       check.push(helperType);
     }
@@ -1193,7 +1193,7 @@ Blockly.Blocks.component_set_get = {
     //    return strings but accept options actually return options.
     if (inputOrOutput == Blockly.Blocks.Utilities.INPUT) {
       var helperType = Blockly.Blocks.Utilities
-          .helperKeyToBlocklyType(property.helperKey);
+          .helperKeyToBlocklyType(property.helperKey, this);
       if (helperType && helperType != blocklyType) {
           check.push(helperType);
       }
