@@ -73,10 +73,12 @@ public class ZooNew extends AndroidNonvisibleComponent {
     description="Make the animal dance."
   )
   public void MakeDance(Animal animal) {
+    dancingAnimal = animal;
   }
 
   @SimpleFunction
   public Animal MakeRun(Animal animal) {
+    runningAnimal = animal;
     return animal;  
   }
 
