@@ -114,6 +114,7 @@ ComponentInstanceDescriptor = function() {};
  * @typedef Option
  * @type {object}
  * @property {!string} name
+ * @property {!string} value
  * @property {!string} description
  * @property {?boolean} deprecated
  */
@@ -125,7 +126,7 @@ Option = function() {};
  * @property {!string} className
  * @property {!string} tag
  * @property {!string} defaultOpt
- * @property {!Array.<!Array>} options
+ * @property {!Array.<Option>} options
  */
 OptionList = function() {};
 
