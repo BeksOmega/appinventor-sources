@@ -60,7 +60,7 @@ Blockly.Blocks['helpers_dropdown'] = {
     var options = [];
     for (var i = 0, option; option = optionList.options[i]; i++) {
       // TODO: First will eventually be the translated name.
-      options.push([option.name, option.name]);
+      options.push([option.name, option.value]);
     }
     return options;
   }

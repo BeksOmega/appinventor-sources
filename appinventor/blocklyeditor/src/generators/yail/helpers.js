@@ -6,8 +6,13 @@
 Blockly.Yail['helpers_dropdown'] = function() {
   var optionList = this.workspace.getComponentDatabase()
       .getOptionList(this.key_);
+  var value = this.getFieldValue('OPTION');
+  var option = optionList.options.find(function(opt) {
+    return opt.value == value;
+  });
+
   // See https://www.gnu.org/software/kawa/Enumerations.html
-  var code = optionList.className + ":" +
-      this.getFieldValue('OPTION');
+  var code = optionList.className + ":" + option.name;
+
   return [code, Blockly.Yail.ORDER_ATOMIC]
 }
