@@ -49,13 +49,13 @@ Blockly.Blocks['helpers_dropdown'] = {
         .appendField(this.key_)
         .appendField(dropdown, 'OPTION');
     
-    var optionList = this.workspace.getComponentDatabase()
+    var optionList = this.getTopWorkspace().getComponentDatabase()
         .getOptionList(this.key_);
     this.setFieldValue(optionList.defaultOpt, 'OPTION');
   },
 
   getDropdownData: function() {
-    var optionList = this.workspace.getComponentDatabase()
+    var optionList = this.getTopWorkspace().getComponentDatabase()
         .getOptionList(this.key_);
     var options = [];
     for (var i = 0, option; option = optionList.options[i]; i++) {
