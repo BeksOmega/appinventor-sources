@@ -227,9 +227,14 @@ Blockly.Drawer.prototype.instanceRecordToXMLArray = function(instanceRecord) {
   var screenName = formName.substring(formName.indexOf("_") + 1);
   var subsetJsonString = "";
   if (window.parent.BlocklyPanel_getComponentInstancePropertyValue) {
-    subsetJsonString = window.parent.BlocklyPanel_getComponentInstancePropertyValue(formName, screenName, "BlocksToolkit");
+    subsetJsonString = window.parent.BlocklyPanel_getComponentInstancePropertyValue(
+        formName, screenName, "BlocksToolkit");
   }
+  // Create the subset of blocks.
   if (subsetJsonString.length > 0) {
+    // TODO: All of this code should be cleaned up and moved into a separate
+    //   function. Logs should be removed.
+    
     var subsetArray = [];
     var subsetBlocks = [];
     subsetArray = JSON.parse(subsetJsonString);
@@ -256,49 +261,93 @@ Blockly.Drawer.prototype.instanceRecordToXMLArray = function(instanceRecord) {
       xmlArray.push(xml);
     }
   } else {
-
-    //create event blocks
-    goog.object.forEach(componentInfo.eventDictionary, function (event, name) {
-      if (event.deprecated != 'true' && event.deprecated !== true) {
-        Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray('component_event', {
-          'component_type': typeName, 'instance_name': instanceRecord.name, 'event_name': name
-        }));
-      }
-    }, this);
-
-    //create non-generic method blocks
-    goog.object.forEach(componentInfo.methodDictionary, function (method, name) {
-      if (method.deprecated != 'true' && method.deprecated !== true) {
-        Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray('component_method', {
-          'component_type': typeName, 'instance_name': instanceRecord.name, 'method_name': name
-        }));
-      }
-    }, this);
-
-    //for each property
-    goog.object.forEach(componentInfo.properties, function (property, name) {
-      if (property.deprecated != 'true' && property.deprecated !== true) {
-        var params = {
-          'component_type': typeName, 'instance_name': instanceRecord.name,
-          'property_name': name
-        };
-        if ((property.mutability & Blockly.PROPERTY_READABLE) == Blockly.PROPERTY_READABLE) {
-          params['set_or_get'] = 'get';
-          Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray('component_set_get', params));
-        }
-        if ((property.mutability & Blockly.PROPERTY_WRITEABLE) == Blockly.PROPERTY_WRITEABLE) {
-          params['set_or_get'] = 'set';
-          Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray('component_set_get', params));
-        }
-      }
-    }, this);
-
-    //create component literal block
-    var mutatorAttributes = {component_type: typeName, instance_name: instanceRecord.name};
-    Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray("component_component_block", mutatorAttributes));
+    xmlArray = this.createAllComponentBlocks(componentInfo, instanceRecord);
   }
   return xmlArray;
 };
+
+/**
+ * Creates all of the blocks for a given component. -- These are actual blocks
+ * not generic ones.
+ * @param {!ComponentTypeDescriptor} componentInfo An object describing all of
+ *     the information about a component. Eg events, methods, properties, etc.
+ * @param {!{name: string, typeName: string}} instanceRecord An object
+ *     describing all of the information about a component instance.
+ */
+Blockly.Drawer.prototype.createAllComponentBlocks =
+  function(componentInfo, instanceRecord) {
+    var xmlArray = [];
+    var typeName = instanceRecord.typeName;
+    var instanceName = instanceRecord.name;
+
+    // Create event blocks.
+    goog.object.forEach(componentInfo.eventDictionary, function (event, name) {
+      if (event.deprecated) {
+        return;
+      }
+
+      var eventObj = {
+        component_type: typeName,
+        instance_name: instanceName,
+        event_name: name
+      };
+      var eventXml = this.blockTypeToXMLArray('component_event', eventObj);
+      Array.prototype.push.apply(xmlArray, eventXml);
+    }, this);
+
+    // Create method blocks.
+    goog.object.forEach(componentInfo.methodDictionary, function (method, name) {
+      if (method.deprecated) {
+        return;
+      }
+
+      var methodObj = {
+        component_type: typeName,
+        instance_name: instanceName,
+        method_name: name
+      };
+      var methodXml = this.blockTypeToXMLArray('component_method', methodObj);
+      Array.prototype.push.apply(xmlArray, methodXml);
+    }, this);
+
+    // Create getter and setter blocks.
+    goog.object.forEach(componentInfo.properties, function (property, name) {
+      if (property.deprecated) {
+        return;
+      }
+
+      var propertyObj = {
+        component_type: typeName,
+        instance_name: instanceName,
+        property_name: name
+      }
+      var readable = Blockly.PROPERTY_READABLE;
+      var writable = Blockly.PROPERTY_WRITEABLE;
+
+      if ((property.mutability & readable) == readable) {
+        propertyObj.set_or_get = 'get';
+        var getXml = this.blockTypeToXMLArray('component_set_get', propertyObj);
+        Array.prototype.push.apply(xmlArray, getXml);
+      }
+
+      if ((property.mutability & writable) == writable) {
+        propertyObj.set_or_get = 'set';
+        var setXml = this.blockTypeToXMLArray('component_set_get', propertyObj);
+        Array.prototype.push.apply(xmlArray, setXml);
+      }
+    }, this);
+
+    // Create component literal block.
+    var componentObj = {
+      component_type: typeName,
+      instance_name: instanceName
+    };
+    var componentXml = this.blockTypeToXMLArray(
+        'component_component_block', componentObj);
+    Array.prototype.push.apply(xmlArray, componentXml);
+
+    return xmlArray;
+  }
 
 Blockly.Drawer.prototype.componentTypeToXMLArray = function(typeName) {
   var xmlArray = [];
