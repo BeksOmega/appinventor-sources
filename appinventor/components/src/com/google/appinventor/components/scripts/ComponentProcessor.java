@@ -770,10 +770,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      *     dropdown in the blocks editor. It is usually the simplified class name.
      * @param default The Option.name of the default option.
      */
-    protected OptionList(String className, String tagName, String defaultOpt) {
+    protected OptionList(String className, String tagName) {
       this.className = className;
       this.tagName = tagName;
-      this.defaultOpt = defaultOpt;
       options = new ArrayList();
     }
 
@@ -790,6 +789,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String getTagName() {
       return tagName;
+    }
+
+    /**
+     * Sets the default option of this OptionList.
+     */
+    public void setDefault(String defaultOpt) {
+      this.defaultOpt = defaultOpt;
     }
 
     /**
@@ -1659,8 +1665,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
     String className = optionElem.asType().toString();
     String tagName = optionElem.getSimpleName().toString();
-    String defaultOpt = getDefaultOption(optionElem);
-    OptionList optionList = new OptionList(className, tagName, defaultOpt);
+    OptionList optionList = new OptionList(className, tagName);
 
     // Get the class.
     Class clazz = null;
@@ -1701,7 +1706,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     for (Element field : optionElem.getEnclosedElements()) {
       String fieldName = field.getSimpleName().toString();
       if (namesToValues.containsKey(fieldName)) {
-        optionList.addOption(elementToOption(field, namesToValues.get(fieldName)));
+        String value = namesToValues.get(fieldName);
+        optionList.addOption(elementToOption(field, value));
+
+        // Set the default to be the first option, or the option tagged with @Default.
+        if (optionList.getDefault() == null || isDefault(field)) {
+          optionList.setDefault(value);
+        }
       }
     }
 
@@ -1713,19 +1724,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * Finds the default option for an OptionList.
+   * @return true if the element is tagged with the @Default annotation.
    */
-  private String getDefaultOption(Element optionElem) {
-    for (Element field : optionElem.getEnclosedElements()) {
-      for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
-        // Make sure the annotation is of type default.
-        if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Default")) {
-          return field.getSimpleName().toString();
-        }
+  private boolean isDefault(Element field) {
+    for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
+      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Default")) {
+        return true;
       }
     }
-    // Return the first option if there is no explicit default.
-    return optionElem.getEnclosedElements().get(0).getSimpleName().toString();
+    return false;
   }
 
   /**
