@@ -1434,10 +1434,10 @@
 (define (coerce-to-key arg)
   (cond
    ;;; TODO: I don't understand why these values have to be coerced.
-   ;;; TODO: Add enums as dictionary keys after #2166 is in.
    ((number? arg) (coerce-to-number arg))
    ((string? arg) (coerce-to-string arg))
    ((instance? arg com.google.appinventor.components.runtime.Component) arg)
+   ((enum? arg) arg)
    (else *non-coercible-value*)))
 
 (define-syntax use-json-format

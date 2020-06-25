@@ -29,7 +29,7 @@ Blockly.Blocks['helpers_dropdown'] = {
 
     // TODO: Do we want to do anything for tooltips on this guy?
     this.setColour(Blockly.COLOUR_HELPERS);
-    // Everything else gets hander by domToMutaiton.
+    // Everything else gets handled by domToMutation.
   },
  
   mutationToDom: function() {
@@ -39,12 +39,16 @@ Blockly.Blocks['helpers_dropdown'] = {
   },
 
   domToMutation: function(xml) {
-    this.key_ = xml.getAttribute('key');
-    var type = Blockly.Blocks.Utilities.helperKeyToBlocklyType(
-      { type: 'OPTION_LIST', key: this.key_ }, this);
-      var dropdown = new Blockly.FieldDropdown(this.getDropdownData());
+    var utils = Blockly.Blocks.Utilities;
 
-    this.setOutput(true, type);
+    this.key_ = xml.getAttribute('key');
+    var type = utils.helperKeyToBlocklyType(
+        { type: 'OPTION_LIST', key: this.key_ }, this);
+    var dropdown = new Blockly.FieldDropdown(this.getDropdownData());
+    var check = Array.isArray(type) ? type : [type];
+    check.push(utils.YailTypeToBlocklyType('enum', utils.OUTPUT));
+
+    this.setOutput(true, check);
     this.appendDummyInput()
         .appendField(this.key_)
         .appendField(dropdown, 'OPTION');
