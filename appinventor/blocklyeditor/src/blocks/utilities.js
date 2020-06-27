@@ -36,8 +36,7 @@ Blockly.Blocks.Utilities.YailTypeToBlocklyTypeMap = {
   'any':{input:null,output:null},
   'dictionary':{input:"Dictionary",output:["Dictionary", "String", "Array"]},
   'pair':{input:"Pair",output:["Pair", "String", "Array"]},
-  'key':{input:"Key",output:["String", "Key"]},
-  'enum':{output:"Key"}
+  'key':{input:"Key",output:["String", "Key"]}
   //add  more types here
 };
 
