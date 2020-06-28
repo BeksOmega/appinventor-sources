@@ -703,6 +703,11 @@ public class BlocklyPanel extends HTMLPanel {
       .saveBlocksFile();
   }-*/;
 
+  public native void addScreen(String name)/*-{
+    this.@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::workspace
+      .addScreen(name);
+  }-*/;
+
   /**
    * Add a component to the blocks workspace
    *

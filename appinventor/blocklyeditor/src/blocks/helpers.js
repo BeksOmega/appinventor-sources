@@ -122,3 +122,29 @@ Blockly.Blocks['helpers_dropdown'] = {
     return tb;
   }
 }
+
+Blockly.Blocks['helpers_screen_names'] = {
+  init: function() {
+    var utils = Blockly.Blocks.Utilities;
+    var dropdown = new Blockly.FieldInvalidDropdown(
+        this.generateOptions.bind(this));
+
+    this.setColour(Blockly.COLOUR_HELPERS);
+
+    this.setOutput(true, utils.YailTypeToBlocklyType('text', utils.OUTPUT));
+    this.appendDummyInput()
+        .appendField(dropdown, 'SCREEN');
+  },
+
+  domToMutation: function(xml) {
+    var value = xml.getAttribute('value');
+    this.setFieldValue(value, 'SCREEN');
+  },
+
+  generateOptions: function() {
+    var screens = this.workspace.getScreenList();
+    return screens.map(function (elem) {
+      return [elem, elem];
+    });
+  }
+}
