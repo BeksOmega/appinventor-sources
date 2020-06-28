@@ -7,7 +7,6 @@
 
 goog.provide('AI.Blockly.FieldInvalidDropdown');
 
-<<<<<<< HEAD
 goog.require('AI.Events');
 goog.require('Blockly.FieldDropdown');
 

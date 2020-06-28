@@ -381,6 +381,12 @@ Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
   this.screenList_.push(name);
 };
 
+//noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
+Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
+  console.log('removing', name, 'at index', this.screenList_.indexOf(name))
+  this.screenList_.splice(this.screenList_.indexOf(name), 1);
+}
+
 Blockly.WorkspaceSvg.prototype.getScreenList = function() {
   return this.screenList_;
 };
