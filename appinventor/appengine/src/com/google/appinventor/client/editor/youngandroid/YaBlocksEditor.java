@@ -425,6 +425,10 @@ public final class YaBlocksEditor extends FileEditor
     // Nothing to do after blocks are saved.
   }
 
+  public void addScreen(String name) {
+    blocksArea.addScreen(name);
+  }
+
   public static String getComponentInfo(String typeName) {
     return SimpleComponentDatabase.getInstance().getTypeDescription(typeName);
   }

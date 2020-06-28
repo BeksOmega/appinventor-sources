@@ -94,12 +94,12 @@ public class DesignToolbar extends Toolbar {
 
     // Returns true if we added the screen (it didn't previously exist), false otherwise.
     public boolean addScreen(String name, FileEditor formEditor, FileEditor blocksEditor) {
-      if (!screens.containsKey(name)) {
-        screens.put(name, new Screen(name, formEditor, blocksEditor));
-        return true;
-      } else {
+      if (screens.containsKey(name)) {
         return false;
       }
+      screens.put(name, new Screen(name, formEditor, blocksEditor));
+      ((YaBlocksEditor) blocksEditor).addScreen(name);
+      return true;
     }
 
     public void removeScreen(String name) {
