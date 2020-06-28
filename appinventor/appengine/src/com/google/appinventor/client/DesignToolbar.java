@@ -102,7 +102,10 @@ public class DesignToolbar extends Toolbar {
     }
 
     public void removeScreen(String name) {
-      screens.remove(name);
+      if (screens.containsKey(name)) {
+        Screen screen = screens.remove(name);
+        ((YaBlocksEditor) screen.blocksEditor).removeScreen(name);
+      }
     }
 
     public void setCurrentScreen(String name) {
