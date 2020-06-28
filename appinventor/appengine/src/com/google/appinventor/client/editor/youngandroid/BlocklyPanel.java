@@ -708,6 +708,11 @@ public class BlocklyPanel extends HTMLPanel {
       .addScreen(name);
   }-*/;
 
+  public native void removeScreen(String name)/*-{
+    this.@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::workspace
+      .removeScreen(name);
+  }-*/;
+
   /**
    * Add a component to the blocks workspace
    *

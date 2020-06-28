@@ -429,6 +429,10 @@ public final class YaBlocksEditor extends FileEditor
     blocksArea.addScreen(name);
   }
 
+  public void removeScreen(String name) {
+    blocksArea.removeScreen(name);
+  }
+
   public static String getComponentInfo(String typeName) {
     return SimpleComponentDatabase.getInstance().getTypeDescription(typeName);
   }
