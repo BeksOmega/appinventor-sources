@@ -36,6 +36,11 @@ Blockly.WorkspaceSvg.prototype.backpack_ = null;
  */
 Blockly.WorkspaceSvg.prototype.componentDb_ = null;
 
+/**
+ * The list of screen names currently in this project.
+ * @type {!Array<string>}
+ * @private
+ */
 Blockly.WorkspaceSvg.prototype.screenList_ = [];
 
 /**
@@ -377,16 +382,27 @@ Blockly.WorkspaceSvg.prototype.getProcedureDatabase = function() {
 };
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
+/**
+ * Adds a screen name to the list tracked by the workspace.
+ * @param {string} name The name of the new screen.
+ */
 Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
   this.screenList_.push(name);
 };
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
+/**
+ * Removes a screen name from the list tracked by the workspace.
+ * @param {string} name The name of the screen to remove.
+ */
 Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
-  console.log('removing', name, 'at index', this.screenList_.indexOf(name))
   this.screenList_.splice(this.screenList_.indexOf(name), 1);
 }
 
+/**
+ * Returns the list of screen names tracked by the workspace.
+ * @return {!Array<string>} The list of screen names.
+ */
 Blockly.WorkspaceSvg.prototype.getScreenList = function() {
   return this.screenList_;
 };
