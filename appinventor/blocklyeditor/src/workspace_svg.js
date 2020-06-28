@@ -36,6 +36,8 @@ Blockly.WorkspaceSvg.prototype.backpack_ = null;
  */
 Blockly.WorkspaceSvg.prototype.componentDb_ = null;
 
+Blockly.WorkspaceSvg.prototype.screenList_ = [];
+
 /**
  * The workspace's typeblock instance.
  * @type {Blockly.TypeBlock}
@@ -372,6 +374,15 @@ Blockly.WorkspaceSvg.prototype.getComponentDatabase = function() {
  */
 Blockly.WorkspaceSvg.prototype.getProcedureDatabase = function() {
   return this.procedureDb_;
+};
+
+//noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
+Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
+  this.screenList_.push(name);
+};
+
+Blockly.WorkspaceSvg.prototype.getScreenList = function() {
+  return this.screenList_;
 };
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
