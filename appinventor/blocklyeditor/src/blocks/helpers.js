@@ -85,7 +85,7 @@ Blockly.Blocks['helpers_dropdown'] = {
 Blockly.Blocks['helpers_screen_names'] = {
   init: function() {
     var utils = Blockly.Blocks.Utilities;
-    var dropdown = new Blockly.FieldDropdown(this.getOptions.bind(this));
+    var dropdown = new Blockly.FieldInvalidDropdown(this.generateOptions.bind(this));
 
     this.setColour(Blockly.COLOUR_HELPERS);
 
@@ -94,7 +94,7 @@ Blockly.Blocks['helpers_screen_names'] = {
         .appendField(dropdown, 'SCREEN');
   },
 
-  getOptions: function() {
+  generateOptions: function() {
     var screens = this.workspace.getScreenList();
     return screens.map(function (elem) {
       return [elem, elem];
