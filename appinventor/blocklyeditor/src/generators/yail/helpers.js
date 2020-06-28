@@ -16,3 +16,8 @@ Blockly.Yail['helpers_dropdown'] = function() {
 
   return [code, Blockly.Yail.ORDER_ATOMIC]
 }
+
+Blockly.Yail['helpers_screen_names'] = function() {
+  var value = Blockly.Yail.quote_(this.getFieldValue('SCREEN'));
+  return [value, Blockly.Yail.ORDER_ATOMIC];
+}

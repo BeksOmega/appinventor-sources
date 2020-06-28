@@ -81,3 +81,23 @@ Blockly.Blocks['helpers_dropdown'] = {
     return options;
   }
 }
+
+Blockly.Blocks['helpers_screen_names'] = {
+  init: function() {
+    var utils = Blockly.Blocks.Utilities;
+    var dropdown = new Blockly.FieldDropdown(this.getOptions.bind(this));
+
+    this.setColour(Blockly.COLOUR_HELPERS);
+
+    this.setOutput(true, utils.YailTypeToBlocklyType('text', utils.OUTPUT));
+    this.appendDummyInput()
+        .appendField(dropdown, 'SCREEN');
+  },
+
+  getOptions: function() {
+    var screens = this.workspace.getScreenList();
+    return screens.map(function (elem) {
+      return [elem, elem];
+    });
+  }
+}
