@@ -16,6 +16,10 @@ goog.require('Blockly.FieldDropdown');
  * badBlock().
  * @param {(!Array.<!Array>|!Function)} menuGenerator A non-empty array of
  *     options for a dropdown list, or a function which generates these options.
+ * @param {!Array.<!Array>} opt_invalidOptions A list of invalid options with
+ *     identically structure to the menuGenerator options list. These options
+ *     will not be available in the dropdown, but the correct human-readable
+ *     values will be displayed if they get some other way (eg via xml).
  * @param {Function=} opt_validator A change listener that is called when a new
  *     option is selected from the dropdown.
  */
@@ -97,10 +101,6 @@ Blockly.FieldInvalidDropdown.prototype.doValueUpdate_ = function(newValue) {
     this.sourceBlock_.bumpNeighbours_();
   }
 }
-
-// TODO: Add this line after the Blockly update.
-/*Blockly.fieldRegistry.register(
-    'field_invalid_dropdown', Blockly.FieldInvalidDropdown);*/
 
 // TODO: Remove the rest of this file after the Blockly update.
 Blockly.FieldInvalidDropdown.prototype.setValue = function(newValue) {
