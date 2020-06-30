@@ -42,7 +42,8 @@ Blockly.Blocks['helpers_dropdown'] = {
     this.key_ = xml.getAttribute('key');
     var type = Blockly.Blocks.Utilities.helperKeyToBlocklyType(
       { type: 'OPTION_LIST', key: this.key_ }, this);
-      var dropdown = new Blockly.FieldDropdown(this.getDropdownData());
+      var dropdown = new Blockly.FieldInvalidDropdown(
+          this.getValidOptions(), this.getInvalidOptions());
 
     this.setOutput(true, type);
     this.appendDummyInput()
@@ -54,13 +55,28 @@ Blockly.Blocks['helpers_dropdown'] = {
     this.setFieldValue(optionList.defaultOpt, 'OPTION');
   },
 
-  getDropdownData: function() {
+  getValidOptions: function() {
     var optionList = this.getTopWorkspace().getComponentDatabase()
         .getOptionList(this.key_);
     var options = [];
     for (var i = 0, option; option = optionList.options[i]; i++) {
       // TODO: First will eventually be the translated name.
-      options.push([option.name, option.value]);
+      if (!option.deprecated) {
+        options.push([option.name, option.value]);
+      }
+    }
+    return options;
+  },
+
+  getInvalidOptions: function() {
+    var optionList = this.getTopWorkspace().getComponentDatabase()
+        .getOptionList(this.key_);
+    var options = [];
+    for (var i = 0, option; option = optionList.options[i]; i++) {
+      // TODO: First will eventually be the translated name.
+      if (option.deprecated) {
+        options.push([option.name, option.value]);
+      }
     }
     return options;
   }
