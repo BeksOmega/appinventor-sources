@@ -388,6 +388,7 @@ Blockly.WorkspaceSvg.prototype.getProcedureDatabase = function() {
  */
 Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
   this.screenList_.push(name);
+  this.typeBlock_.needsReload.screens = true;
 };
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
@@ -397,6 +398,7 @@ Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
  */
 Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
   this.screenList_.splice(this.screenList_.indexOf(name), 1);
+  this.typeBlock_.needsReload.screens = true;
 }
 
 /**
