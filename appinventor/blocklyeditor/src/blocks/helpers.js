@@ -94,10 +94,31 @@ Blockly.Blocks['helpers_screen_names'] = {
         .appendField(dropdown, 'SCREEN');
   },
 
+  domToMutation: function(xml) {
+    var value = xml.getAttribute('value');
+    this.setFieldValue(value, 'SCREEN');
+  },
+
   generateOptions: function() {
     var screens = this.workspace.getScreenList();
     return screens.map(function (elem) {
       return [elem, elem];
     });
+  },
+
+  typeblock: function() {
+    var tb = [];
+
+    var screens = Blockly.mainWorkspace.getScreenList();
+    for (var i = 0, screen; (screen = screens[i]); i++) {
+      tb.push({
+        translatedName: Blockly.Msg.LANG_SCREENS_TITLE + screen,
+        mutatorAttributes: {
+          value: screen
+        }
+      })
+    }
+
+    return tb;
   }
 }

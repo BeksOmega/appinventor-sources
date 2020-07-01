@@ -1548,6 +1548,9 @@ Blockly.Msg.en.switch_language_to_english = {
     Blockly.Msg.LANG_COMPONENT_BLOCK_VOTING_EVENTS_HELPURL = '/reference/components/internal.html#votingevents';
     Blockly.Msg.LANG_COMPONENT_BLOCK_VOTING_METHODS_HELPURL = '/reference/components/internal.html#votingmethods';
 
+// Helper Blocks
+    Blockly.Msg.LANG_SCREENS_TITLE = "Screen Name: ";
+
 //Misc
     Blockly.Msg.SHOW_WARNINGS = "Show Warnings";
     Blockly.Msg.HIDE_WARNINGS = "Hide Warnings";
