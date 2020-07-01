@@ -12,7 +12,12 @@ import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.TopToolbar;
+import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.explorer.project.ProjectChangeListener;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.appinventor.client.settings.user.BlocksSettings;
 import com.google.appinventor.components.common.YaVersion;
@@ -50,7 +55,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  *
  * @author sharon@google.com (Sharon Perl)
  */
-public class BlocklyPanel extends HTMLPanel {
+public class BlocklyPanel extends HTMLPanel implements ProjectChangeListener {
 
   public static interface BlocklySource extends JsniBundle {
     @LibrarySource(value="blockly.js",
@@ -130,6 +135,8 @@ public class BlocklyPanel extends HTMLPanel {
    */
   private boolean loadError = false;
 
+  private final YoungAndroidAssetsFolder assetsFolder;
+
   public BlocklyPanel(YaBlocksEditor blocksEditor, String formName) {
     this(blocksEditor, formName, false);
   }
@@ -139,6 +146,7 @@ public class BlocklyPanel extends HTMLPanel {
     getElement().addClassName("svg");
     getElement().setId(formName);
     this.formName = formName;
+
     /* Blockly initialization now occurs in three stages. This is due to the fact that certain
      * Blockly objects rely on SVG methods such as getScreenCTM(), which are not properly
      * initialized and/or null prior to the svg element being attached to the DOM. The first
@@ -151,8 +159,35 @@ public class BlocklyPanel extends HTMLPanel {
      * has been downloaded from the server.
      */
     initWorkspace(Long.toString(blocksEditor.getProjectId()), readOnly, LocaleInfo.getCurrentLocale().isRTL());
+
+    Project project = Ode.getInstance().getProjectManager().getProject(blocksEditor.getProjectId());
+    assetsFolder = ((YoungAndroidProjectNode) project.getRootNode()).getAssetsFolder();
+    project.addProjectChangeListener(this);
+    YoungAndroidAssetsFolder assetsFolder = ((YoungAndroidProjectNode) project.getRootNode())
+        .getAssetsFolder();
+    for (ProjectNode node : assetsFolder.getChildren()) {
+      onProjectNodeAdded(project, node);
+    }
+
     OdeLog.log("Created BlocklyPanel for " + formName);
   }
+
+  public void onProjectLoaded(Project project) { }
+
+  public void onProjectNodeAdded(Project project, ProjectNode node) {
+    // Check that the node is indeed an asset node before adding.
+    for (ProjectNode assetNode : assetsFolder.getChildren()) {
+      if (assetNode == node) {
+        addAsset(node.getName());
+      }
+    }
+  }
+
+  public void onProjectNodeRemoved(Project project, ProjectNode node) {
+    // Blockly workspace will handle checking if it was indeed an asset.
+    removeAsset(node.getName());
+  }
+
 
   /**
    * Register an object to listen for changes in the Blockly workspace.
@@ -711,6 +746,16 @@ public class BlocklyPanel extends HTMLPanel {
   public native void removeScreen(String name)/*-{
     this.@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::workspace
       .removeScreen(name);
+  }-*/;
+
+  public native void addAsset(String name)/*-{
+    this.@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::workspace
+      .addAsset(name);
+  }-*/;
+
+  public native void removeAsset(String name)/*-{
+    this.@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::workspace
+      .removeAsset(name);
   }-*/;
 
   /**
