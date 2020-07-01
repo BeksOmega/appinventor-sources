@@ -424,6 +424,7 @@ Blockly.WorkspaceSvg.prototype.getScreenList = function() {
 Blockly.Workspace.prototype.addAsset = function(name) {
   if (!this.assetList_.includes(name)) {
     this.assetList_.push(name);
+    this.typeBlock_.needsReload.assets = true;
   }
 };
 
@@ -436,6 +437,7 @@ Blockly.Workspace.prototype.removeAsset = function(name) {
   var index = this.assetList_.indexOf(name);
   if (index != -1) {  // Make sure it is actually an asset.
     this.assetList_.splice(index, 1);
+    this.typeBlock_.needsReload.assets = true;
   }
 };
 

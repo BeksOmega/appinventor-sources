@@ -196,6 +196,15 @@ Blockly.Blocks['helpers_assets'] = {
     }.bind(this));
   },
 
+  domToMutation: function(xml) {
+    var field = this.getField('ASSET');
+    if (!field) {
+      return;
+    }
+    var value = xml.getAttribute('value');
+    field.setValue(value);
+  },
+
   addField: function() {
     var input = this.getInput('INPUT');
     var assets = this.workspace.getAssetList();
@@ -211,7 +220,8 @@ Blockly.Blocks['helpers_assets'] = {
       }
     } else {
       if (!this.getField('TEXT')) {
-        input.appendField(new Blockly.FieldLabel(Blockly.Msg.NO_ASSETS), 'TEXT');
+        var label = new Blockly.FieldLabel(Blockly.Msg.LANG_NO_ASSETS);
+        input.appendField(label, 'TEXT');
       }
       if (this.getField('ASSET')) {
         input.removeField('ASSET');
@@ -234,5 +244,19 @@ Blockly.Blocks['helpers_assets'] = {
     }
 
     return [['', '']]
+  },
+
+  typeblock: function() {
+    tb = [];
+    var assets = Blockly.mainWorkspace.getAssetList();
+    for (var i = 0, asset; (asset = assets[i]); i++) {
+      tb.push({
+        translatedName: asset,
+        mutatorAttributes: {
+          value: asset
+        }
+      })
+    }
+    return tb;
   }
 }
