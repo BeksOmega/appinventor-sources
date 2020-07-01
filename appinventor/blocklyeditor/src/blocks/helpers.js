@@ -134,6 +134,12 @@ Blockly.Blocks['helpers_screen_names'] = {
     this.setOutput(true, utils.YailTypeToBlocklyType('text', utils.OUTPUT));
     this.appendDummyInput()
         .appendField(dropdown, 'SCREEN');
+
+    this.workspace.addChangeListener(function(e) {
+      if (e.type == AI.Events.SCREEN_SWITCH) {
+        this.setFieldValue(this.getFieldValue('SCREEN'), 'SCREEN');
+      }
+    }.bind(this));
   },
 
   domToMutation: function(xml) {
@@ -172,5 +178,71 @@ Blockly.Blocks['helpers_screen_names'] = {
     }
 
     return tb;
+  }
+}
+
+Blockly.Blocks['helpers_assets'] = {
+  init: function() {
+    var utils = Blockly.Blocks.Utilities;
+
+    this.setColour(Blockly.COLOUR_HELPERS);
+
+    this.setOutput(true, utils.YailTypeToBlocklyType('text', utils.OUTPUT));
+    this.appendDummyInput('INPUT')
+
+    this.addField();
+
+    this.workspace.addChangeListener(function(e) {
+      if (e.type != AI.Events.SCREEN_SWITCH) {
+        return;
+      }
+
+      if (this.addField()) {
+        this.setFieldValue(this.getFieldValue('ASSET'), 'ASSET');
+      }
+    }.bind(this));
+  },
+
+  addField: function() {
+    if (!this.workspace) {  // Disposed.
+      return;
+    }
+    var input = this.getInput('INPUT');
+    var assets = Blockly.mainWorkspace.getAssetList();
+
+    if (assets.length) { // We should have an asset dropdown.
+      if (!this.getField('ASSET')) {
+        dropdown = new Blockly.FieldInvalidDropdown(
+            this.generateOptions.bind(this));
+        input.appendField(dropdown, 'ASSET');
+      }
+      if (this.getField('TEXT')) {
+        input.removeField('TEXT');
+      }
+    } else {
+      if (!this.getField('TEXT')) {
+        input.appendField(new Blockly.FieldLabel(Blockly.Msg.NO_ASSETS), 'TEXT');
+      }
+      if (this.getField('ASSET')) {
+        input.removeField('ASSET');
+      }
+    }
+
+    return assets.length;
+  },
+
+  generateOptions: function() {
+    if (!this.workspace) {
+      return [['', '']];
+    }
+
+    var assets = Blockly.mainWorkspace.getAssetList();
+    if (assets.length) {
+      return assets.map(function (elem) {
+        return [elem, elem];
+      });
+    }
+
+    return [['', '']]
   }
 }
