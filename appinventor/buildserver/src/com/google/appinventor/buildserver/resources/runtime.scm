@@ -2897,6 +2897,15 @@ Dictionary implementation.
     (((as android.content.Context *this-form*):getSystemService
       (android.content.Context:.WIFI_SERVICE)):getDhcpInfo))))
 
+;; TODO: This doesn't quite work yet.
+(define-syntax augment
+  (syntax-rules ()
+    ((_ blockid exp)
+     exp)))
+      ;(let ((ans (with-current-block-id info (lambda () exp))))
+        ;(after-execution info)
+        ;ans))))
+
 ;;; process-repl-input
 ;;; Takes input from the blocks editor and arranges to run it on
 ;;; the phone's UI thread. The result is then enqueued to be returned

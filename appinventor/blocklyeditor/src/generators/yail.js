@@ -615,10 +615,23 @@ Blockly.Yail.scrub_ = function(block, code, thisOnly) {
       }
     }
   }*/
+  var code = Blockly.Yail.augment_(block, code);
   var nextBlock = block.nextConnection && block.nextConnection.targetBlock();
   var nextCode = thisOnly ? "" : this.blockToCode(nextBlock);
   return commentCode + code + nextCode;
 };
+
+/**
+ * Adds an (augment blockid code) call around the code. Augmenting allows us to
+ * attach error messages and values to blocks.
+ * @param {!Blockly.Block} block The block that "owns" the code.
+ * @param {string} code The code to augment.
+ */
+Blockly.Yail.augment_ = function(block, code) {
+  // Must quote the block.id because of Blockly's soup.
+  // {@see Blockly.utils.genUid.soup_}
+  return '(augment "' + block.id + '" ' + code + ')';
+}
 
 Blockly.Yail.getDebuggingYail = function() {
   var code = [];

@@ -1050,6 +1050,45 @@ Blockly.ReplMgr.processRetvals = function(responses) {
         console.log("processRetVals: " + JSON.stringify(r));
         switch(r.type) {
         case "return":
+          /*if (r.status != "OK") {
+            if (r.blockid == -2) {  // Chunking error.
+              top.loadAll = false;
+              top.loadAllErrorCount = Blockly.mainWorkspace.getTopBlocks.length;
+              this.resetYail(true);
+              this.pollYail(Blockly.mainWorkspace);
+            } else if (r.blockid != -1) { // We have an error on a block.
+              var block = Blockly.mainWorkspace.getBlockById(r.blockid);
+              if (!block) { // Happens if we switch screen during poll.
+                break;
+              }
+              block.replError = Blockly.Msg.REPL_ERROR_FROM_COMPANION;
+              if (r.value) {
+                block.replError += ': ' + r.value;
+              }
+            } else { // Normal error.
+              runtimeerr(Blockly.Msg.REPL_ERROR_FROM_COMPANION + ": " + r.value);
+            }
+          } else {
+            if (top.loadAllErrorCount > 0) {
+              top.loadAllErrorCount--;
+              if (top.loadAllErrorCount == 0) {
+                top.loadAll = true;
+              }
+            }
+            if (r.blockid != -1 && r.blockid != -2) {
+              var block = Blockly.mainWorkspace.getBlockById(r.blockid);
+              if (!block) { // Happens if we switch screen during poll.
+                break;
+              }
+              block.replError = null;
+              if (r.value && r.value != '*nothing*') {
+                this.setDoitResult(block, r.value);
+              }
+            }
+          }*/
+
+
+
             if (r.status == "OK" && top.loadAllErrorCount > 0) {
                 console.log("Error Countdown: " + top.loadAllErrorCount);
                 top.loadAllErrorCount -= 1;
