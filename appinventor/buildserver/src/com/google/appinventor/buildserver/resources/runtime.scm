@@ -386,6 +386,40 @@
                (cons (list var val-thunk)
                      global-vars-to-create)))
 
+       (define current-block-id -1)
+
+       (define (get-current-block-id) current-block-id)
+
+       (define (set-current-block-id blockid)
+         (set! current-block-id blockid))
+
+       (define (make-error-entries)
+         (define entries-list (list))
+         (define (add-entry blockid error)
+           (if (not (contains-block? blockid))
+             (set! entries-list (cons (make-error-entry blockid error) entries-list)))
+           entries-list)
+         (define (contains-block? blockid)
+           (define (contains-internal blockid list)
+             (if (eq? list '())
+                 #f
+                 (if (eq? ((car list) 'blockid) blockid)
+                     #t
+                     (contains-internal blockid (cdr list)))))
+           (contains-internal blockid entries-list))
+         (define (dispatch m)
+           (cond ((eq? m 'entries-list) entries-list)
+                 ((eq? m 'add-entry) add-entry)
+                 ((eq? m 'contains-block?) contains-block?)))
+         dispatch)
+        
+       (define error-entries (make-error-entries))
+
+       (define (get-blocks-with-errors) blocks-with-errors)
+
+       (define (add-to-blocks-with-errors blockid)
+         (if (not (member blockid blocks-with-errors))
+           (set! blocks-with-errors (cons blockid blocks-with-errors))))
 
        ;; List of expressions to evaluate after the form has been created.
        ;; Used for setting properties
@@ -641,6 +675,28 @@
           (exception com.google.appinventor.components.runtime.errors.YailRuntimeError
                      ;;(android-log-form "Caught exception in define-form ")
                      (process-exception exception))))))))
+
+(define (make-error-entry blockid error)
+  (define error-list (list error))
+  (define count 1)
+  (define (add-error error)
+    (if (not (contains-error? error))
+      (begin
+        (set! error-list (cons error error-list))
+        (set! count (+ count 1))))
+    count)
+  (define (is-for-block? id)
+    (eq? id blockid))
+  (define (contains-error? err)
+    (not (not (member err error-list))))
+  (define (dispatch m)
+    (cond ((eq? m 'blockid) blockid)
+          ((eq? m 'error-list) error-list)
+          ((eq? m 'count) count)
+          ((eq? m 'add-error) add-error)
+          ((eq? m 'is-for-block?) is-for-block?)
+          ((eq? m 'contains-error?) contains-error?)))
+  dispatch)
 
 ;;;; define-event
 
@@ -2897,14 +2953,28 @@ Dictionary implementation.
     (((as android.content.Context *this-form*):getSystemService
       (android.content.Context:.WIFI_SERVICE)):getDhcpInfo))))
 
-;; TODO: This doesn't quite work yet.
+(define (with-current-block-id blockid thunk)
+  (let ((old-block-id (*:get-current-block-id *this-form*)))
+    (*:set-current-block-id *this-form* blockid)
+    (let ((result (thunk)))
+      (*:set-current-block-id *this-form* old-block-id) ;; Reset block-id to remembered value
+      result)))
+
 (define-syntax augment
   (syntax-rules ()
     ((_ blockid exp)
-     exp)))
-      ;(let ((ans (with-current-block-id info (lambda () exp))))
-        ;(after-execution info)
-        ;ans))))
+     (let ((ans (with-current-block-id info (lambda () exp))))
+       (after-execution info)
+       ans))))
+
+(define (after-execution blockid)
+  (send-to-block blockid (list "OK" *the-null-value-printed-rep*)))
+  ;(if (member blockid (*:get-blocks-with-errors *this-form*))
+    ;(begin
+      ;(send-to-block blockid (list "OK" *nothing*))
+      ;;(*:remove-from-last-block-with-error *this-form* blockid)
+      ;;(*:remove-from-errors *this-form* blockid))
+    ;))
 
 ;;; process-repl-input
 ;;; Takes input from the blocks editor and arranges to run it on
