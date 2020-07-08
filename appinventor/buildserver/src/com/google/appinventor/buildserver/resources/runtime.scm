@@ -19,7 +19,7 @@
 ;;;
 
 ;;; also see *debug-form* below
-(define *debug* #f)
+(define *debug* #t)
 
 (define *this-is-the-repl* #f)
 
@@ -315,7 +315,7 @@
          (com.google.appinventor.components.runtime.AppInventorCompatActivity:setClassicModeFromYail classic-theme)
          (invoke-special subclass-name (this) 'onCreate icicle))
 
-       (define *debug-form* #f)
+       (define *debug-form* #t)
 
        (define (android-log-form message)
          (when *debug-form* (android.util.Log:i "YAIL" message)))
@@ -386,7 +386,7 @@
                (cons (list var val-thunk)
                      global-vars-to-create)))
 
-       (define current-block-id -1)
+       (define current-block-id "-1")
 
        (define (get-current-block-id) current-block-id)
 
@@ -396,9 +396,16 @@
        (define (make-error-entries)
          (define entries-list (list))
          (define (add-entry blockid error)
-           (if (not (contains-block? blockid))
-             (set! entries-list (cons (make-error-entry blockid error) entries-list)))
-           entries-list)
+           (cond ((not (contains-block? blockid))
+                  (begin
+                    (set! entries-list (cons (make-error-entry blockid error) entries-list))
+                    #t))
+                 ;; TODO: Could refactor this so that 'add-error returns #t or #f
+                 ((not (((entry-for-block blockid) 'contains-error?) error))
+                  (begin
+                    (((entry-for-block blockid) 'add-error) error)
+                    #t))
+                 (else #f)))
          (define (contains-block? blockid)
            (define (contains-internal blockid list)
              (if (eq? list '())
@@ -407,19 +414,24 @@
                      #t
                      (contains-internal blockid (cdr list)))))
            (contains-internal blockid entries-list))
+         (define (entry-for-block blockid)
+           (define (entry-for-internal blockid list)
+             (if (eq? list '())
+                 '()
+                 (if (eq? ((car list) 'blockid) blockid)
+                     (car list)
+                     (entry-for-internal blockid (cdr list)))))
+           (entry-for-internal blockid entries-list))
          (define (dispatch m)
            (cond ((eq? m 'entries-list) entries-list)
                  ((eq? m 'add-entry) add-entry)
-                 ((eq? m 'contains-block?) contains-block?)))
+                 ((eq? m 'contains-block?) contains-block?)
+                 ((eq? m 'entry-for-block) entry-for-block)))
          dispatch)
         
        (define error-entries (make-error-entries))
 
-       (define (get-blocks-with-errors) blocks-with-errors)
 
-       (define (add-to-blocks-with-errors blockid)
-         (if (not (member blockid blocks-with-errors))
-           (set! blocks-with-errors (cons blockid blocks-with-errors))))
 
        ;; List of expressions to evaluate after the form has been created.
        ;; Used for setting properties
@@ -430,25 +442,25 @@
                (cons thunk
                      form-do-after-creation)))
 
-       (define (send-error error)
-         (com.google.appinventor.components.runtime.util.RetValManager:sendError error))
-
        (define (process-exception ex)
          (define-alias YailRuntimeError <com.google.appinventor.components.runtime.errors.YailRuntimeError>)
-         ;; The call below is a no-op unless we are in the wireless repl
-;; Commented out -- we only send reports from the setting menu choice
-;;         (com.google.appinventor.components.runtime.ReplApplication:reportError ex)
+         (define (send-error error)
+             ;; TODO: Is there anyway to use the send-to-block procedure here?
+             (com.google.appinventor.components.runtime.util.RetValManager:appendReturnValue
+               (get-current-block-id)
+               "NOK"
+               error))
+
          (if isrepl
              (when ((this):toastAllowed)
                    (let ((message (if (instance? ex java.lang.Error) (ex:toString) (ex:getMessage))))
                      (send-error message)
                      ((android.widget.Toast:makeText (this) message 5):show)))
-
              (com.google.appinventor.components.runtime.util.RuntimeErrorAlert:alert
-              (this)
-              (ex:getMessage)
-              (if (instance? ex YailRuntimeError) ((as YailRuntimeError ex):getErrorType) "Runtime Error")
-              "End Application")))
+               (this)
+               (ex:getMessage)
+               (if (instance? ex YailRuntimeError) ((as YailRuntimeError ex):getErrorType) "Runtime Error")
+               "End Application")))
 
 
        ;; For the HandlesEventDispatching interface
@@ -2963,8 +2975,8 @@ Dictionary implementation.
 (define-syntax augment
   (syntax-rules ()
     ((_ blockid exp)
-     (let ((ans (with-current-block-id info (lambda () exp))))
-       (after-execution info)
+     (let ((ans (with-current-block-id blockid (lambda () exp))))
+       (after-execution blockid)
        ans))))
 
 (define (after-execution blockid)
@@ -3025,10 +3037,9 @@ Dictionary implementation.
 ;; when a block is being watched.
 ;; send-to-block sends the result of the expression or an error message to the block editor
 (define (send-to-block blockid message)
-  (let* ((good (car message))
-         (value (cadr message)))
-    (com.google.appinventor.components.runtime.util.RetValManager:appendReturnValue blockid good value)
-    ))
+  (let ((good (car message))
+        (value (cadr message)))
+    (com.google.appinventor.components.runtime.util.RetValManager:appendReturnValue blockid good value)))
 
 (define (clear-current-form)
   (when (not (eq? *this-form* #!null))
