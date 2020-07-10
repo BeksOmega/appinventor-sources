@@ -224,7 +224,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The parameter's Java type, such as "int" or "java.lang.String".
      */
-    protected final String type;
+    protected final TypeMirror type;
 
     protected final boolean color;
 
@@ -234,11 +234,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @param name the parameter name
      * @param type the parameter's Java type (such as "int" or "java.lang.String")
      */
-    protected Parameter(String name, String type) {
+    protected Parameter(String name, TypeMirror type) {
       this(name, type, false);
     }
 
-    protected Parameter(String name, String type, boolean color) {
+    protected Parameter(String name, TypeMirror type, boolean color) {
       this.name = name;
       this.type = type;
       this.color = color;
@@ -255,8 +255,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @throws RuntimeException if {@code parameter} does not have a
      *         corresponding Yail type
      */
-    protected String parameterToYailType(Parameter parameter) {
+    protected String getYailType() {
       return javaTypeToYailType(type);
+    }
+
+    @Override
+    public Parameter clone() {
+      Parameter param = new Parameter (name, type, color);
+      return param;
     }
   }
 
@@ -419,12 +425,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       parameters = Lists.newArrayList();
     }
 
-    protected void addParameter(String name, String type) {
-      parameters.add(new Parameter(name, type));
-    }
-
-    protected void addParameter(String name, String type, boolean color) {
-      parameters.add(new Parameter(name, type, color));
+    protected void addParameter(Parameter param) {
+      parameters.add(param);
     }
 
     /**
@@ -439,7 +441,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       StringBuilder sb = new StringBuilder();
       int count = 0;
       for (Parameter param : parameters) {
-        sb.append(param.parameterToYailType(param));
+        sb.append(param.getYailType());
         sb.append(" ");
         sb.append(param.name);
         if (++count != parameters.size()) {
@@ -465,7 +467,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Event clone() {
       Event that = new Event(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       return that;
     }
@@ -483,7 +485,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   protected final class Method extends ParameterizedFeature
       implements Cloneable, Comparable<Method> {
     // Inherits name, description, and parameters
-    private String returnType;
+    private TypeMirror returnType;
     private boolean color;
 
     protected Method(String name, String description, String longDescription, boolean userVisible,
@@ -493,7 +495,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     protected String getReturnType() {
-      return returnType;
+      if (returnType != null) {
+        return returnType.toString();
+      }
+      return null;
+    }
+
+    protected String getYailReturnType() {
+      return javaTypeToYailType(returnType);
     }
 
     protected boolean isColor() {
@@ -504,7 +513,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public Method clone() {
       Method that = new Method(name, description, longDescription, userVisible, deprecated);
       for (Parameter p : parameters) {
-        that.addParameter(p.name, p.type);
+        that.addParameter(p.clone());
       }
       that.returnType = returnType;
       return that;
@@ -520,10 +529,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents an App Inventor component property (annotated with
    * {@link SimpleProperty}).
    */
-  protected static final class Property extends Feature implements Cloneable {
+  protected final class Property extends Feature implements Cloneable {
     protected final String name;
     private PropertyCategory propertyCategory;
-    private String type;
+    private TypeMirror type;
     private boolean readable;
     private boolean writable;
     private String componentInfoName;
@@ -634,7 +643,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * @return the feature's Java type
      */
     protected String getType() {
-      return type;
+      return type.toString();
+    }
+
+    protected String getYailType() {
+      return javaTypeToYailType(type);
     }
 
     /**
@@ -1523,7 +1536,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // Use typeMirror to set the property's type.
     if (!typeMirror.getKind().equals(TypeKind.VOID)) {
-      property.type = typeMirror.toString();
+      property.type = typeMirror;
       updateComponentTypes(typeMirror);
     }
 
@@ -1664,15 +1677,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     );
   }
 
-  /*private Parameter varElemToParameter(VariableElement varElem) {
+  private Parameter varElemToParameter(VariableElement varElem) {
     Parameter param = new Parameter(
       varElem.getSimpleName().toString(),
       varElem.asType(),
       varElem.getAnnotation(IsColor.class) != null
     );
-    param.helper = elementToHelperKey(varElem, varElem.asType());
+    //param.helper = elementToHelperKey(varElem, varElem.asType());
     return param;
-  }*/
+  }
 
   // Transform an @ActivityElement into an XML element String for use later
   // in creating AndroidManifest.xml.
@@ -1939,9 +1952,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          event.addParameter(ve.getSimpleName().toString(),
-                             ve.asType().toString(),
-                             ve.getAnnotation(IsColor.class) != null);
+          event.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
       }
@@ -1995,15 +2006,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          method.addParameter(ve.getSimpleName().toString(),
-                              ve.asType().toString(),
-                              ve.getAnnotation(IsColor.class) != null);
+          method.addParameter(varElemToParameter(ve));
           updateComponentTypes(ve.asType());
         }
 
         // Extract the return type.
         if (e.getReturnType().getKind() != TypeKind.VOID) {
-          method.returnType = e.getReturnType().toString();
+          method.returnType = e.getReturnType();
           if (e.getAnnotation(IsColor.class) != null) {
             method.color = true;
           }
@@ -2065,58 +2074,66 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @throws RuntimeException if the parameter cannot be mapped to any of the
    *         legal return values
    */
-  protected final String javaTypeToYailType(String type) {
+  protected final String javaTypeToYailType(TypeMirror type) {
     if (BOXED_TYPES.containsKey(type)) {
       throw new IllegalArgumentException(String.format(BOXED_TYPE_ERROR, type,
           BOXED_TYPES.get(type)));
     }
+
+    // Handle enums
+    if (isOptionList(type)) {
+      return type.toString() + "Enum";
+    }
+    
+    String typeString = type.toString();
+
     // boolean -> boolean
-    if (type.equals("boolean")) {
-      return type;
+    if (typeString.equals("boolean")) {
+      return typeString;
     }
     // String -> text
-    if (type.equals("java.lang.String")) {
+    if (typeString.equals("java.lang.String")) {
       return "text";
     }
     // {float, double, int, short, long, byte} -> number
-    if (type.equals("float") || type.equals("double") || type.equals("int") ||
-        type.equals("short") || type.equals("long") || type.equals("byte")) {
+    if (typeString.equals("float") || typeString.equals("double") || typeString.equals("int") ||
+        typeString.equals("short") || typeString.equals("long") || typeString.equals("byte")) {
       return "number";
     }
     // YailList -> list
-    if (type.equals("com.google.appinventor.components.runtime.util.YailList")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailList")) {
       return "list";
     }
     // List<?> -> list
-    if (type.startsWith("java.util.List")) {
+    if (typeString.startsWith("java.util.List")) {
       return "list";
     }
-    if (type.equals("com.google.appinventor.components.runtime.util.YailDictionary")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailDictionary")) {
       return "dictionary";
     }
-    if (type.equals("com.google.appinventor.components.runtime.util.YailObject")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.util.YailObject")) {
       return "yailobject";
     }
 
     // Calendar -> InstantInTime
-    if (type.equals("java.util.Calendar")) {
+    if (typeString.equals("java.util.Calendar")) {
       return "InstantInTime";
     }
 
-    if (type.equals("java.lang.Object")) {
+    if (typeString.equals("java.lang.Object")) {
       return "any";
     }
 
-    if (type.equals("com.google.appinventor.components.runtime.Component")) {
+    if (typeString.equals("com.google.appinventor.components.runtime.Component")) {
       return "component";
     }
 
     // Check if it's a component.
-    if (componentTypes.contains(type)) {
+    if (componentTypes.contains(typeString)) {
       return "component";
     }
 
-    throw new IllegalArgumentException("Cannot convert Java type '" + type + "' to Yail type");
+    throw new IllegalArgumentException("Cannot convert Java typeString '" + type + "' to Yail type");
   }
 
   /**

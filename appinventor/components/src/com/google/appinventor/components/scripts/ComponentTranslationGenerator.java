@@ -7,6 +7,7 @@ package com.google.appinventor.components.scripts;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -79,13 +80,20 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
         outMethods.add(propertyName);
       }
     }
-    // This special case adds the notAlreadyHandled parameter, which is the second parameter for the generic event
-    // handlers. Since it's not explicitly declared in any event handler, we add it here for internationalization.
-    parameters.put("notAlreadyHandled", new Parameter("notAlreadyHandled", "boolean"));
+
     sb.append("\n\n/* Parameters */\n\n");
+    // TODO: Instead of compiling the names here, can we just create a list instead of a map?
+    ArrayList<String> names = new ArrayList();
     for (Parameter parameter : parameters.values()) {
-      sb.append("    map.put(\"PARAM-" + parameter.name + "\", MESSAGES." +
-          Character.toLowerCase(parameter.name.charAt(0)) + parameter.name.substring(1) +
+      names.add(parameter.name);
+    }
+    // This special case adds the notAlreadyHandled parameter, which is the second parameter for the
+    // generic event handlers. Since it's not explicitly declared in an event handler, we have to
+    // add it here for internationalization.
+    names.add("notAlreadyHandled");
+    for (String name : names) {
+      sb.append("    map.put(\"PARAM-" + name + "\", MESSAGES." +
+          Character.toLowerCase(name.charAt(0)) + name.substring(1) +
           "Params());\n");
     }
   }
