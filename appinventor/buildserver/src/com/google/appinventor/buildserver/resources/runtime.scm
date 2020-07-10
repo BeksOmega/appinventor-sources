@@ -442,15 +442,36 @@
                (cons thunk
                      form-do-after-creation)))
 
+       (define (make-error-entry blockid error)
+         (define error-list (list error))
+         (define count 1)
+         (define (add-error error)
+           (if (not (contains-error? error))
+             (begin
+               (set! error-list (cons error error-list))
+               (set! count (+ count 1))))
+           count)
+         (define (is-for-block? id)
+           (eq? id blockid))
+         (define (contains-error? err)
+           (not (not (member err error-list))))
+         (define (dispatch m)
+           (cond ((eq? m 'blockid) blockid)
+                 ((eq? m 'error-list) error-list)
+                 ((eq? m 'count) count)
+                 ((eq? m 'add-error) add-error)
+                 ((eq? m 'is-for-block?) is-for-block?)
+                 ((eq? m 'contains-error?) contains-error?)))
+         dispatch)
+
        (define (process-exception ex)
          (define-alias YailRuntimeError <com.google.appinventor.components.runtime.errors.YailRuntimeError>)
          (define (send-error error)
-             ;; TODO: Is there anyway to use the send-to-block procedure here?
-             (com.google.appinventor.components.runtime.util.RetValManager:appendReturnValue
-               (get-current-block-id)
-               "NOK"
-               error))
-
+             (let ((id (get-current-block-id)))
+               (if ((error-entries 'add-entry) id error)
+                 ;; TODO: Is there anyway to use the send-to-block procedure here?
+                 (com.google.appinventor.components.runtime.util.RetValManager:appendReturnValue id "NOK" error)
+                 #f)))
          (if isrepl
              (when ((this):toastAllowed)
                    (let ((message (if (instance? ex java.lang.Error) (ex:toString) (ex:getMessage))))
@@ -688,27 +709,6 @@
                      ;;(android-log-form "Caught exception in define-form ")
                      (process-exception exception))))))))
 
-(define (make-error-entry blockid error)
-  (define error-list (list error))
-  (define count 1)
-  (define (add-error error)
-    (if (not (contains-error? error))
-      (begin
-        (set! error-list (cons error error-list))
-        (set! count (+ count 1))))
-    count)
-  (define (is-for-block? id)
-    (eq? id blockid))
-  (define (contains-error? err)
-    (not (not (member err error-list))))
-  (define (dispatch m)
-    (cond ((eq? m 'blockid) blockid)
-          ((eq? m 'error-list) error-list)
-          ((eq? m 'count) count)
-          ((eq? m 'add-error) add-error)
-          ((eq? m 'is-for-block?) is-for-block?)
-          ((eq? m 'contains-error?) contains-error?)))
-  dispatch)
 
 ;;;; define-event
 
