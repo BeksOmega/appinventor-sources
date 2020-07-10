@@ -550,6 +550,58 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return that;
     }
 
+    public void merge(Property newProperty, String componentName, boolean newIsOverride) {
+
+      // The old code for this makes absolutely no sense to me (Beka). Why would the getter
+      // determine the type when the type information is only used by the /setter's/ code generator.
+      // I'm just going to throw an error if the types don't match. Because to me no other behavior
+      // makes sense.
+      /*
+       * if (!priorProperty.type.equals(newProperty.type)) {
+       *   // The 'real' type of a property is determined by its getter, if
+       *   // it has one.  In theory there can be multiple setters which
+       *   // take different types and those types can differ from the
+       *   // getter.
+       *   if (newProperty.readable) {
+       *     priorProperty.type = newProperty.type;
+       *   } else if (priorProperty.writable) {
+       *     // TODO(user): handle lang_def and document generation for multiple setters.
+       *     throw new RuntimeException("Inconsistent types " + priorProperty.type +
+       *                                 " and " + newProperty.type + " for property " +
+       *                                 propertyName + " in component " + componentInfo.name);
+       *   }
+       * }
+       */
+
+      // TODO: Could refactor the below errors into a formatted string.
+      if (!type.equals(newProperty.type)) {
+        throw new RuntimeException("Iconsistent types " + type + " and " + newProperty.type +
+            " for property " + name + " in " + componentName);
+      }
+      if (!newProperty.isDefaultDescription() && (this.isDefaultDescription() || newIsOverride)) {
+        setDescription(newProperty.description);
+      }
+      // Later descriptions override earlier descriptions.
+      if (!newProperty.longDescription.isEmpty()) {
+        longDescription = newProperty.longDescription;
+      }
+      if (propertyCategory == PropertyCategory.UNSET) {
+        propertyCategory = newProperty.propertyCategory;
+      } else if (newProperty.propertyCategory != PropertyCategory.UNSET &&
+          propertyCategory != newProperty.propertyCategory) {
+        throw new RuntimeException(
+          "Inconsistent categories " + propertyCategory + " and " + newProperty.propertyCategory +
+          " for property " + name + " in " + componentName);
+      }
+
+      readable = readable || newProperty.readable;
+      writable = writable || newProperty.writable;
+      color = color || newProperty.color;
+      userVisible = isUserVisible() && newProperty.isUserVisible();
+      deprecated = isDeprecated() && newProperty.isDeprecated();
+      componentInfoName = componentName;
+    }
+
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder("<Property name: ");
@@ -1779,10 +1831,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return subelementString.toString();
   }
 
-  private void processProperties(ComponentInfo componentInfo,
-                                 Element componentElement) {
-    // We no longer support properties that use the variant type.
-
+  private void processProperties(ComponentInfo componentInfo, Element componentElement) {
     Map<String, Element> propertyElementsToCheck = new HashMap<>();
 
     for (Element element : componentElement.getEnclosedElements()) {
@@ -1790,109 +1839,52 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         continue;
       }
 
-      // Get the name of the prospective property.
       String propertyName = element.getSimpleName().toString();
+      // TODO: Do we need to call this in the case that the property is removed
+      //  from the componentInfo?
       processConditionalAnnotations(componentInfo, element, propertyName);
 
-      // Designer property information
       DesignerProperty designerProperty = element.getAnnotation(DesignerProperty.class);
       if (designerProperty != null) {
         componentInfo.designerProperties.put(propertyName, designerProperty);
         propertyElementsToCheck.put(propertyName, element);
       }
 
-      // If property is overridden without again using SimpleProperty, remove
-      // it.  For example, this is done for Ball.Width(), which overrides the
-      // inherited property Width() because Ball uses Radius() instead.
-      if (element.getAnnotation(SimpleProperty.class) == null) {
-        if (componentInfo.properties.containsKey(propertyName)) {
-          // Look at the prior property's componentInfoName.
-          Property priorProperty = componentInfo.properties.get(propertyName);
-          if (priorProperty.componentInfoName.equals(componentInfo.name)) {
-            // The prior property's componentInfoName is the same as this componentInfo's name.
-            // This is just a read-only or write-only property. We don't need to do anything
-            // special here.
-          } else {
-            // The prior property's componentInfoName is the different than this componentInfo's
-            // name. This is an overridden property without the SimpleProperty annotation and we
-            // need to remove it.
-            componentInfo.properties.remove(propertyName);
-          }
-        }
-      } else {
-        // Create a new Property element, then compare and combine it with any
-        // prior Property element with the same property name, verifying that
-        // they are consistent.
+      if (element.getAnnotation(SimpleProperty.class) != null) {
         Property newProperty = executableElementToProperty(element, componentInfo.name);
-        if (designerProperty != null
-            && designerProperty.editorType().equals(PropertyTypeConstants.PROPERTY_TYPE_COLOR)) {
-          // Properties that use a color editor should be marked as a color property
+        if (designerProperty != null && designerProperty.editorType()
+            .equals(PropertyTypeConstants.PROPERTY_TYPE_COLOR)) {
           newProperty.color = true;
         }
 
         if (componentInfo.properties.containsKey(propertyName)) {
           Property priorProperty = componentInfo.properties.get(propertyName);
-
-          if (!priorProperty.type.equals(newProperty.type)) {
-            // The 'real' type of a property is determined by its getter, if
-            // it has one.  In theory there can be multiple setters which
-            // take different types and those types can differ from the
-            // getter.
-            if (newProperty.readable) {
-              priorProperty.type = newProperty.type;
-            } else if (priorProperty.writable) {
-              // TODO(user): handle lang_def and document generation for multiple setters.
-              throw new RuntimeException("Inconsistent types " + priorProperty.type +
-                                         " and " + newProperty.type + " for property " +
-                                         propertyName + " in component " + componentInfo.name);
-            }
-          }
-
-          // Merge newProperty into priorProperty, which is already in the properties map.
-          if ((priorProperty.description.isEmpty() || priorProperty.isDefaultDescription()
-               || element.getAnnotation(Override.class) != null)
-              && !newProperty.description.isEmpty() && !newProperty.isDefaultDescription()) {
-            priorProperty.setDescription(newProperty.description);
-          }
-          if (!newProperty.longDescription.isEmpty()) {  /* Latter descriptions of the same property
-                                                            override earlier descriptions. */
-            priorProperty.longDescription = newProperty.longDescription;
-          }
-          if (priorProperty.propertyCategory == PropertyCategory.UNSET) {
-            priorProperty.propertyCategory = newProperty.propertyCategory;
-          } else if (newProperty.propertyCategory != priorProperty.propertyCategory &&
-                     newProperty.propertyCategory != PropertyCategory.UNSET) {
-            throw new RuntimeException(
-                "Property " + propertyName + " has inconsistent categories " +
-                priorProperty.propertyCategory + " and " +
-                newProperty.propertyCategory + " in component " +
-                componentInfo.name);
-          }
-          priorProperty.readable = priorProperty.readable || newProperty.readable;
-          priorProperty.writable = priorProperty.writable || newProperty.writable;
-          priorProperty.userVisible = priorProperty.isUserVisible() && newProperty.isUserVisible();
-          priorProperty.deprecated = priorProperty.isDeprecated() && newProperty.isDeprecated();
-          priorProperty.componentInfoName = componentInfo.name;
-          priorProperty.color = newProperty.color || priorProperty.color;
+          boolean isOverride = element.getAnnotation(Override.class) != null;
+          priorProperty.merge(newProperty, componentInfo.name, isOverride);
         } else {
-          // Add the new property to the properties map.
           componentInfo.properties.put(propertyName, newProperty);
+        }
+      } else if (componentInfo.properties.containsKey(propertyName)) {
+        // The componentInfo contains the key, but this new function is not a SimpleProperty. If
+        // this function is overriding another function, remove that function from the component info.
+        // This is to support subclasses "hiding" properties of their parents. Eg how Ball hides
+        // the Width() property of its parent, because it uses Radius() instead.
+        Property priorProperty = componentInfo.properties.get(propertyName);
+        if (!priorProperty.componentInfoName.equals(componentInfo.name)) {  // If overriding.
+          componentInfo.properties.remove(propertyName);
         }
       }
     }
 
     // Verify that every DesignerComponent has a corresponding property entry. A mismatch results
     // in App Inventor being unable to generate code for the designer since the type information
-    // is in the block property only. We check that the designer property name is also present
-    // in the block properties. If not, an error is reported and the build terminates.
+    // is in the block property only. 
     Set<String> propertyNames = new HashSet<>(componentInfo.designerProperties.keySet());
     propertyNames.removeAll(componentInfo.properties.keySet());
-    if (!propertyNames.isEmpty()) {
-      for (String propertyName : propertyNames) {
-        messager.printMessage(Kind.ERROR,
-            String.format(MISSING_SIMPLE_PROPERTY_ANNOTATION, propertyName),
-            propertyElementsToCheck.get(propertyName));
-      }
+    for (String propertyName : propertyNames) {
+      messager.printMessage(Kind.ERROR,
+          String.format(MISSING_SIMPLE_PROPERTY_ANNOTATION, propertyName),
+          propertyElementsToCheck.get(propertyName));
     }
   }
 
@@ -1937,6 +1929,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         componentInfo.events.put(event.name, event);
 
         // Verify that this element has an ExecutableType.
+        // TODO: This should be checked like way earlier.
         if (!(element instanceof ExecutableElement)) {
           throw new RuntimeException("In component " + componentInfo.name +
                                      ", the representation of SimpleEvent " + eventName +
