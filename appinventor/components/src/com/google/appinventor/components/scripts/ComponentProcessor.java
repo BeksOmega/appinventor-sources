@@ -41,6 +41,7 @@ import java.io.Writer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -197,6 +198,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * This is constructed by {@link #process} for use in {@link #outputResults()}.
    */
   protected final SortedMap<String, ComponentInfo> components = Maps.newTreeMap();
+
+  protected final Map<String, OptionList> optionLists = Maps.newTreeMap();
 
   private final List<String> componentTypes = Lists.newArrayList();
 
@@ -626,6 +629,94 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
         return WRITE_ONLY;
       }
+    }
+  }
+  
+  protected enum HelperType { OPTION_LIST }
+
+  protected final class HelperKey {
+
+    private HelperType helperType;
+    private String key;
+
+    protected HelperKey(HelperType type, String key) {
+      this.helperType = type;
+      this.key = key;
+    }
+
+    protected HelperType getType() {
+      return helperType;
+    }
+
+    protected String getKey() {
+      return key;
+    }
+  }
+
+  protected final class OptionList {
+    private ArrayList<Option> options;
+    private String className;
+    private String tagName;
+    private String defaultOpt;
+
+    protected OptionList(String className, String tagName) {
+      this.className = className;
+      this.tagName = tagName;
+      options = new ArrayList();
+    }
+
+    protected String getClassName() {
+      return className;
+    }
+
+    protected String getTagName() {
+      return tagName;
+    }
+
+    public void setDefault(String defaultOpt) {
+      this.defaultOpt = defaultOpt;
+    }
+
+    public String getDefault() {
+      return defaultOpt;
+    }
+
+    protected void addOption(Option option) {
+      options.add(option);
+    }
+
+    protected boolean containsOption(Option option) {
+      return options.contains(option);
+    }
+
+    protected boolean isEmpty() {
+      return options.isEmpty();
+    }
+
+    protected Collection<Option> asCollection() {
+      return options;
+    }
+  }
+
+  protected final class Option extends Feature {
+    private String value;
+
+    protected Option(
+      String name,
+      String value,
+      String description,
+      boolean deprecated
+    ) {
+      super(name, description, description, "Option", true, deprecated);
+      this.value = value;
+    }
+
+    protected String getDescription() {
+      return description;
+    }
+
+    protected String getValue() {
+      return value;
     }
   }
 
@@ -1388,6 +1479,148 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     return property;
   }
+
+  private HelperKey elementToHelperKey(Element elem, TypeMirror type) {
+    HelperKey key;
+    key = hasOptionListHelper(elem, type);
+    if (key != null) {
+      return key;
+    }
+    // Add more types of helper keys here.
+    return null;
+  }
+
+  private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
+    // Check if the elem type is an optionList.
+    if (isOptionList(type)) {
+      return optionListToHelperKey(((DeclaredType)type).asElement());
+    }
+    // TODO: Might need to add support for @Options annotation under certain
+    //  circumstances. That should be added here.
+    return null;
+  }
+
+  private boolean isOptionList(TypeMirror type) {
+    if (type.getKind() == TypeKind.DECLARED) {
+      TypeElement elem = (TypeElement)((DeclaredType)type).asElement();
+      for (TypeMirror parent : elem.getInterfaces()) {
+        TypeElement parentElem = (TypeElement)((DeclaredType)parent).asElement();
+        if (parentElem.getSimpleName().toString().equals("OptionList")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private HelperKey optionListToHelperKey(Element optionList) {
+    String name = optionList.getSimpleName().toString();
+    // We haven't seen this type of dropdown before, so add it.
+    if (optionLists.get(name) == null) {
+      // Couldn't add it for whatever reason.
+      if (!tryAddOptionList(optionList)) {
+        return null;
+      }
+    }
+    return new HelperKey(HelperType.OPTION_LIST, name);
+  }
+
+  private <E extends Enum<E>> boolean tryAddOptionList(Element optionElem) {
+    String className = optionElem.asType().toString();
+    String tagName = optionElem.getSimpleName().toString();
+    OptionList optionList = new OptionList(className, tagName);
+
+    // Get the class.
+    Class clazz = null;
+    try {
+      clazz = Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException("OptionList Class: " + className + " is not available. " +
+        "Make sure that it is available to the compiler.");
+    }
+    if (clazz == null) {
+      return false;
+    }
+
+    // Get the getValue method.
+    java.lang.reflect.Method getValueMethod = null;
+    try {
+      getValueMethod = clazz.getDeclaredMethod("getValue", new Class[] {});
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("Class: " + className + " must have a getValue() method.");
+    }
+    if (getValueMethod == null) {
+      return false;
+    }
+
+    // Create a map of enum const names -> values.
+    Map<String, String> namesToValues = Maps.newTreeMap();
+    Object[] constants = clazz.getEnumConstants();
+    for (Object constant : clazz.getEnumConstants()) {
+        try {
+          E enumConst = (E) constant;
+          namesToValues.put(
+            enumConst.name(),
+            getValueMethod.invoke(enumConst, new Object [] {}).toString());
+        } catch (Exception e) {}
+    }
+
+    // Add the options to the OptionList.
+    for (Element field : optionElem.getEnclosedElements()) {
+      String fieldName = field.getSimpleName().toString();
+      if (namesToValues.containsKey(fieldName)) {
+        String value = namesToValues.get(fieldName);
+        optionList.addOption(elementToOption(field, value));
+
+        // Set the default to be the first option, or the option tagged with @Default.
+        if (optionList.getDefault() == null || isDefault(field)) {
+          optionList.setDefault(value);
+        }
+      }
+    }
+
+    if (!optionList.isEmpty()) {
+      optionLists.put(optionElem.getSimpleName().toString(), optionList);
+    }
+
+    return !optionList.isEmpty();
+  }
+
+  private boolean isDefault(Element field) {
+    for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
+      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Default")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private Option elementToOption(Element field, String value) {
+    // TODO: getDocComment doesn't seem to work on enum constants?
+    String description = elementUtils.getDocComment(field);
+    if (description == null) {
+      description = "";
+    }
+    // Read only until the first javadoc parameter
+    description = description.split("[^\\\\][@{]")[0].trim();
+
+    return new Option(
+      field.getSimpleName().toString(),
+      value,
+      description,
+      elementUtils.isDeprecated(field)
+    );
+  }
+
+  /*private Parameter varElemToParameter(VariableElement varElem) {
+    Parameter param = new Parameter(
+      varElem.getSimpleName().toString(),
+      varElem.asType(),
+      varElem.getAnnotation(IsColor.class) != null
+    );
+    param.helper = elementToHelperKey(varElem, varElem.asType());
+    return param;
+  }*/
 
   // Transform an @ActivityElement into an XML element String for use later
   // in creating AndroidManifest.xml.
