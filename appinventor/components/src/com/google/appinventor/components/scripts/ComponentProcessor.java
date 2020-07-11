@@ -537,6 +537,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private boolean writable;
     private String componentInfoName;
     private boolean color;
+    // Used in the case that this is a property on an old-style component. It needs to support
+    // concrete typing and abstract typing.
+    private TypeMirror concreteType;
 
     protected Property(String name, String description, String longDescription,
                        PropertyCategory category, boolean userVisible, boolean deprecated) {
@@ -582,11 +585,46 @@ public abstract class ComponentProcessor extends AbstractProcessor {
        * }
        */
 
-      // TODO: Could refactor the below errors into a formatted string.
       if (!type.equals(newProperty.type)) {
         throw new RuntimeException("Iconsistent types " + type + " and " + newProperty.type +
             " for property " + name + " in " + componentName);
       }
+
+      mergeInternal(newProperty, componentName, newIsOverride);
+    }
+
+    // This is the case where we have a component that has both concrete and OptionList version of
+    // a property. If it just has a concrete version, or just has an OptionList version nothing
+    // special needs to happen.
+    public void mergeWithOptionsProperty(Property optionsProperty) {
+      if (!isOptionList(optionsProperty.type)) {
+        throw new RuntimeException("Property " + optionsProperty.name + " should return/accept " +
+            "an OptionList enum.");
+      }
+      if (writable != optionsProperty.writable) {
+        throw new RuntimeException("Properties " + name + " and " + optionsProperty.name +
+            " must have matching writability (both or neither writable).");
+      }
+      // We can have a concrete getter and no OptionList getter. But we cannot have an OptionList
+      // getter without a concrete getter (in the case that the component supports both concrete
+      // and OptionLists). This is because old-style components must return concrete types, so an
+      // OptionList getter would never be triggered anyway.
+      // If we add a toggle so that old-style getters return abstract types (to support enums as
+      // dictionary keys) we would need to check that the readability matches.
+      if (!readable && optionsProperty.readable) {
+        throw new RuntimeException("OptionList getters in components that have a concrete setter " +
+            "must also have a concrete getter.");
+      }
+
+      // We'll just say that it is an override (even though we don't know). This will make the
+      // abstract's doc take priority.
+      mergeInternal(optionsProperty, componentInfoName, true);
+
+      concreteType = type;
+      type = optionsProperty.type;
+    }
+
+    private void mergeInternal(Property newProperty, String componentName, boolean newIsOverride) {
       if (!newProperty.isDefaultDescription() && (this.isDefaultDescription() || newIsOverride)) {
         setDescription(newProperty.description);
       }
@@ -598,9 +636,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         propertyCategory = newProperty.propertyCategory;
       } else if (newProperty.propertyCategory != PropertyCategory.UNSET &&
           propertyCategory != newProperty.propertyCategory) {
-        throw new RuntimeException(
-          "Inconsistent categories " + propertyCategory + " and " + newProperty.propertyCategory +
-          " for property " + name + " in " + componentName);
+        throw new RuntimeException("Inconsistent categories " + propertyCategory + " and " +
+            newProperty.propertyCategory + " for property " + name + " in " + componentName);
       }
 
       readable = readable || newProperty.readable;
@@ -648,6 +685,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected String getYailType() {
       return javaTypeToYailType(type);
+    }
+
+    protected String getConcreteYailType() {
+      return javaTypeToYailType(concreteType);
     }
 
     /**
@@ -1473,6 +1514,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         && element.getKind() == ElementKind.METHOD;
   }
 
+  // TODO: Couldn't this be refactored into a constructor?
   private Property executableElementToProperty(Element element, String componentInfoName) {
     String propertyName = element.getSimpleName().toString();
     SimpleProperty simpleProperty = element.getAnnotation(SimpleProperty.class);
@@ -1899,6 +1941,19 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           String.format(MISSING_SIMPLE_PROPERTY_ANNOTATION, propertyName),
           propertyElementsToCheck.get(propertyName));
     }
+
+    // Merge all of the abstract and concrete properties.
+    for (Map.Entry<String, Property> entry : componentInfo.properties.entrySet()) {
+      String key = entry.getKey();
+      String suffix = "Options";
+      if (key.endsWith(suffix)) {
+        String suffixlessKey = key.substring(0, key.length() - suffix.length());
+        if (componentInfo.properties.containsKey(suffixlessKey)) {
+          Property optionsProperty = componentInfo.properties.get(suffixlessKey);
+          entry.getValue().mergeWithOptionsProperty(optionsProperty);
+        }
+      }
+    }
   }
 
   // Note: The top halves of the bodies of processEvent() and processMethods()
@@ -2078,6 +2133,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     if (BOXED_TYPES.containsKey(type)) {
       throw new IllegalArgumentException(String.format(BOXED_TYPE_ERROR, type,
           BOXED_TYPES.get(type)));
+    }
+
+    if (type == null) {
+      return null;
     }
 
     // Handle enums

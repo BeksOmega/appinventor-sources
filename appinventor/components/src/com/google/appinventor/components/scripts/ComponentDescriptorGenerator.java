@@ -283,6 +283,10 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(formatDescription(prop.getDescription()));
     sb.append(", \"type\": \"");
     sb.append(prop.getYailType());
+    if (prop.getConcreteYailType() != null) {
+      sb.append("\", \"concreteType\": \"");
+      sb.append(prop.getConcreteYailType());
+    }
     sb.append("\", \"rw\": \"");
     sb.append(prop.isUserVisible() ? prop.getRwString() : "invisible");
     // [lyn, 2015/12/20] Added deprecated field to JSON.
