@@ -171,6 +171,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     BOXED_TYPES.put("java.lang.Double", "double");
   }
 
+  private final String OPTIONS_SUFFIX = "Options";
+
   // The next two fields are set in init().
   /**
    * A handle allowing access to facilities provided by the annotation
@@ -224,7 +226,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The parameter's Java type, such as "int" or "java.lang.String".
      */
-    protected final TypeMirror type;
+    protected TypeMirror type;
+
+    protected TypeMirror concreteType;
 
     protected final boolean color;
 
@@ -257,6 +261,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String getYailType() {
       return javaTypeToYailType(type);
+    }
+
+    protected String getConcreteYailType() {
+      return javaTypeToYailType(concreteType);
     }
 
     @Override
@@ -411,6 +419,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
   }
 
+  protected interface Mergeable {
+    public void mergeWithOptionsVersion(Object mergeable);
+  }
+
   /**
    * Represents a component feature that has a name, description, and
    * parameters.
@@ -483,8 +495,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * {@link SimpleFunction}).
    */
   protected final class Method extends ParameterizedFeature
-      implements Cloneable, Comparable<Method> {
+      implements Cloneable, Comparable<Method>, Mergeable {
     // Inherits name, description, and parameters
+    // TODO: We still need to handle concrete and abstract return types. I just don't know whether
+    //  we are going to use a third overload, or an annotation to specify that.
     private TypeMirror returnType;
     private boolean color;
 
@@ -509,6 +523,37 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return color;
     }
 
+    public void mergeWithOptionsVersion(Object methodObj) {
+      Method optionsMethod = (Method) methodObj;
+      if (parameters.size() != optionsMethod.parameters.size()) {
+        throw new RuntimeException("Options @SimpleFunction " + optionsMethod.name + " must have " +
+            "the same number of parameters as the original " + name + " function (" +
+            parameters.size() + ")");
+      }
+      if ((returnType == null && optionsMethod.returnType != null) ||
+          !returnType.equals(optionsMethod.returnType)) {
+        String correctType = returnType == null ? "void" : getReturnType();
+        throw new RuntimeException("Options @SimpleFunction " + optionsMethod.name + " must have " +
+            "the same return type as the original " + name + " function (" + correctType + ")");
+      }
+      
+      for (int i = 0; i < parameters.size(); i++) {
+        Parameter concreteParam = parameters.get(i);
+        Parameter optionsParam = optionsMethod.parameters.get(i);
+        if (isOptionList(concreteParam.type)) {
+          throw new RuntimeException("Concrete @SimpleFunction " + name + " should not contain " +
+              "OptionList enums.");
+        }
+        // TODO: We could add more checks here if we wanted. Making sure that the OptionList
+        //   correctly casts, and that concrete types match. Although checking the OptionList's
+        //   underlying type might be tricky depending on if we want to handle ducktypeing or not.
+        if (isOptionList(optionsParam.type)) {
+          concreteParam.concreteType = concreteParam.type;
+          concreteParam.type = optionsParam.type;
+        }
+      }
+    }
+
     @Override
     public Method clone() {
       Method that = new Method(name, description, longDescription, userVisible, deprecated);
@@ -529,7 +574,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents an App Inventor component property (annotated with
    * {@link SimpleProperty}).
    */
-  protected final class Property extends Feature implements Cloneable {
+  protected final class Property extends Feature implements Cloneable, Mergeable {
     protected final String name;
     private PropertyCategory propertyCategory;
     private TypeMirror type;
@@ -596,7 +641,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     // This is the case where we have a component that has both concrete and OptionList version of
     // a property. If it just has a concrete version, or just has an OptionList version nothing
     // special needs to happen.
-    public void mergeWithOptionsProperty(Property optionsProperty) {
+    public void mergeWithOptionsVersion(Object optionsObj) {
+      Property optionsProperty = (Property) optionsObj;
       if (!isOptionList(optionsProperty.type)) {
         throw new RuntimeException("Property " + optionsProperty.name + " should return/accept " +
             "an OptionList enum.");
@@ -1942,21 +1988,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           propertyElementsToCheck.get(propertyName));
     }
 
-    // Merge all of the abstract and concrete properties.
-    Set<String> keysToRemove = new HashSet<>();
-    for (Map.Entry<String, Property> entry : componentInfo.properties.entrySet()) {
-      String key = entry.getKey();
-      String suffix = "Options";
-      if (key.endsWith(suffix)) {
-        String suffixlessKey = key.substring(0, key.length() - suffix.length());
-        if (componentInfo.properties.containsKey(suffixlessKey)) {
-          Property concreteProperty = componentInfo.properties.get(suffixlessKey);
-          concreteProperty.mergeWithOptionsProperty(entry.getValue());
-          keysToRemove.add(key);
-        }
-      }
-    }
-    componentInfo.properties.keySet().removeAll(keysToRemove);
+    mergeMergeables(componentInfo.properties);
   }
 
   // Note: The top halves of the bodies of processEvent() and processMethods()
@@ -2078,6 +2110,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
       }
     }
+
+    mergeMergeables(componentInfo.methods);
   }
 
   /**
@@ -2111,6 +2145,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
   }
 
+  // Merges all of the abstract and concrete versions of features.
+  private void mergeMergeables(Map<String, ? extends Mergeable> mergeables) {
+    Set<String> keysToRemove = new HashSet<>();
+    for (Map.Entry<String, ? extends Mergeable> entry : mergeables.entrySet()) {
+      String key = entry.getKey();
+      if (key.endsWith(OPTIONS_SUFFIX)) {
+        String suffixlessKey = key.substring(0, key.length() - OPTIONS_SUFFIX.length());
+        if (mergeables.containsKey(suffixlessKey)) {
+          Mergeable concreteMergeable = mergeables.get(suffixlessKey);
+          concreteMergeable.mergeWithOptionsVersion(entry.getValue());
+          keysToRemove.add(key);
+        }
+      }
+    }
+    mergeables.keySet().removeAll(keysToRemove);
+  }
   /**
    * <p>Outputs the required component information in the desired format.  It is called by
    * {@link #process} after the fields {@link #components} and {@link #messager}

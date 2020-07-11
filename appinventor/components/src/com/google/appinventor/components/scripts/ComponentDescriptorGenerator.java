@@ -355,6 +355,10 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(p.name);
       sb.append("\", \"type\": \"");
       sb.append(p.getYailType());
+      if (p.getConcreteYailType() != null) {
+        sb.append("\", \"concreteType\": \"");
+        sb.append(p.getConcreteYailType());
+      }
       sb.append("\"}");
       separator = ",";
     }
