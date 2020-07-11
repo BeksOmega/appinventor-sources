@@ -427,7 +427,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents a component feature that has a name, description, and
    * parameters.
    */
-  protected abstract class ParameterizedFeature extends Feature {
+  protected abstract class ParameterizedFeature extends Feature implements Mergeable {
     // Inherits name, description
     protected final List<Parameter> parameters;
 
@@ -439,6 +439,31 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected void addParameter(Parameter param) {
       parameters.add(param);
+    }
+
+    public void mergeWithOptionsVersion(Object featObj) {
+      ParameterizedFeature optionsFeat = (ParameterizedFeature) featObj;
+      if (parameters.size() != optionsFeat.parameters.size()) {
+        throw new RuntimeException("Options " + optionsFeat.name + " must have " +
+            "the same number of parameters as the original " + name + " function (" +
+            parameters.size() + ")");
+      }
+
+      for (int i = 0; i < parameters.size(); i++) {
+        Parameter concreteParam = parameters.get(i);
+        Parameter optionsParam = optionsFeat.parameters.get(i);
+        if (isOptionList(concreteParam.type)) {
+          throw new RuntimeException("Concrete " + name + " should not contain " +
+              "OptionList enums.");
+        }
+        // TODO: We could add more checks here if we wanted. Making sure that the OptionList
+        //   correctly casts, and that concrete types match. Although checking the OptionList's
+        //   underlying type might be tricky depending on if we want to handle ducktypeing or not.
+        if (isOptionList(optionsParam.type)) {
+          concreteParam.concreteType = concreteParam.type;
+          concreteParam.type = optionsParam.type;
+        }
+      }
     }
 
     /**
@@ -525,33 +550,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     public void mergeWithOptionsVersion(Object methodObj) {
       Method optionsMethod = (Method) methodObj;
-      if (parameters.size() != optionsMethod.parameters.size()) {
-        throw new RuntimeException("Options @SimpleFunction " + optionsMethod.name + " must have " +
-            "the same number of parameters as the original " + name + " function (" +
-            parameters.size() + ")");
-      }
       if ((returnType == null && optionsMethod.returnType != null) ||
           !returnType.equals(optionsMethod.returnType)) {
         String correctType = returnType == null ? "void" : getReturnType();
         throw new RuntimeException("Options @SimpleFunction " + optionsMethod.name + " must have " +
             "the same return type as the original " + name + " function (" + correctType + ")");
       }
-      
-      for (int i = 0; i < parameters.size(); i++) {
-        Parameter concreteParam = parameters.get(i);
-        Parameter optionsParam = optionsMethod.parameters.get(i);
-        if (isOptionList(concreteParam.type)) {
-          throw new RuntimeException("Concrete @SimpleFunction " + name + " should not contain " +
-              "OptionList enums.");
-        }
-        // TODO: We could add more checks here if we wanted. Making sure that the OptionList
-        //   correctly casts, and that concrete types match. Although checking the OptionList's
-        //   underlying type might be tricky depending on if we want to handle ducktypeing or not.
-        if (isOptionList(optionsParam.type)) {
-          concreteParam.concreteType = concreteParam.type;
-          concreteParam.type = optionsParam.type;
-        }
-      }
+      super.mergeWithOptionsVersion(methodObj);
     }
 
     @Override
@@ -2047,6 +2052,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
       }
     }
+    mergeMergeables(componentInfo.events);
   }
 
   private void processMethods(ComponentInfo componentInfo,
