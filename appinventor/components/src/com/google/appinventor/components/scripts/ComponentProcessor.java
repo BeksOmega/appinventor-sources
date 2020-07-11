@@ -1943,17 +1943,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     // Merge all of the abstract and concrete properties.
+    Set<String> keysToRemove = new HashSet<>();
     for (Map.Entry<String, Property> entry : componentInfo.properties.entrySet()) {
       String key = entry.getKey();
       String suffix = "Options";
       if (key.endsWith(suffix)) {
         String suffixlessKey = key.substring(0, key.length() - suffix.length());
         if (componentInfo.properties.containsKey(suffixlessKey)) {
-          Property optionsProperty = componentInfo.properties.get(suffixlessKey);
-          entry.getValue().mergeWithOptionsProperty(optionsProperty);
+          Property concreteProperty = componentInfo.properties.get(suffixlessKey);
+          concreteProperty.mergeWithOptionsProperty(entry.getValue());
+          keysToRemove.add(key);
         }
       }
     }
+    componentInfo.properties.keySet().removeAll(keysToRemove);
   }
 
   // Note: The top halves of the bodies of processEvent() and processMethods()
