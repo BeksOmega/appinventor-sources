@@ -283,10 +283,6 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(formatDescription(prop.getDescription()));
     sb.append(", \"type\": \"");
     sb.append(prop.getYailType());
-    if (prop.getConcreteYailType() != null) {
-      sb.append("\", \"concreteType\": \"");
-      sb.append(prop.getConcreteYailType());
-    }
     sb.append("\", \"rw\": \"");
     sb.append(prop.isUserVisible() ? prop.getRwString() : "invisible");
     // [lyn, 2015/12/20] Added deprecated field to JSON.
@@ -295,7 +291,6 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("\", \"deprecated\": \"");
     sb.append(prop.isDeprecated());
     sb.append("\"");
-    outputHelper(prop.getHelperKey(), sb);
     if (alwaysSend) {
       sb.append(", \"alwaysSend\": true, \"defaultValue\": \"");
       sb.append(defaultValue.replaceAll("\"", "\\\""));
@@ -340,7 +335,6 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(method.getYailReturnType());
       sb.append("\"");
     }
-    outputHelper(method.getReturnHelperKey(), sb);
     sb.append("}");
   }
 
@@ -356,64 +350,10 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       sb.append(p.name);
       sb.append("\", \"type\": \"");
       sb.append(p.getYailType());
-      if (p.getConcreteYailType() != null) {
-        sb.append("\", \"concreteType\": \"");
-        sb.append(p.getConcreteYailType());
-      }
-      sb.append("\"");
-      outputHelper(p.getHelperKey(), sb);
-      sb.append("}");
+      sb.append("\"}");
       separator = ",";
     }
     sb.append("]");
-  }
-
-  private void outputHelper(HelperKey helper, StringBuilder sb) {
-    if (helper == null) {
-      return;
-    }
-    sb.append(", \"helper\": {\n");
-    sb.append("    \"type\": \"");
-    sb.append(helper.getType());
-    sb.append("\",\n");
-    sb.append("    \"data\": {\n");
-    switch (helper.getType()) {
-      case OPTION_LIST:
-        outputOptionList(helper.getKey(), sb);
-    }
-    sb.append("    }\n}");
-  }
-
-  private void outputOptionList(String key, StringBuilder sb) {
-    OptionList optList = optionLists.get(key);
-    sb.append("      \"className\": \"");
-    sb.append(optList.getClassName());
-    sb.append("\",\n");
-    sb.append("      \"key\": \"");
-    sb.append(key);
-    sb.append("\",\n");
-    sb.append("      \"tag\": \"");
-    sb.append(optList.getTagName());
-    sb.append("\",\n");
-    sb.append("      \"defaultOpt\": \"");
-    sb.append(optList.getDefault());
-    sb.append("\",\n");
-    sb.append("      \"options\": [\n");
-    String separator = "";
-    for (Option opt : optList.asCollection()) {
-      sb.append(separator);
-      sb.append("        { \"name\": \"");
-      sb.append(opt.name);
-      sb.append("\", \"value\": \"");
-      sb.append(opt.getValue());
-      sb.append("\", \"description\": ");
-      sb.append(formatDescription(opt.getDescription()));
-      sb.append(", \"deprecated\": \"");
-      sb.append(opt.isDeprecated());
-      sb.append("\" }");
-      separator = ",\n";
-    }
-    sb.append("\n      ]\n");
   }
 
   @Override
