@@ -227,9 +227,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * The parameter's Java type, such as "int" or "java.lang.String".
      */
     protected TypeMirror type;
-
     protected TypeMirror concreteType;
-
+    protected HelperKey helper;
     protected final boolean color;
 
     /**
@@ -265,6 +264,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected String getConcreteYailType() {
       return javaTypeToYailType(concreteType);
+    }
+
+    protected HelperKey getHelperKey() {
+      return helper;
     }
 
     @Override
@@ -463,6 +466,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           concreteParam.concreteType = concreteParam.type;
           concreteParam.type = optionsParam.type;
         }
+        if (concreteParam.helper == null) {
+          concreteParam.helper = optionsParam.helper;
+        }
       }
     }
 
@@ -525,6 +531,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     // TODO: We still need to handle concrete and abstract return types. I just don't know whether
     //  we are going to use a third overload, or an annotation to specify that.
     private TypeMirror returnType;
+    private HelperKey returnHelperKey;
     private boolean color;
 
     protected Method(String name, String description, String longDescription, boolean userVisible,
@@ -544,6 +551,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return javaTypeToYailType(returnType);
     }
 
+    protected HelperKey getReturnHelperKey() {
+      return returnHelperKey;
+    }
+
     protected boolean isColor() {
       return color;
     }
@@ -557,6 +568,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
             "the same return type as the original " + name + " function (" + correctType + ")");
       }
       super.mergeWithOptionsVersion(methodObj);
+      if (returnHelperKey == null) {
+        returnHelperKey = optionsMethod.returnHelperKey;
+      }
     }
 
     @Override
@@ -583,13 +597,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     protected final String name;
     private PropertyCategory propertyCategory;
     private TypeMirror type;
+    // Used in the case that this is a property on an old-style component. It needs to support
+    // concrete typing and abstract typing.
+    private TypeMirror concreteType;
+    private HelperKey helper;
     private boolean readable;
     private boolean writable;
     private String componentInfoName;
     private boolean color;
-    // Used in the case that this is a property on an old-style component. It needs to support
-    // concrete typing and abstract typing.
-    private TypeMirror concreteType;
 
     protected Property(String name, String description, String longDescription,
                        PropertyCategory category, boolean userVisible, boolean deprecated) {
@@ -609,6 +624,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       that.writable = writable;
       that.componentInfoName = componentInfoName;
       that.color = color;
+      that.helper = helper;
       return that;
     }
 
@@ -697,6 +713,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       userVisible = isUserVisible() && newProperty.isUserVisible();
       deprecated = isDeprecated() && newProperty.isDeprecated();
       componentInfoName = componentName;
+      if (helper == null) {
+        helper = newProperty.helper;
+      }
     }
 
     @Override
@@ -740,6 +759,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     protected String getConcreteYailType() {
       return javaTypeToYailType(concreteType);
+    }
+
+    protected HelperKey getHelperKey() {
+      return helper;
     }
 
     /**
@@ -1609,6 +1632,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         throw new RuntimeException("Property method is void and has no parameters: "
                                    + propertyName);
       }
+      property.helper = elementToHelperKey(element, ((ExecutableElement)element).getReturnType());
       if (element.getAnnotation(IsColor.class) != null) {
         property.color = true;
       }
@@ -1620,6 +1644,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
                                    propertyName);
       }
       typeMirror = parameters.get(0);
+      Element param = ((ExecutableElement)element).getParameters().get(0);
+      property.helper = elementToHelperKey(param, param.asType());
       for (VariableElement ve : ((ExecutableElement) element).getParameters()) {
         if (ve.getAnnotation(IsColor.class) != null) {
           property.color = true;
@@ -1776,7 +1802,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       varElem.asType(),
       varElem.getAnnotation(IsColor.class) != null
     );
-    //param.helper = elementToHelperKey(varElem, varElem.asType());
+    param.helper = elementToHelperKey(varElem, varElem.asType());
     return param;
   }
 
@@ -2109,6 +2135,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         // Extract the return type.
         if (e.getReturnType().getKind() != TypeKind.VOID) {
           method.returnType = e.getReturnType();
+          method.returnHelperKey = elementToHelperKey(e, method.returnType);
           if (e.getAnnotation(IsColor.class) != null) {
             method.color = true;
           }
