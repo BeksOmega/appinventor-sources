@@ -38,20 +38,42 @@ Blockly.PROPERTY_READWRITEABLE = 3;
 ComponentInfo = function() {};
 
 /**
+ * @typedef HelperKey
+ * @type {object}
+ * @property {!string} type
+ * @property {!string} concreteType
+ * @property {!string} key
+ */
+HelperKey = function() {};
+
+/**
  * @typedef ParameterDescriptor
  * @type {object}
  * @property {!string} name
  * @property {!type} type
+ * @property {HelperKey} helperKey
  */
 ParameterDescriptor = function() {};
 
 /**
- * @typedef {{name: !string, description: !string, deprecated: ?boolean, parameters: !ParameterDescriptor[]}}
+ * @typedef {{
+ *            name: !string,
+ *            description: !string,
+ *            deprecated: ?boolean,
+ *            parameters: !ParameterDescriptor[]
+ *          }}
  */
 EventDescriptor = function() {};
 
 /**
- * @typedef {{name: !string, description: !string, deprecated: ?boolean, parameters: !ParameterDescriptor[], returnType: ?string}}
+ * @typedef {{
+ *            name: !string, 
+ *            description: !string,
+ *            deprecated: ?boolean,
+ *            parameters: !ParameterDescriptor[],
+ *            returnType: ?string
+ *            returnHelperKey: HelperKey
+ *          }}
  */
 MethodDescriptor = function() {};
 
@@ -61,6 +83,8 @@ MethodDescriptor = function() {};
  * @property {!string} name
  * @property {!string} description
  * @property {!string} type
+ * @property {!string} concreteType
+ * @property {HelperKey} helperKey
  * @property {!string} rw
  * @property {?boolean} deprecated
  */
@@ -89,6 +113,25 @@ ComponentTypeDescriptor = function() {};
 ComponentInstanceDescriptor = function() {};
 
 /**
+ * @typedef Option
+ * @type {object}
+ * @property {!string} name
+ * @property {!string} description
+ * @property {?boolean} deprecated
+ */
+Option = function() {};
+
+/**
+ * @typedef OptionList
+ * @type {object}
+ * @property {!string} className
+ * @property {!string} tag
+ * @property {!string} defaultOpt
+ * @property {!Array.<Option>} options
+ */
+OptionList = function() {};
+
+/**
  * Database for component type information and instances.
  * @constructor
  */
@@ -100,6 +143,12 @@ Blockly.ComponentDatabase = function() {
   // For migration of old projects that are name based rather than uid based.
   /** @type {Object.<string, string>} */
   this.instanceNameUid_ = {};
+
+  /**
+   * Maps names of options lists to OptionLists
+   * @type {Object.<string, !Option>}
+   */
+  this.optionLists_ = {};
 
   // Internationalization support
   this.i18nComponentTypes_ = {};
@@ -315,7 +364,7 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         event['deprecated'] = JSON.parse(event['deprecated']);
       }
       if (event['parameters'] === undefined) {
-        event['parameters'] = event['params'];
+        event['parameters'] = this.processParameters(event['params']);
         delete event['params'];
       }
       info.eventDictionary[event.name] = event;
@@ -325,8 +374,11 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         method['deprecated'] = JSON.parse(method['deprecated']);
       }
       if (method['parameters'] === undefined) {
-        method['parameters'] = method['params'];
+        method['parameters'] = this.processParameters(method['params']);
         delete method['params'];
+      }
+      if (method['helper']) {
+        method['returnHelperKey'] = this.processHelper(method['helper']);
       }
       info.methodDictionary[method.name] = method;
     }
@@ -347,6 +399,9 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
         property.mutability = Blockly.PROPERTY_WRITEABLE;
         info.setPropertyList.push(property.name);
       }
+      if (property['helper']) {
+        property['helperKey'] = this.processHelper(property['helper']);
+      }
     }
     // Copy the designer property information to the block information
     for (j = 0; property = componentInfo.properties[j]; ++j) {
@@ -359,6 +414,74 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
     }
   }
 };
+
+/**
+ * Processes the given array of parameters (from simple_components.json, not
+ * Parameters) and returns an array of Parameters.
+ * @param {!Array.<!Object>} paramData An array of data from
+ *     simple_components.json defining the parameters.
+ * @return {!Array.<!Parameter>} An array of parameters.
+ */
+Blockly.ComponentDatabase.prototype.processParameters = function(params) {
+  for (var i = 0, param; param = params[i]; i++) {
+    param['helperKey'] = this.processHelper(param['helper']);
+    delete param['helper'];
+  }
+  return params;
+}
+
+/**
+ * Processes a helper (from simple_components.json) and returns a HelperKey if
+ * possible.
+ * @param {Object} helper The (possibly null) helper definition.
+ * @return {HelperKey} The helper key associated with the helper (if it is
+ *     possible) to create one.
+ */
+Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
+  if (!helper) {
+    return null;
+  }
+  switch (helper.type) {
+    case "OPTION_LIST":
+      return this.processOptionList(helper.data);
+  }
+  return null;
+}
+
+/**
+ * Processes data defining an OptionList (from simple_components.json) and
+ * returns a HelperKey associated with the OptionList.
+ * @param {!Object} data The data defining the OptionList.
+ * @return {!HelperKey} The key associated with the OptionList.
+ */
+Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
+  if (!this.optionLists_[data.key]) {
+    var options = [];
+    for (var i = 0, option; option = data.options[i]; i++) {
+      options[i] = this.processOption(option);
+    }
+
+    this.optionLists_[data.key] = {
+      className: data.className,
+      tag: data.tag,
+      defaultOpt: data.defaultOpt,
+      options: options
+    };
+  }
+  return {
+    type: "OPTION_LIST",
+    key: data.key
+  };
+}
+
+Blockly.ComponentDatabase.prototype.processOption = function(option) {
+  return {
+    name: option.name,
+    value: option.value,
+    description: option.description,
+    deprecated: option.deprecated == "true"
+  };
+}
 
 Blockly.ComponentDatabase.PROPDESC = /PropertyDescriptions$/;
 Blockly.ComponentDatabase.METHODDESC = /MethodDescrptions$/;
@@ -502,6 +625,16 @@ Blockly.ComponentDatabase.prototype.getGetterNamesForType = function(typeName) {
   }
   return null;
 };
+
+/**
+ * Returns the OptionList associated with the given key.
+ * @param {!string} key The dictionary key for the OptionList.
+ * @return {OptionList} The associated option list, or undefined if one is not
+ *     found.
+ */
+Blockly.ComponentDatabase.prototype.getOptionList = function(key) {
+  return this.optionLists_[key];
+}
 
 /**
  * Get the internationalized string for the given component type.
