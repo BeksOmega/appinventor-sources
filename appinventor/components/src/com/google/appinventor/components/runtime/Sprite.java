@@ -12,6 +12,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.common.Direction;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.runtime.errors.AssertionFailure;
 import com.google.appinventor.components.runtime.errors.IllegalArgumentError;
@@ -43,6 +44,7 @@ public abstract class Sprite extends VisibleComponent
   private static final float DEFAULT_SPEED = 0.0f;   // pixels per interval
   private static final boolean DEFAULT_VISIBLE = true;
   private static final double DEFAULT_Z = 1.0;
+  private static final int DIRECTION_NONE = 0;
   protected static final boolean DEFAULT_ORIGIN_AT_CENTER = false;
 
   protected final Canvas canvas;              // enclosing Canvas
@@ -475,7 +477,7 @@ public abstract class Sprite extends VisibleComponent
 
   /**
    * Event handler called when the `%type%` reaches an `edge`{:.variable.block} of the screen.
-   * If {@link #Bounce(int)} is then called with that edge, the sprite will appear to bounce off
+   * If {@link #Bounce} is then called with that edge, the sprite will appear to bounce off
    * of the edge it reached. Edge here is represented as an integer that indicates one of eight
    * directions north(1), northeast(2), east(3), southeast(4), south (-1), southwest(-2), west(-3),
    * and northwest(-4).
@@ -487,13 +489,19 @@ public abstract class Sprite extends VisibleComponent
           "indicates one of eight directions north (1), northeast (2), east (3), southeast (4), " +
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
   public void EdgeReached(int edge) {
-    if (edge == Component.DIRECTION_NONE
-        || edge < Component.DIRECTION_MIN
-        || edge > Component.DIRECTION_MAX) {
-      // This should never be reached.
+    Direction dir = Direction.get(edge);
+    if (dir == null) {
       return;
     }
-    postEvent(this, "EdgeReached", edge);
+    EdgeReachedOptions(dir);
+  }
+
+  /**
+   * Called when the sprite hits an edge of the screen.
+   */
+  @SimpleEvent
+  public void EdgeReachedOptions(Direction edge) {
+    postEvent(this, "EdgeReached", edge.getValue());
   }
 
   /**
@@ -594,48 +602,63 @@ public abstract class Sprite extends VisibleComponent
    * be the one returned by {@link #EdgeReached}.
    *
    * @param edge the direction of the object (real or imaginary) to bounce off
-   *             of; this should be one of
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTH},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTHEAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_EAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTHEAST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTH},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_SOUTHWEST},
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_WEST}, or
-   *    {@link com.google.appinventor.components.runtime.Component#DIRECTION_NORTHWEST}.
+   *             of; this should be one of the values of
+   *             {@link com.google.appinventor.components.common.Direction}.
    */
   @SimpleFunction(
     description = "Makes the %type% bounce, as if off a wall. " +
         "For normal bouncing, the edge argument should be the one returned by EdgeReached.")
   public void Bounce (int edge) {
+    // Make sure that "edge" is a valid Direction.
+    Direction dir = Direction.get(edge);
+    if (dir == null) {
+      return;
+    }
+    BounceOptions(dir);
+  }
+
+  /**
+   * Makes the Sprite bounce off the wall defined by edge.
+   * 
+   * @param edge The direction of the edge to bounce off of. For instance in this case:
+   *        ----------
+   *        |   \    |
+   *        |    \   |
+   *        |     \  |
+   *        |      \ |
+   *        |       *|
+   *        |      / |
+   *        ----------  
+   *        The correct direction would be `Direction.East`.
+   */
+  @SimpleFunction
+  public void BounceOptions(Direction edge) {
     MoveIntoBounds();
 
     // Normalize heading to [0, 360)
     double normalizedAngle = userHeading % 360;
-    // The following step is necessary because Java's modulus operation yields a
-    // negative number if the dividend is negative and the divisor is positive.
     if (normalizedAngle < 0) {
       normalizedAngle += 360;
     }
 
     // Only transform heading if sprite was moving in that direction.
     // This avoids oscillations.
-    if ((edge == Component.DIRECTION_EAST
+    if ((edge == Direction.East
          && (normalizedAngle < 90 || normalizedAngle > 270))
-        || (edge == Component.DIRECTION_WEST
+        || (edge == Direction.West
             && (normalizedAngle > 90 && normalizedAngle < 270))) {
       Heading(180 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTH
+    } else if ((edge == Direction.North
                 && normalizedAngle > 0 && normalizedAngle < 180)
-               || (edge == Component.DIRECTION_SOUTH && normalizedAngle > 180)) {
+               || (edge == Direction.South && normalizedAngle > 180)) {
       Heading(360 - normalizedAngle);
-    } else if ((edge == Component.DIRECTION_NORTHEAST
+    } else if ((edge == Direction.Northeast
                 && normalizedAngle > 0 && normalizedAngle < 90)
-              || (edge == Component.DIRECTION_NORTHWEST
+              || (edge == Direction.Northwest
                   && normalizedAngle > 90 && normalizedAngle < 180)
-              || (edge == Component.DIRECTION_SOUTHWEST
+              || (edge == Direction.Southwest
                   && normalizedAngle > 180 && normalizedAngle < 270)
-              || (edge == Component.DIRECTION_SOUTHEAST && normalizedAngle > 270)) {
+              || (edge == Direction.Southeast && normalizedAngle > 270)) {
       Heading(180 + normalizedAngle);
     }
   }
@@ -722,7 +745,7 @@ public abstract class Sprite extends VisibleComponent
    * enclosing Canvas and checking for any consequences that need
    * handling.  Specifically, this (1) notifies the Canvas of a change
    * so it can detect any collisions, etc., and (2) raises the
-   * {@link #EdgeReached(int)} event if the Sprite has reached the edge of the
+   * {@link #EdgeReached} event if the Sprite has reached the edge of the
    * Canvas.
    */
   protected void registerChange() {
@@ -733,9 +756,9 @@ public abstract class Sprite extends VisibleComponent
       canvas.getView().invalidate();
       return;
     }
-    int edge = hitEdge();
-    if (edge != Component.DIRECTION_NONE) {
-      EdgeReached(edge);
+    Direction edge = hitEdgeOptions();
+    if (edge != null) {
+      EdgeReachedOptions(edge);
     }
     canvas.registerChange(this);
   }
@@ -749,11 +772,65 @@ public abstract class Sprite extends VisibleComponent
    *         edge of the canvas has been hit
    */
   protected int hitEdge() {
-    if (!canvas.ready()) {
+    Direction edge = hitEdgeOptions();
+    if (edge == null) {
       return Component.DIRECTION_NONE;
     }
+    return edge.getValue();
+  }
 
-    return hitEdge(canvas.Width(), canvas.Height());
+  protected int hitEdge(int canvasWidth, int canvasHeight) {
+    Direction edge = hitEdgeOptions(canvasWidth, canvasHeight);
+    if (edge == null) {
+      return Component.DIRECTION_NONE;
+    }
+    return edge.getValue();
+  }
+
+  protected Direction hitEdgeOptions() {
+    if (!canvas.ready()) {
+      return null;
+    }
+    return hitEdgeOptions(canvas.Width(), canvas.Height());
+  }
+
+  protected Direction hitEdgeOptions(int canvasWidth, int canvasHeight) {
+    // More than one boolean value can be true.
+    boolean west = overWestEdge();
+    boolean north = overNorthEdge();
+    boolean east = overEastEdge(canvasWidth);
+    boolean south = overSouthEdge(canvasHeight);
+
+    if (!(north || south || east || west)) {
+      return null;
+    }
+
+    MoveIntoBounds();
+
+    if (west) {
+      if (north) {
+        return Direction.Northwest;
+      }
+      if (south) {
+        return Direction.Southwest;
+      }
+      return Direction.West;
+    }
+
+    if (east) {
+      if (north) {
+        return Direction.Northeast;
+      }
+      if (south) {
+        return Direction.Southeast;
+      }
+      return Direction.East;
+    }
+
+    if (north) {
+      return Direction.North;
+    }
+    return Direction.South;
   }
 
   /**
@@ -846,56 +923,6 @@ public abstract class Sprite extends VisibleComponent
     return yTop + Height() > canvasHeight;
   }
 
-  protected int hitEdge(int canvasWidth, int canvasHeight) {
-    // Determine in which direction(s) we are out of bounds, if any.
-    // Note that more than one boolean value can be true.  For example, if
-    // the sprite is past the northwest boundary, north and west will be true.
-    boolean west = overWestEdge();
-    boolean north = overNorthEdge();
-    boolean east = overEastEdge(canvasWidth);
-    boolean south = overSouthEdge(canvasHeight);
-
-    // If no edge was hit, return.
-    if (!(north || south || east || west)) {
-      return Component.DIRECTION_NONE;
-    }
-
-    // Move the sprite back into bounds.  Note that we don't just reverse the
-    // last move, since that might have been multiple pixels, and we'd only need
-    // to undo part of it.
-    MoveIntoBounds();
-
-    // Determine the appropriate return value.
-    if (west) {
-      if (north) {
-        return Component.DIRECTION_NORTHWEST;
-      } else if (south) {
-        return Component.DIRECTION_SOUTHWEST;
-      } else {
-        return Component.DIRECTION_WEST;
-      }
-    }
-
-    if (east) {
-      if (north) {
-        return Component.DIRECTION_NORTHEAST;
-      } else if (south) {
-        return Component.DIRECTION_SOUTHEAST;
-      } else {
-        return Component.DIRECTION_EAST;
-      }
-    }
-
-    if (north) {
-      return Component.DIRECTION_NORTH;
-    }
-    if (south) {
-      return Component.DIRECTION_SOUTH;
-    }
-
-    // This should never be reached.
-    return Component.DIRECTION_NONE;
-  }
 
   /**
    * Provides the bounding box for this sprite.  Modifying the returned value

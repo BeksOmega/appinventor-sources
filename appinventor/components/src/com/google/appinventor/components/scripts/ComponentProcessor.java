@@ -562,7 +562,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     public void mergeWithOptionsVersion(Object methodObj) {
       Method optionsMethod = (Method) methodObj;
       if ((returnType == null && optionsMethod.returnType != null) ||
-          !returnType.equals(optionsMethod.returnType)) {
+          (returnType != null && !returnType.equals(optionsMethod.returnType))) {
         String correctType = returnType == null ? "void" : getReturnType();
         throw new RuntimeException("Options @SimpleFunction " + optionsMethod.name + " must have " +
             "the same return type as the original " + name + " function (" + correctType + ")");
