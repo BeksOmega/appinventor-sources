@@ -273,6 +273,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     @Override
     public Parameter clone() {
       Parameter param = new Parameter (name, type, color);
+      param.concreteType = concreteType;
+      param.helper = helper;
       return param;
     }
   }
