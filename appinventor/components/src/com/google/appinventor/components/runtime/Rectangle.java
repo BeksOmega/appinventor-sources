@@ -12,6 +12,7 @@ import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.MapFeature;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -100,8 +101,14 @@ public class Rectangle extends PolygonBase implements MapRectangle {
       description = "Returns the type of the feature. For rectangles, this returns the text "
           + "\"Rectangle\".")
   public String Type() {
-    return MapFactory.MapFeatureType.TYPE_RECTANGLE;
+    return MapFeature.Rectangle.getValue();
   }
+
+  @SimpleProperty
+  public MapFeature TypeOptions() {
+    return MapFeature.Rectangle;
+  }
+
 
   /**
    * Specifies the east-most edge of the `Rectangle`, in decimal degrees east of the prime meridian.

@@ -22,6 +22,7 @@ import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.MapFeature;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.MapFactory.MapCircle;
@@ -111,7 +112,12 @@ public class LineString extends MapFeatureBase implements MapLineString {
           + "the text \"LineString\".")
   @Override
   public String Type() {
-    return MapFactory.MapFeatureType.TYPE_LINESTRING;
+    return MapFeature.LineString.getValue();
+  }
+
+  @SimpleProperty
+  public MapFeature TypeOptions() {
+    return MapFeature.LineString;
   }
 
   @SimpleProperty(category = PropertyCategory.APPEARANCE,

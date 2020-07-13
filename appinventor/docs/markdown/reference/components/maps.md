@@ -81,8 +81,8 @@ The `Circle` component visualizes a circle of a given [`Radius`](#Circle.Radius)
 : Sets or gets the title displayed in the info window that appears when the user clicks on the
  map feature.
 
-{:id="Circle.Type" .text .ro .bo} *Type*
-: Returns the type of the feature. For Circles, this returns the text "Circle".
+{:id="Circle.Type" .com.google.appinventor.components.common.MapFeatureEnum .ro .bo} *Type*
+: Property for TypeOptions
 
 {:id="Circle.Visible" .boolean} *Visible*
 : Specifies whether the `Circle` should be visible on the screen.  Value is `true`{:.logic.block}
@@ -304,8 +304,8 @@ A `FeatureCollection` groups one or more map features together. Any events that 
 : Sets or gets the title displayed in the info window that appears when the user clicks on the
  map feature.
 
-{:id="LineString.Type" .text .ro .bo} *Type*
-: Returns the type of the map feature. For LineString, this returns the text "LineString".
+{:id="LineString.Type" .com.google.appinventor.components.common.MapFeatureEnum .ro .bo} *Type*
+: Property for TypeOptions
 
 {:id="LineString.Visible" .boolean} *Visible*
 : Specifies whether the `LineString` should be visible on the screen.  Value is `true`{:.logic.block}
@@ -677,8 +677,8 @@ The `Marker` component indicates points on a [`Map`](#Map), such as buildings or
 : Sets or gets the title displayed in the info window that appears when the user clicks on the
  map feature.
 
-{:id="Marker.Type" .text .ro .bo} *Type*
-: Return the type of the map feature. For Marker, this returns the text "Marker".
+{:id="Marker.Type" .com.google.appinventor.components.common.MapFeatureEnum .ro .bo} *Type*
+: Property for TypeOptions
 
 {:id="Marker.Visible" .boolean} *Visible*
 : Specifies whether the `Marker` should be visible on the screen.  Value is `true`{:.logic.block}
@@ -884,8 +884,8 @@ The Navigation component generates directions between two locations using a serv
 : Sets or gets the title displayed in the info window that appears when the user clicks on the
  map feature.
 
-{:id="Polygon.Type" .text .ro .bo} *Type*
-: Returns the type of the feature. For polygons, this returns the text "Polygon".
+{:id="Polygon.Type" .com.google.appinventor.components.common.MapFeatureEnum .ro .bo} *Type*
+: Property for TypeOptions
 
 {:id="Polygon.Visible" .boolean} *Visible*
 : Specifies whether the `Polygon` should be visible on the screen.  Value is `true`{:.logic.block}
@@ -994,8 +994,8 @@ The Navigation component generates directions between two locations using a serv
 : Sets or gets the title displayed in the info window that appears when the user clicks on the
  map feature.
 
-{:id="Rectangle.Type" .text .ro .bo} *Type*
-: Returns the type of the feature. For rectangles, this returns the text "Rectangle".
+{:id="Rectangle.Type" .com.google.appinventor.components.common.MapFeatureEnum .ro .bo} *Type*
+: Property for TypeOptions
 
 {:id="Rectangle.Visible" .boolean} *Visible*
 : Specifies whether the `Rectangle` should be visible on the screen.  Value is `true`{:.logic.block}
