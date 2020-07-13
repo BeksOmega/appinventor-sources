@@ -97,7 +97,7 @@ A round 'sprite' that can be placed on a [`Canvas`](#Canvas), where it can react
  anywhere in response to the Dragged event unless
  [`MoveTo`](#Ball.MoveTo) is specifically called.
 
-{:id="Ball.EdgeReached"} EdgeReached(*edge*{:.number})
+{:id="Ball.EdgeReached"} EdgeReached(*edge*{:.com.google.appinventor.components.common.DirectionEnum})
 : Event handler called when the `Ball` reaches an `edge`{:.variable.block} of the screen.
  If [`Bounce`](#Ball.Bounce) is then called with that edge, the sprite will appear to bounce off
  of the edge it reached. Edge here is represented as an integer that indicates one of eight
@@ -132,7 +132,7 @@ A round 'sprite' that can be placed on a [`Canvas`](#Canvas), where it can react
 
 {:.methods}
 
-{:id="Ball.Bounce" class="method"} <i/> Bounce(*edge*{:.number})
+{:id="Ball.Bounce" class="method"} <i/> Bounce(*edge*{:.com.google.appinventor.components.common.DirectionEnum})
 : Makes this `Ball` bounce, as if off a wall. For normal bouncing, the `edge` argument should
  be the one returned by [`EdgeReached`](#Ball.EdgeReached).
 
@@ -412,7 +412,7 @@ A 'sprite' that can be placed on a [`Canvas`](#Canvas), where it can react to to
  anywhere in response to the Dragged event unless
  [`MoveTo`](#ImageSprite.MoveTo) is specifically called.
 
-{:id="ImageSprite.EdgeReached"} EdgeReached(*edge*{:.number})
+{:id="ImageSprite.EdgeReached"} EdgeReached(*edge*{:.com.google.appinventor.components.common.DirectionEnum})
 : Event handler called when the `ImageSprite` reaches an `edge`{:.variable.block} of the screen.
  If [`Bounce`](#ImageSprite.Bounce) is then called with that edge, the sprite will appear to bounce off
  of the edge it reached. Edge here is represented as an integer that indicates one of eight
@@ -447,7 +447,7 @@ A 'sprite' that can be placed on a [`Canvas`](#Canvas), where it can react to to
 
 {:.methods}
 
-{:id="ImageSprite.Bounce" class="method"} <i/> Bounce(*edge*{:.number})
+{:id="ImageSprite.Bounce" class="method"} <i/> Bounce(*edge*{:.com.google.appinventor.components.common.DirectionEnum})
 : Makes this `ImageSprite` bounce, as if off a wall. For normal bouncing, the `edge` argument should
  be the one returned by [`EdgeReached`](#ImageSprite.EdgeReached).
 

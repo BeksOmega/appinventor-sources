@@ -55,6 +55,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.ScreenAnimation;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.collect.Lists;
 import com.google.appinventor.components.runtime.collect.Maps;
@@ -188,9 +189,9 @@ public class Form extends AppInventorCompatActivity
   private int horizontalAlignment;
   private int verticalAlignment;
 
-  // String representing the transition animation type
-  private String openAnimType;
-  private String closeAnimType;
+  // Represents the transition animation type.
+  private ScreenAnimation openAnimType;
+  private ScreenAnimation closeAnimType;
 
   // Syle information
   private int primaryColor = DEFAULT_PRIMARY_COLOR;
@@ -1611,6 +1612,14 @@ public class Form extends AppInventorCompatActivity
     description = "The animation for switching to another screen. Valid" +
     " options are default, fade, zoom, slidehorizontal, slidevertical, and none"    )
   public String OpenScreenAnimation() {
+    if (openAnimType != null) {
+      return openAnimType.getValue();
+    }
+    return null;
+  }
+
+  @SimpleProperty
+  public ScreenAnimation OpenScreenAnimationOptions() {
     return openAnimType;
   }
 
@@ -1624,13 +1633,18 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void OpenScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+    // Make sure that "animType" is a valid ScreenAnimation.
+    ScreenAnimation anim = ScreenAnimation.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
+    OpenScreenAnimationOptions(anim);
+  }
+
+  @SimpleProperty
+  public void OpenScreenAnimationOptions(ScreenAnimation animType) {
     openAnimType = animType;
   }
 
@@ -1645,6 +1659,13 @@ public class Form extends AppInventorCompatActivity
     " to the previous screen. Valid options are default, fade, zoom, slidehorizontal, " +
     "slidevertical, and none")
   public String CloseScreenAnimation() {
+    if (closeAnimType != null) {
+      return closeAnimType.getValue();
+    }
+    return null;
+  }
+
+  public ScreenAnimation CloseScreenAnimationOptions() {
     return closeAnimType;
   }
 
@@ -1658,13 +1679,17 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "default")
   @SimpleProperty
   public void CloseScreenAnimation(String animType) {
-    if ((animType != "default") &&
-      (animType != "fade") && (animType != "zoom") && (animType != "slidehorizontal") &&
-      (animType != "slidevertical") && (animType != "none")) {
+    // Make sure "animType" is a valid ScreenAnimation.
+    ScreenAnimation anim = ScreenAnimation.get(animType);
+    if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
       return;
     }
+    CloseScreenAnimationOptions(anim);
+  }
+
+  public void CloseScreenAnimationOptions(ScreenAnimation animType) {
     closeAnimType = animType;
   }
 
@@ -1673,7 +1698,7 @@ public class Form extends AppInventorCompatActivity
    * animation
    */
   public String getOpenAnimType() {
-    return openAnimType;
+    return openAnimType.getValue();
   }
 
   /**

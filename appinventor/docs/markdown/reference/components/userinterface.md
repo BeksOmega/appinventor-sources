@@ -978,9 +978,8 @@ Top-level component containing all other components in the program.
  up to 1024x1024 pixels. Larger images may cause compiling or installing the app to fail.
  The build server will generate images of standard dimensions for Android devices.
 
-{:id="Screen.OpenScreenAnimation" .text} *OpenScreenAnimation*
-: The animation for switching to another screen. Valid options are `default`, `fade`, `zoom`,
- `slidehorizontal`, `slidevertical`, and `none`.
+{:id="Screen.OpenScreenAnimation" .com.google.appinventor.components.common.ScreenAnimationEnum} *OpenScreenAnimation*
+: Property for OpenScreenAnimationOptions
 
 {:id="Screen.Platform" .text .ro .bo} *Platform*
 : Gets the name of the underlying platform running the app. Currently, this is the text
