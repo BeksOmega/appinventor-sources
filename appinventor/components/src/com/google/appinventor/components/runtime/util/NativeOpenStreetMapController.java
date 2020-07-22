@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.google.appinventor.components.common.ComponentConstants;
+import com.google.appinventor.components.common.MapType;
 import com.google.appinventor.components.common.Units;
 import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.LocationSensor;
@@ -43,7 +44,6 @@ import com.google.appinventor.components.runtime.util.MapFactory.MapMarker;
 import com.google.appinventor.components.runtime.util.MapFactory.MapPolygon;
 import com.google.appinventor.components.runtime.util.MapFactory.MapRectangle;
 import com.google.appinventor.components.runtime.util.MapFactory.MapScaleUnits;
-import com.google.appinventor.components.runtime.util.MapFactory.MapType;
 import com.google.appinventor.components.runtime.view.ZoomControlView;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.config.Configuration;
@@ -374,28 +374,36 @@ class NativeOpenStreetMapController implements MapController, MapListener {
   }
 
   @Override
-  public void setMapType(MapType type) {
+  public void setMapType(MapFactory.MapType type) {
+    MapType mapType = MapType.fromUnderlyingValue(type.ordinal());
+    if (mapType != null) {
+      setMapTypeAbstract(mapType);
+    }
+  }
+
+  @Override
+  public MapFactory.MapType getMapType() {
+    return MapFactory.MapType.values()[tileType.toUnderlyingValue()];
+  }
+
+  @Override
+  public void setMapTypeAbstract(MapType type) {
+    tileType = type;
     switch (type) {
-      case ROADS:
-        tileType = type;
+      case Road:
         view.setTileSource(TileSourceFactory.MAPNIK);
         break;
-      case AERIAL:
-        tileType = type;
+      case Aerial:
         view.setTileSource(TileSourceFactory.USGS_SAT);
         break;
-      case TERRAIN:
-        tileType = type;
+      case Terrain:
         view.setTileSource(TileSourceFactory.USGS_TOPO);
-        break;
-      case UNKNOWN:
-      default:
         break;
     }
   }
 
   @Override
-  public MapType getMapType() {
+  public MapType getMapTypeAbstract() {
     return tileType;
   }
 
