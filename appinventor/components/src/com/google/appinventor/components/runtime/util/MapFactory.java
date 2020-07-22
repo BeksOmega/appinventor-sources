@@ -8,6 +8,7 @@ package com.google.appinventor.components.runtime.util;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.appinventor.components.common.Units;
 import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.Form;
@@ -575,6 +576,16 @@ public final class MapFactory {
      * @return the units used for the scale overlay
      */
     MapScaleUnits getScaleUnits();
+
+    /**
+     * Sets the units for the scale.
+     */
+    void setScaleUnitsAbstract(Units units);
+
+    /**
+     * Returns the units for the scale.
+     */
+    Units getScaleUnitsAbstract();
   }
 
   /**

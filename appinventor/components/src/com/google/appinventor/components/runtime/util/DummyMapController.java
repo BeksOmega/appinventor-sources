@@ -6,6 +6,7 @@
 package com.google.appinventor.components.runtime.util;
 
 import android.view.View;
+import com.google.appinventor.components.common.Units;
 import com.google.appinventor.components.runtime.LocationSensor;
 import com.google.appinventor.components.runtime.util.MapFactory.HasFill;
 import com.google.appinventor.components.runtime.util.MapFactory.HasStroke;
@@ -290,6 +291,16 @@ class DummyMapController implements MapController {
 
   @Override
   public MapScaleUnits getScaleUnits() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void setScaleUnitsAbstract(Units units) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Units getScaleUnitsAbstract() {
     throw new UnsupportedOperationException();
   }
 }
