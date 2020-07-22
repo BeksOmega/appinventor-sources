@@ -18,6 +18,7 @@ import org.osmdroid.util.BoundingBox;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
@@ -28,6 +29,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.Units;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.MapFactory.MapCircle;
 import com.google.appinventor.components.runtime.util.MapFactory.MapController;
@@ -511,25 +513,34 @@ public class Map extends MapFeatureContainerBase implements MapEventListener {
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_MAP_UNIT_SYSTEM,
       defaultValue = "1")
   @SimpleProperty
-  public void ScaleUnits(int units) {
-    if (1 <= units && units < MapScaleUnits.values().length) {
-      mapController.setScaleUnits(MapScaleUnits.values()[units]);
-    } else {
+  public void ScaleUnits(@Options(Units.class) int units) {
+    // Make sure units is a valid Units.
+    Units scaleUnits = Units.fromUnderlyingValue(units);
+    if (scaleUnits == null) {
       $form().dispatchErrorOccurredEvent(this, "ScaleUnits",
           ErrorMessages.ERROR_INVALID_UNIT_SYSTEM, units);
+      return;
     }
+    ScaleUnitsAbstract(scaleUnits);
+  }
+
+  /**
+   * Sets the system of measurement used by the map.
+   */
+  public void ScaleUnitsAbstract(Units units) {
+    mapController.setScaleUnitsAbstract(units);
   }
 
   @SimpleProperty
-  public int ScaleUnits() {
-    switch (mapController.getScaleUnits()) {
-      case METRIC:
-        return 1;
-      case IMPERIAL:
-        return 2;
-      default:
-        return 0;
-    }
+  public @Options(Units.class) int ScaleUnits() {
+    return ScaleUnitsAbstract().toUnderlyingValue();
+  }
+
+  /**
+   * Returns the system of measurement used by the map.
+   */
+  public Units ScaleUnitsAbstract() {
+    return mapController.getScaleUnitsAbstract();
   }
 
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,

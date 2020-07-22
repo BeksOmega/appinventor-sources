@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.google.appinventor.components.common.ComponentConstants;
+import com.google.appinventor.components.common.Units;
 import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.LocationSensor;
 import com.google.appinventor.components.runtime.util.MapFactory.HasFill;
@@ -1315,6 +1316,31 @@ class NativeOpenStreetMapController implements MapController, MapListener {
         return MapScaleUnits.IMPERIAL;
       case metric:
         return MapScaleUnits.METRIC;
+      default:
+        throw new IllegalStateException("Somehow we have an unallowed unit system");
+    }
+  }
+
+  @Override
+  public void setScaleUnitsAbstract(Units units) {
+    switch (units) {
+      case Metric:
+        scaleBar.setUnitsOfMeasure(UnitsOfMeasure.metric);
+        break;
+      case Imperial:
+        scaleBar.setUnitsOfMeasure(UnitsOfMeasure.imperial);
+        break;
+    }
+    view.invalidate();
+  }
+
+  @Override
+  public Units getScaleUnitsAbstract() {
+    switch (scaleBar.getUnitsOfMeasure()) {
+      case imperial:
+        return Units.Imperial;
+      case metric:
+        return Units.Metric;
       default:
         throw new IllegalStateException("Somehow we have an unallowed unit system");
     }
