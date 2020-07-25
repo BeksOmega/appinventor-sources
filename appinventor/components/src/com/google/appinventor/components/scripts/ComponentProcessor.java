@@ -721,11 +721,18 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
   /**
    * An enum specifying the available types of helper blocks aka types of helper UI.
+   * Currently the only type of helper UI is an OPTION_LIST which defines a dropdown UI in the blocks
+   * editor. This is associated with the OptionList data type, ie OptionList data always has an
+   * OPTOIN_LIST style UI in the blocks editor (as of now).
    */
   protected enum HelperType { OPTION_LIST }
 
   /**
    * A key that allows you to access info about a helper block.
+   * 
+   * Currently HelperKeys are only used to define OptionList style helper blocks. Aka dropdown
+   * blocks for the current UI implementation in the blocks editor. In the future helper keys could
+   * be used to define other kinds of helper blocks like range blocks, default color blocks, etc.
    */
   protected final class HelperKey {
     private HelperType helperType;
@@ -761,7 +768,26 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
   /**
    * Represents a list of Options associated with some (enum) class. The data in this OptionList
-   * is used to create OptionList helper blocks. 
+   * is used to create OptionList helper blocks.
+   * 
+   * Here JSON-ified example of such data, in this case we are looking at the Direction enum with
+   * a default value of East.
+   * {
+   *   "className": "com.google.appinventor.components.common.Direction",
+   *   "key": "Direction",
+   *   "tag": "Direction",
+   *   "defaultOpt": "East",
+   *   "options": [
+   *     { "name": "North", "value": "1", "description": "Option for North", "deprecated": "false" },
+   *     { "name": "Northeast", "value": "2", "description": "Option for Northeast", "deprecated": "false" },
+   *     { "name": "East", "value": "3", "description": "Option for East", "deprecated": "false" },
+   *     { "name": "Southeast", "value": "4", "description": "Option for Southeast", "deprecated": "false" },
+   *     { "name": "South", "value": "-1", "description": "Option for South", "deprecated": "false" },
+   *     { "name": "Southwest", "value": "-2", "description": "Option for Southwest", "deprecated": "false" },
+   *     { "name": "West", "value": "-3", "description": "Option for West", "deprecated": "false" },
+   *     { "name": "Northwest", "value": "-4", "description": "Option for Northwest", "deprecated": "false" }
+       ]
+   * }
    */
   protected final class OptionList {
     /**
@@ -778,7 +804,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * The tag name this OptionList is associated with. This goes in front of the dropdown in the
-     * blocks editor. It is usually the simplified class name.
+     * blocks editor. It is always the simplified class name.
      */
     private String tagName;
 
@@ -1685,7 +1711,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * Returns the associated helper key if the element has an OptionList assciated with it.
+   * Returns the associated helper key if the element has an OptionList associated with it.
    * Null otherwise.
    *
    * @param elem the Element which represents a function (for return types) or a parameter.
@@ -1752,6 +1778,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         return null;
       }
     }
+    // This helper key is storing info about an OptionList.
     return new HelperKey(HelperType.OPTION_LIST, name);
   }
 
@@ -1789,10 +1816,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return false;
     }
   
-    // Create a map of enum const names -> values.
+    // Create a map of enum const names -> values. This is used to filter the below elements
+    // returned by getEnclosedElements().
     Map<String, String> namesToValues = Maps.newTreeMap();
     Object[] constants = clazz.getEnumConstants();
-    for (Object constant : clazz.getEnumConstants()) {
+    if (constants == null) {
+      throw new IllegalArgumentException("Class: " + className + " should be an enum and declare " +
+          "enum constants.");
+    }
+    for (Object constant : constants) {
         try {
           E enumConst = (E) constant;
           namesToValues.put(
@@ -1802,6 +1834,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     // Add the options to the OptionList.
+    // Note that getEnclosedElements() returns not only enum constants but also method and field
+    // names, so we need to filter those out using namesToValues.
     for (Element field : optionElem.getEnclosedElements()) {
       String fieldName = field.getSimpleName().toString();
       if (namesToValues.containsKey(fieldName)) {
@@ -2328,6 +2362,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // Handle enums
     if (isOptionList(type)) {
+      // In YAIL code generation we need any easy way to test if a type symbol, represents an
+      // abstract option type. We have chosen to do this by having each type end with "Enum". For
+      // example, if you have a parameter that accepts a Direction the type symbol passed to Yail
+      // would be 'com.google.appinventor.components.common.DirectionEnum.
       return type.toString() + "Enum";
     }
 
