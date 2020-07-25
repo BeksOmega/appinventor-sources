@@ -201,12 +201,22 @@ public class Marker extends MapFeatureBaseWithFill implements MapMarker {
   }
 
   @SimpleProperty
-  public String TypeConcrete() {
+  public String PropNoAnnotation() {
+    return TypeAbstract().getValue();
+  }
+
+  @SimpleProperty
+  public @Options(MapFeature.class) String PropWithAnnotation() {
     return TypeAbstract().getValue();
   }
 
   @SimpleFunction
-  public @Options(MapFeature.class) String TypeAbstractMethod() {
+  public @Options(MapFeature.class) String MethodWithAnnotation() {
+    return TypeAbstract().getValue();
+  }
+
+  @SimpleFunction
+  public @Options(MapFeature.class) String MethodWithAnnotationAndParams(int param) {
     return TypeAbstract().getValue();
   }
 

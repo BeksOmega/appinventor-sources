@@ -198,7 +198,7 @@
 ;;; (get-property 'Label1 'Text)
 (define (get-property component prop-name)
   (let ((component (coerce-to-component-and-verify component)))
-    (sanitize-return-value (invoke component prop-name) component prop-name)))
+    (sanitize-return-value (invoke component prop-name) component prop-name #!null)))
 
 (define (coerce-to-component-and-verify possible-component)
   (let ((component (coerce-to-component possible-component)))
@@ -217,7 +217,7 @@
                  component-type
                  (*:getSimpleName (*:getClass possible-component)))
          "Problem with application")
-        (sanitize-return-value (invoke component prop-name) component prop-name))))
+        (sanitize-return-value (invoke component prop-name) component prop-name #!null))))
 
 (define (set-and-coerce-property-and-check! possible-component comp-type prop-sym property-value property-type)
   (let ((component (coerce-to-component-of-type possible-component comp-type)))
@@ -1057,7 +1057,7 @@
                            (*:dispatchPermissionDeniedEvent (SimpleForm:getActiveForm) component method-name exception)))
                (generate-runtime-type-error method-name arglist))))
       ;; TODO(markf): this should probably be generalized but for now this is OK, I think
-      (sanitize-return-value result component method-name))))
+      (sanitize-return-value result component method-name ((kawa-list->yail-list coerced-args):toArray)))))
 
 ;;; CALL-COMPONENT-TYPE-METHOD
 ;;; Call the component method for the given component object with the given list of args,
@@ -1085,7 +1085,7 @@
                             ,@coerced-args))
                    (generate-runtime-type-error method-name arglist))))
           ;; TODO(markf): this should probably be generalized but for now this is OK, I think
-          (sanitize-return-value result component-value method-name)))))
+          (sanitize-return-value result component-value method-name ((kawa-list->yail-list coerced-args):toArray))))))
 
 
 ;;; CALL-USER-PROCEDURE
@@ -1184,11 +1184,11 @@
    (#t (sanitize-atomic data))))
 
 
-(define (sanitize-return-value value component func-name)
+(define (sanitize-return-value value component func-name args)
   (define-alias OptionHelper com.google.appinventor.components.runtime.OptionHelper)
   (if (enum? value)
        value
-       (let ((value (OptionHelper:optionListFromValue component func-name value)))
+       (let ((value (OptionHelper:optionListFromValue component func-name value args)))
          (if (enum? value)
              value
              (sanitize-component-data value)))))
@@ -1431,11 +1431,11 @@
    ((number? arg) arg)
    ((string? arg)
     (or (padded-string->number arg) *non-coercible-value*))
-   ((enum? arg)
-    (let ((val (arg:getValue)))
-      (if (number? val)
-        val
-        *non-coercible-value*)))
+   ;;((enum? arg)
+    ;;(let ((val (arg:getValue)))
+      ;;(if (number? val)
+        ;;val
+        ;;*non-coercible-value*)))
    (else *non-coercible-value*)))
 
 (define (coerce-to-key arg)
@@ -1692,8 +1692,8 @@
    ;; ((and (string? x1) (string? x2))
    ;;  (equal? x1 x2))
 
-   ((and (enum? x1) (not (enum? x2))) (equal? (x1:getValue) x2))
-   ((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:getValue)))
+   ;;((and (enum? x1) (not (enum? x2))) (equal? (x1:getValue) x2))
+   ;;((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:getValue)))
 
    ;; If the x1 and x2 are not equal?, try comparing coverting x1 and x2 to numbers
    ;; and comparing them numerically
