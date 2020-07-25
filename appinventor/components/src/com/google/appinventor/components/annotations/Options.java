@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  * public void FavoriteAnimal (Animal anim) { }
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.TYPE_USE})
+@Target({ElementType.PARAMETER, ElementType.TYPE_USE, ElementType.METHOD})
 public @interface Options {
     public Class<? extends OptionList> value();
 }

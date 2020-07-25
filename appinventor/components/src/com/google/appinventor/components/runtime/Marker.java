@@ -200,6 +200,16 @@ public class Marker extends MapFeatureBaseWithFill implements MapMarker {
     return TypeAbstract().getValue();
   }
 
+  @SimpleProperty
+  public String TypeConcrete() {
+    return TypeAbstract().getValue();
+  }
+
+  @SimpleFunction
+  public @Options(MapFeature.class) String TypeAbstractMethod() {
+    return TypeAbstract().getValue();
+  }
+
   /**
    * @return the abstract MapFeature type of this feature. In this case MapFeature.Marker.
    */

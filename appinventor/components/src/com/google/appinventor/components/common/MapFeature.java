@@ -36,7 +36,7 @@ public enum MapFeature implements OptionList {
     }
   }
 
-  public static MapFeature get(int feat) {
+  public static MapFeature get(Object feat) {
     return lookup.get(feat);
   }
 }
