@@ -77,6 +77,8 @@ import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1813,6 +1815,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       throw new IllegalArgumentException("Class: " + className + " must have a getValue() method.");
     }
     if (getValueMethod == null) {
+      return false;
+    }
+
+    // Get the get method. This is not used, we just need to require it.
+    java.lang.reflect.Method getMethod = null;
+    try {
+      ParameterizedType optionListType = (ParameterizedType) clazz.getGenericInterfaces()[0];
+      Type typeT = optionListType.getActualTypeArguments()[0];
+      Class<?> typeClass = (Class<?>) typeT;
+      getMethod = clazz.getDeclaredMethod("get", typeClass);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("Class: " + className + " must have a static get method.");
+    }
+    if (getMethod == null) {
       return false;
     }
   

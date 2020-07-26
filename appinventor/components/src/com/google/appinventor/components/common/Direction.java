@@ -11,10 +11,9 @@ import java.util.Map;
 /**
  * Defines a Direction type used by the Sprite component (and subclasses).
  */
-public enum Direction implements OptionList {
+public enum Direction implements OptionList<Integer> {
   North(1),
   Northeast(2),
-  @Default
   East(3),
   Southeast(4),
   South(-1),
@@ -40,7 +39,7 @@ public enum Direction implements OptionList {
     }
   }
 
-  public static Direction get(int dir) {
+  public static Direction get(Integer dir) {
     return lookup.get(dir);
   }
 }
