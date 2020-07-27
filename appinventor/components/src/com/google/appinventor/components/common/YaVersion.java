@@ -1024,7 +1024,9 @@ public class YaVersion {
   // - The ShowShadow property was removed
   // For MARKER_COMPONENT_VERSION 3:
   // - Added fill and stroke opacity properties
-  public static final int MARKER_COMPONENT_VERSION = 3;
+  // For MARKER_COMPONENT_VERSION 4:
+  // - Add AlignHorizontal and AlignVertical dropdown blocks.
+  public static final int MARKER_COMPONENT_VERSION = 4;
 
   // For NAVIGATION_COMPONENT_VERSION 1:
   // - Initial Navigation implementation
