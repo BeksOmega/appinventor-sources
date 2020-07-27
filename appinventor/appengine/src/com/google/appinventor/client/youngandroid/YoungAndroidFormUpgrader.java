@@ -1723,6 +1723,10 @@ public final class YoungAndroidFormUpgrader {
       // The FillOpacity and StrokeOpacity properties were added
       srcCompVersion = 3;
     }
+    if (srcCompVersion < 4) {
+      // Add AlignHorizontal and AlignVertical dropdown blocks.
+      srcCompVersion = 4;
+    }
     return srcCompVersion;
   }
 

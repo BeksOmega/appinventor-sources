@@ -2069,7 +2069,14 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI2:
     // - The FillOpacity and StrokeOpacity properties were added
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // For MARKER_COMPONENT_VERSION 4:
+    // - Add AlignHorizontal and AlignVertical dropdown blocks.
+    4: [Blockly.Versioning.makeSetterUseDropdown(
+           'Marker', 'AnchorHorizontal', 'HorizontalAlignment'),
+        Blockly.Versioning.makeSetterUseDropdown(
+           'Marker', 'AnchorVertical', 'VerticalAlignment')]
   }, // End Marker upgraders
 
   "Polygon": {
