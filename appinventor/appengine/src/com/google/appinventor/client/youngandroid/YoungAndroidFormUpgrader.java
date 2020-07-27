@@ -275,6 +275,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("HorizontalArrangement")) {
         srcCompVersion = upgradeHorizontalArrangementProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("HorizontalScrollArrangement")) {
+        srcCompVersion = upgradeHorizontalScrollArrangementProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("Image")) {
         srcCompVersion = upgradeImageProperties(componentProperties, srcCompVersion);
 
@@ -331,6 +334,9 @@ public final class YoungAndroidFormUpgrader {
 
       } else if (componentType.equals("VerticalArrangement")) {
         srcCompVersion = upgradeVerticalArrangementProperties(componentProperties, srcCompVersion);
+
+      } else if (componentType.equals("VerticalScrollArrangement")) {
+        srcCompVersion = upgradeVerticalScrollArrangementProperties(componentProperties, srcCompVersion);
 
       } else if (componentType.equals("VideoPlayer")) {
         srcCompVersion = upgradeVideoPlayerProperties(componentProperties, srcCompVersion);
@@ -1080,6 +1086,21 @@ public final class YoungAndroidFormUpgrader {
       // - Added background color & image
       srcCompVersion = 3;
     }
+    if (srcCompVersion < 4) {
+      // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+      srcCompVersion = 4;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeHorizontalScrollArrangementProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+      srcCompVersion = 2;
+    }
     return srcCompVersion;
   }
 
@@ -1444,6 +1465,21 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 3) {
       // - Added background color & image
       srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+      // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+      srcCompVersion = 4;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeVerticalScrollArrangementProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+      srcCompVersion = 2;
     }
     return srcCompVersion;
   }
