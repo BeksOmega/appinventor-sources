@@ -816,6 +816,12 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String defaultOpt;
 
     /**
+     * The underlying type passed to this OptionList. Eg in the case of OptionList<Integer> this
+     * would be a TypeMirror representing the type Integer.
+     */
+    private TypeMirror underlyingType;
+
+    /**
      * Creates an OptionList (which is a definition of a option list helper-block) that can be
      * populated with options.
      * 
@@ -850,7 +856,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Sets the default option of this OptionList.
      * @param defaultOpt the Option.name of the default option to set.
      */
-    public void setDefault(String defaultOpt) {
+    protected void setDefault(String defaultOpt) {
       this.defaultOpt = defaultOpt;
     }
 
@@ -860,6 +866,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      */
     protected String getDefault() {
       return defaultOpt;
+    }
+
+    /**
+     * Sets the underlying type of this OptionList.
+     * @param type the underlying type to assign to this OptionList.
+     */
+    protected void setUnderlyingType(TypeMirror type) {
+      underlyingType = type;
+    }
+
+    /**
+     * Returns the underlying type of this OptionList.
+     * @return the underlying type of this OptionList.
+     */
+    protected TypeMirror getUnderlyingType() {
+      return underlyingType;
     }
 
     /**
@@ -1873,6 +1895,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
       }
     }
+
+    DeclaredType optionListInterface = (DeclaredType)((TypeElement)optionElem)
+        .getInterfaces().get(0);
+    optionList.setUnderlyingType(optionListInterface.getTypeArguments().get(0));
 
     if (!optionList.isEmpty()) {
       optionLists.put(optionElem.getSimpleName().toString(), optionList);
