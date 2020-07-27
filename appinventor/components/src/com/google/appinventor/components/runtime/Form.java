@@ -57,6 +57,7 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.HorizontalAlignment;
 import com.google.appinventor.components.common.VerticalAlignment;
+import com.google.appinventor.components.common.Permission;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.ScreenAnimation;
 import com.google.appinventor.components.common.ScreenOrientation;
@@ -1054,7 +1055,11 @@ public class Form extends AppInventorCompatActivity
    * @param permissionName The name of the permission that has been denied by the user.
    */
   @SimpleEvent
-  public void PermissionDenied(Component component, String functionName, String permissionName) {
+  public void PermissionDenied(
+      Component component,
+      String functionName,
+      @Options(Permission.class) String permissionName
+  ) {
     if (permissionName.startsWith("android.permission.")) {
       // Forward compatibility with iOS so that we don't have to pass around Android-specific names
       permissionName = permissionName.replace("android.permission.", "");
@@ -1073,7 +1078,7 @@ public class Form extends AppInventorCompatActivity
   @SimpleEvent(description = "Event to handle when the app user has granted a needed permission. "
       + "This event is only run when permission is granted in response to the AskForPermission "
       + "method.")
-  public void PermissionGranted(String permissionName) {
+  public void PermissionGranted(@Options(Permission.class) String permissionName) {
     if (permissionName.startsWith("android.permission.")) {
       // Forward compatibility with iOS so that we don't have to pass around Android-specific names
       permissionName = permissionName.replace("android.permission.", "");
@@ -1096,7 +1101,7 @@ public class Form extends AppInventorCompatActivity
    * @param permissionName The name of the permission to request from the user.
    */
   @SimpleFunction(description = "Ask the user to grant access to a dangerous permission.")
-  public void AskForPermission(String permissionName) {
+  public void AskForPermission(@Options(Permission.class) String permissionName) {
     if (!permissionName.contains(".")) {
       permissionName = "android.permission." + permissionName;
     }
@@ -1110,6 +1115,15 @@ public class Form extends AppInventorCompatActivity
         }
       }
     });
+  }
+
+  /**
+   * Asks the user to grant access toa sensitive permission.
+   */
+  public void AskForPermissionAbstract(Permission permission) {
+    // Usually when we are upgrading components to use dropdown blocks we make the Abstract function
+    // the "true" function. But in this case I think it makes more sense to use the concrete one.
+    AskForPermission(permission.getValue());
   }
 
   /**
