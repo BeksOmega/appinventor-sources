@@ -1723,7 +1723,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
     // Check if the elem type is an OptionList
     if (isOptionList(type)) {
-      return optionListToHelperKey(((DeclaredType)type).asElement());
+      throw new RuntimeException("Using OptionLists as parameter types is not yet supported. Please " +
+          "use a concrete value (such as int, or String) annotated with an @Options parameter.");
+      //return optionListToHelperKey(((DeclaredType)type).asElement());
     }
 
     // Check if the elem has an @Options annotation.
