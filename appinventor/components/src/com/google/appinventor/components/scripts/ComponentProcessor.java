@@ -1808,28 +1808,35 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     // Get the getValue method.
-    java.lang.reflect.Method getValueMethod = null;
+    java.lang.reflect.Method toValueMethod = null;
     try {
-      getValueMethod = clazz.getDeclaredMethod("getValue", new Class[] {});
+      toValueMethod = clazz.getDeclaredMethod("toUnderlyingValue", new Class[] {});
     } catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException("Class: " + className + " must have a getValue() method.");
+      throw new IllegalArgumentException("Class: " + className + " must have a toUnderlyingValue() " +
+          "method.");
     }
-    if (getValueMethod == null) {
+    if (toValueMethod == null) {
       return false;
     }
 
     // Get the get method. This is not used, we just need to require it.
-    java.lang.reflect.Method getMethod = null;
+    java.lang.reflect.Method fromValueMethod = null;
+    Type genericType = null;
     try {
       ParameterizedType optionListType = (ParameterizedType) clazz.getGenericInterfaces()[0];
-      Type typeT = optionListType.getActualTypeArguments()[0];
-      Class<?> typeClass = (Class<?>) typeT;
-      getMethod = clazz.getDeclaredMethod("get", typeClass);
+      genericType = optionListType.getActualTypeArguments()[0];
+      Class<?> typeClass = (Class<?>) genericType;
+      fromValueMethod = clazz.getDeclaredMethod("fromUnderlyingValue", typeClass);
     } catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException("Class: " + className + " must have a static get method.");
+      throw new IllegalArgumentException("Class: " + className + " must have a static " +
+          "fromUnderlyingValue(" +  genericType.getTypeName() + ") method.");
     }
-    if (getMethod == null) {
+    if (fromValueMethod == null) {
       return false;
+    }
+    if (!java.lang.reflect.Modifier.isStatic(fromValueMethod.getModifiers())) {
+      throw new IllegalArgumentException("Class: " + className + " must have a static " +
+          "fromUnderlyingValue(" +  genericType.getTypeName() + ") method.");
     }
   
     // Create a map of enum const names -> values. This is used to filter the below elements
@@ -1845,7 +1852,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           E enumConst = (E) constant;
           namesToValues.put(
             enumConst.name(),
-            getValueMethod.invoke(enumConst, new Object [] {}).toString());
+            toValueMethod.invoke(enumConst, new Object [] {}).toString());
         } catch (Exception e) {}
     }
 

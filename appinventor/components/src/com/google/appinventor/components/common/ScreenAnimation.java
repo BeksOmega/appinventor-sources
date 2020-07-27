@@ -26,7 +26,7 @@ public enum ScreenAnimation implements OptionList<String> {
     this.value = anim;
   }
 
-  public String getValue() {
+  public String toUnderlyingValue() {
     return value;
   }
 
@@ -34,11 +34,11 @@ public enum ScreenAnimation implements OptionList<String> {
 
   static {
     for(ScreenAnimation anim : ScreenAnimation.values()) {
-      lookup.put(anim.getValue(), anim);
+      lookup.put(anim.toUnderlyingValue(), anim);
     }
   }
 
-  public static ScreenAnimation get(String anim) {
+  public static ScreenAnimation fromUnderlyingValue(String anim) {
     return lookup.get(anim);
   }
 }

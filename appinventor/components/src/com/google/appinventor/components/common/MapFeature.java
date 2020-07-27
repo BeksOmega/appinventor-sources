@@ -24,7 +24,7 @@ public enum MapFeature implements OptionList<String> {
     this.value = feat;
   }
 
-  public String getValue() {
+  public String toUnderlyingValue() {
     return value;
   }
 
@@ -32,11 +32,11 @@ public enum MapFeature implements OptionList<String> {
 
   static {
     for(MapFeature feat : MapFeature.values()) {
-      lookup.put(feat.getValue(), feat);
+      lookup.put(feat.toUnderlyingValue(), feat);
     }
   }
 
-  public static MapFeature get(String feat) {
+  public static MapFeature fromUnderlyingValue(String feat) {
     return lookup.get(feat);
   }
 }

@@ -113,7 +113,7 @@ public class LineString extends MapFeatureBase implements MapLineString {
           + "MapFeature.LineString (\"LineString\").")
   @Override
   public @Options(MapFeature.class) String Type() {
-    return TypeAbstract().getValue();
+    return TypeAbstract().toUnderlyingValue();
   }
 
   /**

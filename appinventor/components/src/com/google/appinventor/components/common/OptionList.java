@@ -11,7 +11,7 @@ package com.google.appinventor.components.common;
  */
 public interface OptionList<T> {
     /**
-     * Returns the underlying primitive value of the option.
+     * Returns the underlying value of the option.
      */
-    public T getValue();
+    public T toUnderlyingValue();
 }

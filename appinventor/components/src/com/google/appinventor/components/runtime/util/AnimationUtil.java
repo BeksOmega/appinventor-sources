@@ -79,7 +79,7 @@ public final class AnimationUtil {
    * @param animType - the animation type
    */
   public static void ApplyOpenScreenAnimation(Activity activity, String animType) {
-    ScreenAnimation anim = ScreenAnimation.get(animType);
+    ScreenAnimation anim = ScreenAnimation.fromUnderlyingValue(animType);
     AnimationUtil.ApplyOpenScreenAnimation(activity, anim);
   }
 
@@ -136,7 +136,7 @@ public final class AnimationUtil {
    * @param animType - the animation type
    */
   public static void ApplyCloseScreenAnimation(Activity activity, String animType) {
-    ScreenAnimation anim = ScreenAnimation.get(animType);
+    ScreenAnimation anim = ScreenAnimation.fromUnderlyingValue(animType);
     AnimationUtil.ApplyCloseScreenAnimation(activity, animType);
   }
 

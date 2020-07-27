@@ -122,7 +122,7 @@ public class Polygon extends PolygonBase implements MapPolygon {
       description = "Returns the type of the feature. For polygons, this returns "
           + "MapFeature.Polygon (\"Polygon\").")
   public @Options(MapFeature.class) String Type() {
-    return TypeAbstract().getValue();
+    return TypeAbstract().toUnderlyingValue();
   }
 
   /**

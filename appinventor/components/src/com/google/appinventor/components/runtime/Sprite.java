@@ -491,7 +491,7 @@ public abstract class Sprite extends VisibleComponent
           "south (-1), southwest (-2), west (-3), and northwest (-4).")
   public void EdgeReached(@Options(Direction.class) int edge) {
     // Make sure that "edge" is a valid Direction.
-    Direction dir = Direction.get(edge);
+    Direction dir = Direction.fromUnderlyingValue(edge);
     if (dir == null) {
       return;
     }
@@ -503,7 +503,7 @@ public abstract class Sprite extends VisibleComponent
    */
   public void EdgeReachedAbstract(Direction edge) {
     // We have to post the edge as an int for backwards compatibility.
-    postEvent(this, "EdgeReached", edge.getValue());
+    postEvent(this, "EdgeReached", edge.toUnderlyingValue());
   }
 
   /**
@@ -612,7 +612,7 @@ public abstract class Sprite extends VisibleComponent
         "For normal bouncing, the edge argument should be the one returned by EdgeReached.")
   public void Bounce (@Options(Direction.class) int edge) {
     // Make sure that "edge" is a valid Direction.
-    Direction dir = Direction.get(edge);
+    Direction dir = Direction.fromUnderlyingValue(edge);
     if (dir == null) {
       return;
     }
@@ -776,7 +776,7 @@ public abstract class Sprite extends VisibleComponent
     if (edge == null) {
       return DIRECTION_NONE;
     }
-    return edge.getValue();
+    return edge.toUnderlyingValue();
   }
 
   /**
@@ -791,7 +791,7 @@ public abstract class Sprite extends VisibleComponent
     if (edge == null) {
       return DIRECTION_NONE;
     }
-    return edge.getValue();
+    return edge.toUnderlyingValue();
   }
 
   /**

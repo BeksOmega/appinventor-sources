@@ -27,7 +27,7 @@ public enum Direction implements OptionList<Integer> {
     this.value = dir;
   }
 
-  public Integer getValue() {
+  public Integer toUnderlyingValue() {
     return value;
   }
 
@@ -35,11 +35,11 @@ public enum Direction implements OptionList<Integer> {
 
   static {
     for(Direction dir : Direction.values()) {
-      lookup.put(dir.getValue(), dir);
+      lookup.put(dir.toUnderlyingValue(), dir);
     }
   }
 
-  public static Direction get(Integer dir) {
+  public static Direction fromUnderlyingValue(Integer dir) {
     return lookup.get(dir);
   }
 }

@@ -1614,7 +1614,7 @@ public class Form extends AppInventorCompatActivity
     " options are default, fade, zoom, slidehorizontal, slidevertical, and none"    )
   public String OpenScreenAnimation() {
     if (openAnimType != null) {
-      return openAnimType.getValue();
+      return openAnimType.toUnderlyingValue();
     }
     return null;
   }
@@ -1636,7 +1636,7 @@ public class Form extends AppInventorCompatActivity
   @SimpleProperty
   public void OpenScreenAnimation(@Options(ScreenAnimation.class) String animType) {
     // Make sure that "animType" is a valid ScreenAnimation.
-    ScreenAnimation anim = ScreenAnimation.get(animType);
+    ScreenAnimation anim = ScreenAnimation.fromUnderlyingValue(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
@@ -1666,7 +1666,7 @@ public class Form extends AppInventorCompatActivity
     "slidevertical, and none")
   public String CloseScreenAnimation() {
     if (closeAnimType != null) {
-      return closeAnimType.getValue();
+      return closeAnimType.toUnderlyingValue();
     }
     return null;
   }
@@ -1689,7 +1689,7 @@ public class Form extends AppInventorCompatActivity
   @SimpleProperty
   public void CloseScreenAnimation(@Options(ScreenAnimation.class) String animType) {
     // Make sure that "animType" is a valid ScreenAnimation.
-    ScreenAnimation anim = ScreenAnimation.get(animType);
+    ScreenAnimation anim = ScreenAnimation.fromUnderlyingValue(animType);
     if (anim == null) {
       this.dispatchErrorOccurredEvent(this, "Screen",
         ErrorMessages.ERROR_SCREEN_INVALID_ANIMATION, animType);
@@ -1713,7 +1713,7 @@ public class Form extends AppInventorCompatActivity
    * animation
    */
   public String getOpenAnimType() {
-    return openAnimType.getValue();
+    return openAnimType.toUnderlyingValue();
   }
 
   /**
