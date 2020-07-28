@@ -884,6 +884,7 @@ public class YaVersion {
   // - Added the Platform and PlatformVersion read-only blocks
   // For FORM_COMPONENT_VERSION 28:
   // - Adds dropdown blocks for ScreenAnimation.
+  // - Adds dropdown block for ScreenOrientation.
   public static final int FORM_COMPONENT_VERSION = 28;
 
   // For FUSIONTABLESCONTROL_COMPONENT_VERSION 2:

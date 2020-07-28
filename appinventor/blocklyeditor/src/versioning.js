@@ -2477,10 +2477,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For FORM_COMPONENT_VERSION 28:
     // - Adds dropdown blocks for ScreenAnimation.
+    // - Adds dropdown block for ScreenOrientation.
     28: [Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'OpenScreenAnimation', 'ScreenAnimation'),
          Blockly.Versioning.makeSetterUseDropdown(
-            'Form', 'CloseScreenAnimation', 'ScreenAnimation')]
+            'Form', 'CloseScreenAnimation', 'ScreenAnimation'),
+         Blockly.Versioning.makeSetterUseDropdown(
+            'Form', 'ScreenOrientation', 'ScreenOrientation')]
 
   }, // End Screen
 
