@@ -1040,6 +1040,7 @@ public final class YoungAndroidFormUpgrader {
 
     if (srcCompVersion < 28) {
       // ScreenAnimation dropdown blocks were added.
+      // Adds Permission dropdown block.
       srcCompVersion = 28;
     }
 

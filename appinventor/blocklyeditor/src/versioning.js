@@ -741,7 +741,44 @@ Blockly.Versioning.v17_translateComponentSetGetProperty = function(blockElem) {
   // old blocks had a 'yailtype' attribute in mutator, lets get rid of
   if (mutationElement.getAttribute('yailtype')!=null)
     mutationElement.removeAttribute('yailtype');
-};
+}
+
+/**
+ * Upgrades a specific method arguement to use a permissions dropodown block
+ * rather than a text block.
+ * @param {string} componentType the name of the component to fix.
+ * @param {string} methodName The name of the method to fix.
+ * @param {number} argNum The number of the arguement to fix.
+ */
+Blockly.Versioning.upgradePermissionsToDropdown =
+  function(componentType, methodName, argNum) {
+    return function (blocksRep, workspace) {
+      var valueMap = Blockly.Versioning
+          .getOptionListValueMap(workspace, 'Permission');
+      var entries = Object.entries(valueMap);
+      for (var i = 0, pair; pair = entries[i]; i++) {
+        var key = pair[0];
+        var value = pair[1];
+        if (valueMap.hasOwnProperty(key)) {
+          valueMap['android.permission.' + key] = value;
+        }
+      }
+      var dom = Blockly.Versioning.ensureDom(blocksRep);
+      var methodNodes = Blockly.Versioning
+          .findAllMethodCalls(dom, componentType, methodName);
+      for (var i = 0, method; method = methodNodes[i]; i++) {
+        for (var j = 0, child; child = method.children[j]; j++) {
+          if (child.tagName == 'value' && 
+              child.getAttribute('name') == 'ARG' + argNum) {
+            Blockly.Versioning.tryReplaceTargetBlock(
+                child, valueMap, 'Permission');
+            break;
+          }
+        }
+      }
+      return blocksRep;
+    }
+  };
 
 /******************************************************************************
  General helper methods for upgrades go in this section
@@ -2477,10 +2514,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For FORM_COMPONENT_VERSION 28:
     // - Adds dropdown blocks for ScreenAnimation.
+    // - Adds Permission dropdown block.
     28: [Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'OpenScreenAnimation', 'ScreenAnimation'),
          Blockly.Versioning.makeSetterUseDropdown(
-            'Form', 'CloseScreenAnimation', 'ScreenAnimation')]
+            'Form', 'CloseScreenAnimation', 'ScreenAnimation'),
+         Blockly.Versioning.upgradePermissionsToDropdown(
+            'Form', 'AskForPermission', 0)]
 
   }, // End Screen
 
