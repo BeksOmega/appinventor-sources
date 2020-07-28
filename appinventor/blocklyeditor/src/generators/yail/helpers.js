@@ -8,8 +8,18 @@ Blockly.Yail['helpers_dropdown'] = function() {
       .getOptionList(this.key_);
   var enumConstantName = this.getFieldValue('OPTION');
 
+  // TODO: This will be used after we add abstraction.
   // See https://www.gnu.org/software/kawa/Enumerations.html
-  var code = optionList.className + ":" + enumConstantName;
+  //var code = optionList.className + ":" + enumConstantName;
+
+  var option = optionList.options.find(function(opt) {
+    return opt.name == enumConstantName;
+  });
+
+  var code = option.value;
+  if (optionList.underlyingType == "java.lang.String") {
+    code = Blockly.Yail.quote_(code);
+  } // Otherwise assume it doesn't need to be quoted.
 
   return [code, Blockly.Yail.ORDER_ATOMIC]
 }
