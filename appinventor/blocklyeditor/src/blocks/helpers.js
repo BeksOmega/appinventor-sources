@@ -49,7 +49,7 @@ Blockly.Blocks['helpers_dropdown'] = {
     var dropdown = new Blockly.FieldInvalidDropdown(
         this.getValidOptions(), this.getInvalidOptions());
 
-    this.setOutput(true, type);
+    this.setOutput(true, [type, 'Key']);
     this.appendDummyInput()
         .appendField(optionList.tag)
         .appendField(dropdown, 'OPTION');
