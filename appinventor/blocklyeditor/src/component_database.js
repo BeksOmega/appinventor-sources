@@ -126,6 +126,7 @@ Option = function() {};
  * @property {!string} className
  * @property {!string} tag
  * @property {!string} defaultOpt
+ * @property {!string} underlyingType
  * @property {!Array.<!Option>} options
  */
 OptionList = function() {};
@@ -412,7 +413,6 @@ Blockly.ComponentDatabase.prototype.populateTypes = function(componentInfos) {
       });
     }
   }
-  console.log(this.optionLists_);
 };
 
 /**
@@ -469,6 +469,7 @@ Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
       className: data.className,
       tag: data.tag,
       defaultOpt: data.defaultOpt,
+      underlyingType: data.underlyingType,
       options: options
     };
   }

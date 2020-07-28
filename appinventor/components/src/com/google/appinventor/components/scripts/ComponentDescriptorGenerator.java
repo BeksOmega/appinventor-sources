@@ -418,6 +418,9 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("      \"defaultOpt\": \"");
     sb.append(optList.getDefault());
     sb.append("\",\n");
+    sb.append("      \"underlyingType\": \"");
+    sb.append(optList.getUnderlyingType().toString());
+    sb.append("\",\n");
     sb.append("      \"options\": [\n");
     String separator = "";
     for (Option opt : optList.asCollection()) {
