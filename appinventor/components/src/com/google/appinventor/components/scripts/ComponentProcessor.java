@@ -779,6 +779,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    *   "key": "Direction",
    *   "tag": "Direction",
    *   "defaultOpt": "East",
+   *   "underlyingType": "java.lang.Integer",
    *   "options": [
    *     { "name": "North", "value": "1", "description": "Option for North", "deprecated": "false" },
    *     { "name": "Northeast", "value": "2", "description": "Option for Northeast", "deprecated": "false" },
@@ -1843,7 +1844,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return false;
     }
 
-    // Get the get method. This is not used, we just need to require it.
+    // Get the fromUnderlyingValue method. This is not used, we just need to require it.
     java.lang.reflect.Method fromValueMethod = null;
     Type genericType = null;
     try {
