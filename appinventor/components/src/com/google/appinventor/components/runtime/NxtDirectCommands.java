@@ -7,10 +7,19 @@
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.NxtMailbox;
+import com.google.appinventor.components.common.NxtMotorMode;
+import com.google.appinventor.components.common.NxtMotorPort;
+import com.google.appinventor.components.common.NxtRegulationMode;
+import com.google.appinventor.components.common.NxtRunState;
+import com.google.appinventor.components.common.NxtSensorMode;
+import com.google.appinventor.components.common.NxtSensorPort;
+import com.google.appinventor.components.common.NxtSensorType;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.FileUtil;
@@ -142,62 +151,70 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   }
 
   @SimpleFunction(description = "Sets the output state of a motor on the robot.")
-  public void SetOutputState(String motorPortLetter, int power, int mode, int regulationMode,
-      int turnRatio, int runState, long tachoLimit) {
+  public void SetOutputState(
+    @Options(NxtMotorPort.class) String motorPortLetter,
+    int power,
+    @Options(NxtMotorMode.class) int mode,
+    @Options(NxtRegulationMode.class) int regulationMode,
+    int turnRatio,
+    @Options(NxtRunState.class) int runState,
+    long tachoLimit
+  ) {
     String functionName = "SetOutputState";
     if (!checkBluetooth(functionName)) {
       return;
     }
 
-    int port;
-    try {
-      port = convertMotorPortLetterToNumber(motorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure motorPortLetter is a valid NxtMotorPort.
+    NxtMotorPort port = NxtMotorPort.fromUnderlyingValue(motorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_MOTOR_PORT, motorPortLetter);
       return;
     }
 
-    setOutputState(functionName, port, power, mode,
+    setOutputState(functionName, port.toInt(), power, mode,
         regulationMode, sanitizeTurnRatio(turnRatio), runState, tachoLimit);
   }
 
   @SimpleFunction(description = "Configure an input sensor on the robot.")
-  public void SetInputMode(String sensorPortLetter, int sensorType, int sensorMode) {
+  public void SetInputMode(
+    @Options(NxtSensorPort.class) String sensorPortLetter,
+    @Options(NxtSensorType.class) int sensorType,
+    @Options(NxtSensorMode.class) int sensorMode
+  ) {
     String functionName = "SetInputMode";
     if (!checkBluetooth(functionName)) {
       return;
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLetter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return;
     }
 
-    setInputMode(functionName, port, sensorType, sensorMode);
+    setInputMode(functionName, port.toInt(), sensorType, sensorMode);
   }
 
   @SimpleFunction(description = "Reads the output state of a motor on the robot.")
-  public List<Number> GetOutputState(String motorPortLetter) {
+  public List<Number> GetOutputState(@Options(NxtMotorPort.class) String motorPortLetter) {
     String functionName = "GetOutputState";
     if (!checkBluetooth(functionName)) {
       return new ArrayList<Number>();
     }
 
-    int port;
-    try {
-      port = convertMotorPortLetterToNumber(motorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure motorPortLetter is a valid NxtMotorPort.
+    NxtMotorPort port = NxtMotorPort.fromUnderlyingValue(motorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_MOTOR_PORT, motorPortLetter);
       return new ArrayList<Number>();
     }
 
-    byte[] returnPackage = getOutputState(functionName, port);
+    byte[] returnPackage = getOutputState(functionName, port.toInt());
     if (returnPackage != null) {
       List<Number> outputState = new ArrayList<Number>();
       outputState.add(getSBYTEValueFromBytes(returnPackage, 4));   // Power (SBYTE -100 to 100)
@@ -235,22 +252,21 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
 
   @SimpleFunction(description = "Reads the values of an input sensor on the robot. " +
       "Assumes sensor type has been configured via SetInputMode.")
-  public List<Object> GetInputValues(String sensorPortLetter) {
+  public List<Object> GetInputValues(@Options(NxtSensorPort.class) String sensorPortLetter) {
     String functionName = "GetInputValues";
     if (!checkBluetooth(functionName)) {
       return new ArrayList<Object>();
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLeter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return new ArrayList<Object>();
     }
 
-    byte[] returnPackage = getInputValues(functionName, port);
+    byte[] returnPackage = getInputValues(functionName, port.toInt());
     if (returnPackage != null) {
       List<Object> inputValues = new ArrayList<Object>();
       inputValues.add(getBooleanValueFromBytes(returnPackage, 4));  // Valid
@@ -269,40 +285,37 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   }
 
   @SimpleFunction(description = "Reset the scaled value of an input sensor on the robot.")
-  public void ResetInputScaledValue(String sensorPortLetter) {
+  public void ResetInputScaledValue(@Options(NxtSensorPort.class) String sensorPortLetter) {
     String functionName = "ResetInputScaledValue";
     if (!checkBluetooth(functionName)) {
       return;
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLetter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return;
     }
 
-    resetInputScaledValue(functionName, port);
+    resetInputScaledValue(functionName, port.toInt());
     byte[] command = new byte[3];
     command[0] = (byte) 0x80;  // Direct command telegram, no response
     command[1] = (byte) 0x08;  // RESETINPUTSCALEDVALUE command
-    copyUBYTEValueToBytes(port, command, 2);
+    copyUBYTEValueToBytes(port.toInt(), command, 2);
     sendCommand(functionName, command);
   }
 
   @SimpleFunction(description = "Write a message to a mailbox (1-10) on the robot.")
-  public void MessageWrite(int mailbox, String message) {
+  public void MessageWrite(@Options(NxtMailbox.class) int mailbox, String message) {
     String functionName = "MessageWrite";
     if (!checkBluetooth(functionName)) {
       return;
     }
-    // Note from Paul Gyugyi during code review: we are only supporting mailboxes 1-10, but NXT can
-    // use mailboxes above 10 as relays to other NXTs.  We've never needed it, but if you ever see
-    // a feature request or bug report, all that might be required is just raising our upper limit
-    // on the range.
-    if (mailbox < 1 || mailbox > 10) {
+    // Make sure mailbox is a valid NxtMailbox.
+    NxtMailbox box = NxtMailbox.fromUnderlyingValue(mailbox);
+    if (box == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_MAILBOX, mailbox);
       return;
@@ -314,12 +327,10 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return;
     }
 
-    mailbox--; // send 0-based mailbox to NXT
-
     byte[] command = new byte[4 + messageLength + 1];
     command[0] = (byte) 0x80;  // Direct command telegram, no response
     command[1] = (byte) 0x09;  // MESSAGEWRITE command
-    copyUBYTEValueToBytes(mailbox, command, 2);
+    copyUBYTEValueToBytes(box.toInt(), command, 2);
     // message length includes null termination byte
     copyUBYTEValueToBytes(messageLength + 1, command, 3);
     copyStringValueToBytes(message, command, 4, messageLength);
@@ -328,16 +339,18 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   }
 
   @SimpleFunction(description = "Reset motor position.")
-  public void ResetMotorPosition(String motorPortLetter, boolean relative) {
+  public void ResetMotorPosition(
+    @Options(NxtMotorPort.class) String motorPortLetter,
+    boolean relative
+  ) {
     String functionName = "ResetMotorPosition";
     if (!checkBluetooth(functionName)) {
       return;
     }
 
-    int port;
-    try {
-      port = convertMotorPortLetterToNumber(motorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure motorPortLetter is a valid NxtMotorPort.
+    NxtMotorPort port = NxtMotorPort.fromUnderlyingValue(motorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_MOTOR_PORT, motorPortLetter);
       return;
@@ -346,7 +359,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
     byte[] command = new byte[4];
     command[0] = (byte) 0x80;  // Direct command telegram, no response
     command[1] = (byte) 0x0A;  // RESETMOTORPOSITION command
-    copyUBYTEValueToBytes(port, command, 2);
+    copyUBYTEValueToBytes(port.toInt(), command, 2);
     copyBooleanValueToBytes(relative, command, 3);
     sendCommand(functionName, command);
   }
@@ -411,36 +424,38 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   }
 
   @SimpleFunction(description = "Returns the count of available bytes to read.")
-  public int LsGetStatus(String sensorPortLetter) {
+  public int LsGetStatus(@Options(NxtSensorPort.class) String sensorPortLetter) {
     String functionName = "LsGetStatus";
     if (!checkBluetooth(functionName)) {
       return 0;
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLetter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return 0;
     }
 
-    return lsGetStatus(functionName, port);
+    return lsGetStatus(functionName, port.toInt());
   }
 
   @SimpleFunction(description = "Writes low speed data to an input sensor on the robot. " +
       "Assumes sensor type has been configured via SetInputMode.")
-  public void LsWrite(String sensorPortLetter, YailList list, int rxDataLength) {
+  public void LsWrite(
+    @Options(NxtSensorPort.class) String sensorPortLetter,
+    YailList list,
+    int rxDataLength
+  ) {
     String functionName = "LsWrite";
     if (!checkBluetooth(functionName)) {
       return;
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLetter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return;
@@ -475,28 +490,27 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
         return;
       }
     }
-    lsWrite(functionName, port, bytes, rxDataLength);
+    lsWrite(functionName, port.toInt(), bytes, rxDataLength);
   }
 
 
   @SimpleFunction(description = "Reads unsigned low speed data from an input sensor on the " +
       "robot. Assumes sensor type has been configured via SetInputMode.")
-  public List<Integer> LsRead(String sensorPortLetter) {
+  public List<Integer> LsRead(@Options(NxtSensorPort.class)String sensorPortLetter) {
     String functionName = "LsRead";
     if (!checkBluetooth(functionName)) {
       return new ArrayList<Integer>();
     }
 
-    int port;
-    try {
-      port = convertSensorPortLetterToNumber(sensorPortLetter);
-    } catch (IllegalArgumentException e) {
+    // Make sure sensorPortLetter is a valid NxtSensorPort.
+    NxtSensorPort port = NxtSensorPort.fromUnderlyingValue(sensorPortLetter);
+    if (port == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_SENSOR_PORT, sensorPortLetter);
       return new ArrayList<Integer>();
     }
 
-    byte[] returnPackage = lsRead(functionName, port);
+    byte[] returnPackage = lsRead(functionName, port.toInt());
     if (returnPackage != null) {
       List<Integer> list = new ArrayList<Integer>();
       int count = getUBYTEValueFromBytes(returnPackage, 3);
@@ -538,35 +552,31 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   }
 
   @SimpleFunction(description = "Read a message from a mailbox (1-10) on the robot.")
-  public String MessageRead(int mailbox) {
+  public String MessageRead(@Options(NxtMailbox.class) int mailbox) {
     String functionName = "MessageRead";
     if (!checkBluetooth(functionName)) {
       return "";
     }
-    // Note from Paul Gyugyi during code review: we are only supporting mailboxes 1-10, but NXT can
-    // use mailboxes above 10 as relays to other NXTs.  We've never needed it, but if you ever see
-    // a feature request or bug report, all that might be required is just raising our upper limit
-    // on the range.
-    if (mailbox < 1 || mailbox > 10) {
+    // Make sure mailbox is a valid NxtMailbox.
+    NxtMailbox box = NxtMailbox.fromUnderlyingValue(mailbox);
+    if (box == null) {
       form.dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_NXT_INVALID_MAILBOX, mailbox);
       return "";
     }
 
-    mailbox--; // send 0-based mailbox to NXT
-
     byte[] command = new byte[5];
     command[0] = (byte) 0x00;  // Direct command telegram, response required
     command[1] = (byte) 0x13;  // MESSAGEREAD command
     copyUBYTEValueToBytes(0, command, 2);  // no remote mailbox
-    copyUBYTEValueToBytes(mailbox, command, 3);
+    copyUBYTEValueToBytes(box.toInt(), command, 3);
     copyBooleanValueToBytes(true, command, 4);  // remove message from mailbox
     byte[] returnPackage = sendCommandAndReceiveReturnPackage(functionName, command);
     if (evaluateStatus(functionName, returnPackage, command[1])) {
       if (returnPackage.length == 64) {
         int mailboxEcho = getUBYTEValueFromBytes(returnPackage, 3);
-        if (mailboxEcho != mailbox) {
-          Log.w(logTag, "MessageRead: unexpected return mailbox: " +
+        if (mailboxEcho != box.toInt()) {
+          Log.w(logTag, "MessageRead: unexpected return mailbox: Box" +
               mailboxEcho + " (expected " + mailbox + ")");
         }
         int messageLength = getUBYTEValueFromBytes(returnPackage, 4) - 1;
