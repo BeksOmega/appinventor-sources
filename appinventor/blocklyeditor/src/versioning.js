@@ -2247,10 +2247,13 @@ Blockly.Versioning.AllUpgradeMaps =
     1: "noUpgrade",
 
     // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
+    // Add GyroSensorMode dropdown block.
     2: [Blockly.Versioning.methodToSetterWithValue(
           'Ev3GyroSensor', 'SetAngleMode', 'Mode', 'angle'),
         Blockly.Versioning.methodToSetterWithValue(
-          'Ev3GyroSensor', 'SetRateMode', 'Mode', 'rate')]
+          'Ev3GyroSensor', 'SetRateMode', 'Mode', 'rate'),
+        Blockly.Versioning.makeSetterUseDropdown(
+          'Ev3GyroSensor', 'Mode', 'GyroSensorMode')]
 
   }, // End Ev3GyroSensor upgraders
 
