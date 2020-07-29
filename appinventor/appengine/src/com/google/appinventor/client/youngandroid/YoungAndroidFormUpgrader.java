@@ -1773,6 +1773,7 @@ public final class YoungAndroidFormUpgrader {
   ) {
     if (srcCompVersion < 2) {
       // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+      // Add ColorSensorMode dropdown.
       srcCompVersion = 2;
     }
     return srcCompVersion;
