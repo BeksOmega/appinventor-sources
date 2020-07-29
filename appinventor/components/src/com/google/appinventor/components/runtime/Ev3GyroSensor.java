@@ -146,6 +146,7 @@ public class Ev3GyroSensor extends LegoMindstormsEv3Sensor implements Deleteable
    * Make the sensor read the angle.
    */
   @SimpleFunction(description = "Measures the orientation of the sensor.")
+  @Deprecated
   public void SetAngleMode() {
     setMode(GyroSensorMode.Angle);
   }
@@ -154,6 +155,7 @@ public class Ev3GyroSensor extends LegoMindstormsEv3Sensor implements Deleteable
    * Make the sensor read the rotation rate.
    */
   @SimpleFunction(description = "Measures the angular velocity of the sensor.")
+  @Deprecated
   public void SetRateMode() {
     setMode(GyroSensorMode.Rate);
   }
