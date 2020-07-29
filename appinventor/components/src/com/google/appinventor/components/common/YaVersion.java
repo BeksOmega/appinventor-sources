@@ -1082,6 +1082,7 @@ public class YaVersion {
 
   // For EV3_GYROSENSOR_COMPONENT_VERSION 2:
   // - Remove SetAngleMode and SetRateMode. Use Mode setter instead.
+  // - Add GyroSensorMode dropdown block.
   public static final int EV3_GYROSENSOR_COMPONENT_VERSION = 2;
 
   public static final int EV3_TOUCHSENSOR_COMPONENT_VERSION = 1;

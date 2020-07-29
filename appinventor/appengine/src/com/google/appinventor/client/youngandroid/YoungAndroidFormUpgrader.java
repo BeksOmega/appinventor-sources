@@ -1853,6 +1853,7 @@ public final class YoungAndroidFormUpgrader {
   ) {
     if (srcCompVersion < 2) {
       // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
+      // Add GyroSensorMode dropdown block.
       srcCompVersion = 2;
     }
     return srcCompVersion;
