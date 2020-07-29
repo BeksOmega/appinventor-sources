@@ -372,6 +372,8 @@ public final class YoungAndroidFormUpgrader {
         srcCompVersion = upgradeFeatureCollection(componentProperties, srcCompVersion);
       } else if (componentType.equals("YandexTranslate")) {
         srcCompVersion = upgradeYandexTranslateProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("Ev3ColorSensor")) {
+        srcCompVersion = upgradeEv3ColorSensorProperties(componentProperties, srcCompVersion);
       }
 
       if (srcCompVersion < sysCompVersion) {
@@ -1760,6 +1762,17 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 2) {
       // Version 2
       // The ApiKey property was added
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeEv3ColorSensorProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
       srcCompVersion = 2;
     }
     return srcCompVersion;

@@ -394,7 +394,11 @@ public class Ev3ColorSensor extends LegoMindstormsEv3Sensor implements Deleteabl
   }
 
   /**
-   * Returns the mode of the sensor.
+   * The current mode of the sensor. One of:
+   *     Reflected: Senses the current light level including light reflected by the sensor.
+   *     Ambient: Senses the current light level *not* including light reflected by the sensor.
+   *     Color: Senses the color the sensor is pointing at.
+   *     
    */
   @SimpleProperty(description = "Get the current sensor mode.",
                   category = PropertyCategory.BEHAVIOR)
@@ -414,6 +418,7 @@ public class Ev3ColorSensor extends LegoMindstormsEv3Sensor implements Deleteabl
    * Enter the color detection mode.
    */
   @SimpleFunction(description = "Enter the color detection mode.")
+  @Deprecated
   public void SetColorMode() {
     setMode(ColorSensorMode.Color);
   }
@@ -422,6 +427,7 @@ public class Ev3ColorSensor extends LegoMindstormsEv3Sensor implements Deleteabl
    * Make the sensor read the light level with reflected light.
    */
   @SimpleFunction(description = "Make the sensor read the light level with reflected light.")
+  @Deprecated
   public void SetReflectedMode() {
     setMode(ColorSensorMode.Reflected);
   }
@@ -430,6 +436,7 @@ public class Ev3ColorSensor extends LegoMindstormsEv3Sensor implements Deleteabl
    * Make the sensor read the light level without reflected light.
    */
   @SimpleFunction(description = "Make the sensor read the light level without reflected light.")
+  @Deprecated
   public void SetAmbientMode() {
     setMode(ColorSensorMode.Ambient);
   }

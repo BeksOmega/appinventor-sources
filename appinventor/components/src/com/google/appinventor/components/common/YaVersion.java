@@ -1060,7 +1060,9 @@ public class YaVersion {
 
   public static final int EV3_MOTORS_COMPONENT_VERSION = 1;
 
-  public static final int EV3_COLORSENSOR_COMPONENT_VERSION = 1;
+  // For EV3_COLORSENSOR_COMPONENT_VERSION 2:
+  // - Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+  public static final int EV3_COLORSENSOR_COMPONENT_VERSION = 2;
 
   public static final int EV3_GYROSENSOR_COMPONENT_VERSION = 1;
 
