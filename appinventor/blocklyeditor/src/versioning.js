@@ -2330,12 +2330,15 @@ Blockly.Versioning.AllUpgradeMaps =
     1: "noUpgrade",
 
     // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+    // Add ColorSensorMode dropdown.
     2: [Blockly.Versioning.methodToSetterWithValue(
           'Ev3ColorSensor', 'SetAmbientMode', 'Mode', 'ambient'),
         Blockly.Versioning.methodToSetterWithValue(
           'Ev3ColorSensor', 'SetColorMode', 'Mode', 'color'),
         Blockly.Versioning.methodToSetterWithValue(
-          'Ev3ColorSensor', 'SetReflectedMode', 'Mode', 'reflected')]
+          'Ev3ColorSensor', 'SetReflectedMode', 'Mode', 'reflected'),
+        Blockly.Versioning.makeSetterUseDropdown(
+         'Ev3ColorSensor', 'Mode', 'ColorSensorMode')]
 
   }, // End Ev3ColorSensor upgraders
 

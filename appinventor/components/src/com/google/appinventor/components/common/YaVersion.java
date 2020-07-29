@@ -1077,6 +1077,7 @@ public class YaVersion {
 
   // For EV3_COLORSENSOR_COMPONENT_VERSION 2:
   // - Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+  // - Add ColorSensorMode dropdown.
   public static final int EV3_COLORSENSOR_COMPONENT_VERSION = 2;
 
   public static final int EV3_GYROSENSOR_COMPONENT_VERSION = 1;
