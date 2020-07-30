@@ -277,6 +277,9 @@ Blockly.Drawer.prototype.instanceRecordToXMLArray = function(instanceRecord) {
 Blockly.Drawer.prototype.createAllComponentBlocks =
   function(componentInfo, instanceRecord) {
     var xmlArray = [];
+    // Collect helper keys used in events, methods, and properties so that we
+    // can add all the helper blocks used by the component near the bottom of
+    // its drawer.
     var helperKeys = [];
     var typeName = instanceRecord.typeName;
     var instanceName = instanceRecord.name;
@@ -314,6 +317,8 @@ Blockly.Drawer.prototype.createAllComponentBlocks =
       var eventXml = this.blockTypeToXMLArray('component_event', eventObj);
       Array.prototype.push.apply(xmlArray, eventXml);
 
+      // Determine if any parameters are associated with a helper which should
+      // be added at the bottom of the drawer.
       event.parameters.forEach(getHelper);
     }, this);
 
@@ -330,12 +335,14 @@ Blockly.Drawer.prototype.createAllComponentBlocks =
       };
       var methodXml = this.blockTypeToXML('component_method', methodObj);
 
-      // Add helpers.
       method.parameters.forEach(function(param, index) {
         if (!param.helperKey) {
           return;
         }
+        // Determine if any parameters are associated with a helper which should
+        // be added at the bottom of the drawer.
         getHelper(param);
+        // Adds dropdown blocks to inputs which expect them.
         var inputXml = this.valueWithHelperXML('ARG' + index, param.helperKey);
         // First child b/c these are wrapped in an <xml/> node.
         methodXml.firstChild.appendChild(inputXml.firstChild);
@@ -368,6 +375,7 @@ Blockly.Drawer.prototype.createAllComponentBlocks =
         var setXml = this.blockTypeToXML('component_set_get', propertyObj);
 
         if (property.helperKey) {
+          // Adds dropdown blocks to inputs which expect them.
           var inputXml = this.valueWithHelperXML('VALUE', property.helperKey);
           // First child b/c these are wrapped in an <xml/> node.
           setXml.firstChild.appendChild(inputXml.firstChild);
@@ -376,10 +384,16 @@ Blockly.Drawer.prototype.createAllComponentBlocks =
         Array.prototype.push.apply(xmlArray, this.XMLToArray(setXml));
       }
 
+      // Collects up helper blocks for properties which use them so they can
+      // be added to the bottom of the drawer.
       getHelper(property);
     }, this);
 
-    // Create helper blocks.
+    // Create helper blocks at the bottom of the drawer, right above the
+    // component block.
+    // Another option was to create a separate drawer for helper blocks, but it
+    // was decided that it was better to keep helpers close to the components/
+    // blocks that use them.
     helperKeys.forEach(function(helper) {
       var xml = this.helperKeyToXML(helper);
       Array.prototype.push.apply(xmlArray, this.XMLToArray(xml));
