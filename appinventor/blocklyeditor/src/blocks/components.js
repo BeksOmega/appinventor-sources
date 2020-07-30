@@ -1206,7 +1206,9 @@ Blockly.Blocks.component_set_get = {
     }
 
     // Aka if this is a setter. We don't want blockly to think properties that
-    //    return strings but accept options actually return options.
+    // return strings but accept options actually return options. Once we add
+    // support for sanitizing returned values to their enum types, this will
+    // change.
     if (inputOrOutput == Blockly.Blocks.Utilities.INPUT) {
       var helperType = Blockly.Blocks.Utilities
           .helperKeyToBlocklyType(property.helperKey, this);
