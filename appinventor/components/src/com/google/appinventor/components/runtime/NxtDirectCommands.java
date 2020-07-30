@@ -173,8 +173,30 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return;
     }
 
-    setOutputState(functionName, port.toInt(), power, mode,
-        regulationMode, sanitizeTurnRatio(turnRatio), runState, tachoLimit);
+    // Make sure mode is a valid NxtMotorMode.
+    NxtMotorMode motorMode = NxtMotorMode.fromUnderlyingValue(mode);
+    if (motorMode == null) {
+      return;
+    }
+
+    // Make sure regulationMode is a valid NxtRegulationMode.
+    NxtRegulationMode regMode = NxtRegulationMode.fromUnderlyingValue(regulationMode);
+    if (regMode == null) {
+      return;
+    }
+
+    // Make sure runState is a valid NxtRunState;
+    NxtRunState state = NxtRunState.fromUnderlyingValue(runState);
+
+    setOutputState(
+        functionName,
+        port,
+        power,
+        motorMode,
+        regMode,
+        turnRatio,
+        state,
+        tachoLimit);
   }
 
   @SimpleFunction(description = "Configure an input sensor on the robot.")
@@ -196,7 +218,19 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return;
     }
 
-    setInputMode(functionName, port.toInt(), sensorType, sensorMode);
+    // Make sure sensorType is a valid NxtSensorType.
+    NxtSensorType type = NxtSensorType.fromUnderlyingValue(sensorType);
+    if (type == null) {
+      return;
+    }
+
+    // Make sure sensorMode is a valid NxtSensorMode.
+    NxtSensorMode mode = NxtSensorMode.fromUnderlyingValue(sensorMode);
+    if (mode == null) {
+      return;
+    }
+
+    setInputMode(functionName, port, type, mode);
   }
 
   @SimpleFunction(description = "Reads the output state of a motor on the robot.")
@@ -214,7 +248,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return new ArrayList<Number>();
     }
 
-    byte[] returnPackage = getOutputState(functionName, port.toInt());
+    byte[] returnPackage = getOutputState(functionName, port);
     if (returnPackage != null) {
       List<Number> outputState = new ArrayList<Number>();
       outputState.add(getSBYTEValueFromBytes(returnPackage, 4));   // Power (SBYTE -100 to 100)
@@ -233,11 +267,11 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
     return new ArrayList<Number>();
   }
 
-  private byte[] getOutputState(String functionName, int port) {
+  private byte[] getOutputState(String functionName, NxtMotorPort port) {
     byte[] command = new byte[3];
     command[0] = (byte) 0x00;  // Direct command telegram, response required
     command[1] = (byte) 0x06;  // GETOUTPUTSTATE command
-    copyUBYTEValueToBytes(port, command, 2);
+    copyUBYTEValueToBytes(port.toInt(), command, 2);
     byte[] returnPackage = sendCommandAndReceiveReturnPackage(functionName, command);
     if (evaluateStatus(functionName, returnPackage, command[1])) {
       if (returnPackage.length == 25) {
@@ -266,7 +300,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return new ArrayList<Object>();
     }
 
-    byte[] returnPackage = getInputValues(functionName, port.toInt());
+    byte[] returnPackage = getInputValues(functionName, port);
     if (returnPackage != null) {
       List<Object> inputValues = new ArrayList<Object>();
       inputValues.add(getBooleanValueFromBytes(returnPackage, 4));  // Valid
@@ -299,42 +333,11 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return;
     }
 
-    resetInputScaledValue(functionName, port.toInt());
+    resetInputScaledValue(functionName, port);
     byte[] command = new byte[3];
     command[0] = (byte) 0x80;  // Direct command telegram, no response
     command[1] = (byte) 0x08;  // RESETINPUTSCALEDVALUE command
     copyUBYTEValueToBytes(port.toInt(), command, 2);
-    sendCommand(functionName, command);
-  }
-
-  @SimpleFunction(description = "Write a message to a mailbox (1-10) on the robot.")
-  public void MessageWrite(@Options(NxtMailbox.class) int mailbox, String message) {
-    String functionName = "MessageWrite";
-    if (!checkBluetooth(functionName)) {
-      return;
-    }
-    // Make sure mailbox is a valid NxtMailbox.
-    NxtMailbox box = NxtMailbox.fromUnderlyingValue(mailbox);
-    if (box == null) {
-      form.dispatchErrorOccurredEvent(this, functionName,
-          ErrorMessages.ERROR_NXT_INVALID_MAILBOX, mailbox);
-      return;
-    }
-    int messageLength = message.length();
-    if (messageLength > 58) {
-      form.dispatchErrorOccurredEvent(this, functionName,
-          ErrorMessages.ERROR_NXT_MESSAGE_TOO_LONG);
-      return;
-    }
-
-    byte[] command = new byte[4 + messageLength + 1];
-    command[0] = (byte) 0x80;  // Direct command telegram, no response
-    command[1] = (byte) 0x09;  // MESSAGEWRITE command
-    copyUBYTEValueToBytes(box.toInt(), command, 2);
-    // message length includes null termination byte
-    copyUBYTEValueToBytes(messageLength + 1, command, 3);
-    copyStringValueToBytes(message, command, 4, messageLength);
-    // The command array is already filled with zeros. No need to actually set the last byte to 0.
     sendCommand(functionName, command);
   }
 
@@ -438,7 +441,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return 0;
     }
 
-    return lsGetStatus(functionName, port.toInt());
+    return lsGetStatus(functionName, port);
   }
 
   @SimpleFunction(description = "Writes low speed data to an input sensor on the robot. " +
@@ -490,7 +493,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
         return;
       }
     }
-    lsWrite(functionName, port.toInt(), bytes, rxDataLength);
+    lsWrite(functionName, port, bytes, rxDataLength);
   }
 
 
@@ -510,7 +513,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       return new ArrayList<Integer>();
     }
 
-    byte[] returnPackage = lsRead(functionName, port.toInt());
+    byte[] returnPackage = lsRead(functionName, port);
     if (returnPackage != null) {
       List<Integer> list = new ArrayList<Integer>();
       int count = getUBYTEValueFromBytes(returnPackage, 3);
@@ -554,9 +557,6 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   @SimpleFunction(description = "Read a message from a mailbox (1-10) on the robot.")
   public String MessageRead(@Options(NxtMailbox.class) int mailbox) {
     String functionName = "MessageRead";
-    if (!checkBluetooth(functionName)) {
-      return "";
-    }
     // Make sure mailbox is a valid NxtMailbox.
     NxtMailbox box = NxtMailbox.fromUnderlyingValue(mailbox);
     if (box == null) {
@@ -564,20 +564,30 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
           ErrorMessages.ERROR_NXT_INVALID_MAILBOX, mailbox);
       return "";
     }
+    return MessageReadAbstract(box);
+  }
+
+  public String MessageReadAbstract(NxtMailbox mailbox) {
+    final String functionName = "MessageRead";
+    final int intMailbox = mailbox.toInt();
+
+    if (!checkBluetooth(functionName)) {
+      return "";
+    }
 
     byte[] command = new byte[5];
     command[0] = (byte) 0x00;  // Direct command telegram, response required
     command[1] = (byte) 0x13;  // MESSAGEREAD command
     copyUBYTEValueToBytes(0, command, 2);  // no remote mailbox
-    copyUBYTEValueToBytes(box.toInt(), command, 3);
+    copyUBYTEValueToBytes(intMailbox, command, 3);
     copyBooleanValueToBytes(true, command, 4);  // remove message from mailbox
     byte[] returnPackage = sendCommandAndReceiveReturnPackage(functionName, command);
     if (evaluateStatus(functionName, returnPackage, command[1])) {
       if (returnPackage.length == 64) {
         int mailboxEcho = getUBYTEValueFromBytes(returnPackage, 3);
-        if (mailboxEcho != box.toInt()) {
+        if (mailboxEcho != intMailbox) {
           Log.w(logTag, "MessageRead: unexpected return mailbox: Box" +
-              mailboxEcho + " (expected " + mailbox + ")");
+              mailboxEcho + " (expected " + intMailbox + ")");
         }
         int messageLength = getUBYTEValueFromBytes(returnPackage, 4) - 1;
         return getStringValueFromBytes(returnPackage, 5, messageLength);
@@ -587,6 +597,43 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
       }
     }
     return "";
+  }
+
+  @SimpleFunction(description = "Write a message to a mailbox (1-10) on the robot.")
+  public void MessageWrite(@Options(NxtMailbox.class) int mailbox, String message) {
+    String functionName = "MessageWrite";
+    // Make sure mailbox is a valid NxtMailbox.
+    NxtMailbox box = NxtMailbox.fromUnderlyingValue(mailbox);
+    if (box == null) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_INVALID_MAILBOX, mailbox);
+      return;
+    }
+    MessageWriteAbstract(box, message);
+  }
+
+  public void MessageWriteAbstract(NxtMailbox mailbox, String message) {
+    final String functionName = "MessageWrite";
+
+    if (!checkBluetooth(functionName)) {
+      return;
+    }
+    int messageLength = message.length();
+    if (messageLength > 58) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_MESSAGE_TOO_LONG);
+      return;
+    }
+
+    byte[] command = new byte[4 + messageLength + 1];
+    command[0] = (byte) 0x80;  // Direct command telegram, no response
+    command[1] = (byte) 0x09;  // MESSAGEWRITE command
+    copyUBYTEValueToBytes(mailbox.toInt(), command, 2);
+    // message length includes null termination byte
+    copyUBYTEValueToBytes(messageLength + 1, command, 3);
+    copyStringValueToBytes(message, command, 4, messageLength);
+    // The command array is already filled with zeros. No need to actually set the last byte to 0.
+    sendCommand(functionName, command);
   }
 
   /**
