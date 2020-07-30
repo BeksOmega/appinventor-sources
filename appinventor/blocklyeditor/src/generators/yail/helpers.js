@@ -8,10 +8,6 @@ Blockly.Yail['helpers_dropdown'] = function() {
       .getOptionList(this.key_);
   var enumConstantName = this.getFieldValue('OPTION');
 
-  // TODO: This will be used after we add abstraction.
-  // See https://www.gnu.org/software/kawa/Enumerations.html
-  //var code = optionList.className + ":" + enumConstantName;
-
   var option = optionList.options.find(function(opt) {
     return opt.name == enumConstantName;
   });
@@ -22,4 +18,14 @@ Blockly.Yail['helpers_dropdown'] = function() {
   } // Otherwise assume it doesn't need to be quoted.
 
   return [code, Blockly.Yail.ORDER_ATOMIC]
+
+  // TODO: This will be used after we add abstraction.
+  // See https://www.gnu.org/software/kawa/Enumerations.html
+  // var code = optionList.className + ":" + enumConstantName;
+
+  // Currently we are returning the concrete values of the optionList option for
+  // easy backwards compatibility with the companion. But in the future we will
+  // return a macro which checks if the companion supports OptionLists and if
+  // it does it will return the abstract enum value. If the companion does not
+  // support OptionLists it will continue to return the concrete value.
 }

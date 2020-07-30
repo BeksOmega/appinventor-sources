@@ -1366,6 +1366,8 @@
   (if (and (enum? arg)
         ;; We have to trick the Kawa compiler into not open-coding "instance?"
         ;; or else we get a ClassCastException here.
+        ;; This check is necessary to make sure we treat each enum type separately.
+        ;; Eg a HorizontalAlignment is different from a VerticalAlignment.
         (apply instance? (list arg (string->symbol (string-replace-all (symbol->string type) "Enum" "")))))
       arg 
       *non-coercible-value*))
@@ -1421,7 +1423,7 @@
    ((string? arg)
     (or (padded-string->number arg) *non-coercible-value*))
    ((enum? arg)
-    (let ((val (arg:getValue)))
+    (let ((val (arg:toUnderlyingValue)))
       (if (number? val)
         val
         *non-coercible-value*)))
@@ -1454,7 +1456,7 @@
              (let ((pieces (map coerce-to-string arg)))
                (call-with-output-string (lambda (port) (display pieces port))))))
         ((enum? arg)
-          (let ((val (arg:getValue)))
+          (let ((val (arg:toUnderlyingValue)))
             (if (string? val)
               val
               *non-coercible-value*)))
@@ -1681,8 +1683,8 @@
    ;; ((and (string? x1) (string? x2))
    ;;  (equal? x1 x2))
 
-   ((and (enum? x1) (not (enum? x2))) (equal? (x1:getValue) x2))
-   ((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:getValue)))
+   ((and (enum? x1) (not (enum? x2))) (equal? (x1:toUnderlyingValue) x2))
+   ((and (not (enum? x1)) (enum? x2)) (equal? x1 (x2:toUnderlyingValue)))
 
    ;; If the x1 and x2 are not equal?, try comparing coverting x1 and x2 to numbers
    ;; and comparing them numerically

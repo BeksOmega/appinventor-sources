@@ -19,7 +19,10 @@ goog.require('Blockly.FieldDropdown');
  * @param {!Array.<!Array>} opt_invalidOptions A list of invalid options with
  *     identically structure to the menuGenerator options list. These options
  *     will not be available in the dropdown, but the correct human-readable
- *     values will be displayed if they get some other way (eg via xml).
+ *     values will be displayed if they are set some other way (eg via xml).
+ *     If an invalid value is set and it does not exist in the set of
+ *     invalidOptions then the stringified version of that value will be
+ *     displayed.
  * @param {Function=} opt_validator A change listener that is called when a new
  *     option is selected from the dropdown.
  */
@@ -82,6 +85,8 @@ Blockly.FieldInvalidDropdown.prototype.doValueInvalid_ = function(invalidValue) 
 Blockly.FieldInvalidDropdown.prototype.doValueUpdate_ = function(newValue) {
   // TODO: Uncomment this after Blockly update.
   //Blockly.FieldInvalidDropdown.superClass_.doValueUpdate_.call(this, newValue);
+  
+  // If we get here the value is valid. Make sure the block is not marked as bad.
   this.sourceBlock_ && this.sourceBlock_.notBadBlock();
 
   // TODO: Remove the rest of this function after Blockly update.
@@ -114,6 +119,15 @@ Blockly.FieldInvalidDropdown.prototype.setValue = function(newValue) {
   newValue = this.processValidation_(newValue, validatedValue);
   if (newValue instanceof Error) {
     return;
+  }
+
+  var localValidator = this.getValidator();
+  if (localValidator) {
+    validatedValue = localValidator.call(this, newValue);
+    newValue = this.processValidation_(newValue, validatedValue);
+    if (newValue instanceof Error) {
+      return;
+    }
   }
 
   var source = this.sourceBlock_;

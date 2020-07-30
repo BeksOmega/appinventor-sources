@@ -26,10 +26,8 @@ Blockly.Blocks['helpers_dropdown'] = {
      * @private
      */
     this.key_ = "";
-
-    // TODO: Do we want to do anything for tooltips on this guy?
     this.setColour(Blockly.COLOUR_HELPERS);
-    // Everything else gets hander by domToMutaiton.
+    // Everything else gets handled by domToMutaiton.
   },
  
   mutationToDom: function() {
@@ -49,6 +47,10 @@ Blockly.Blocks['helpers_dropdown'] = {
     var dropdown = new Blockly.FieldInvalidDropdown(
         this.getValidOptions(), this.getInvalidOptions());
 
+    // Setting the output check to be the OptionList type only allows this block
+    // to connect to inputs which expect its specific type of enum. Currently
+    // this is only used for Blockly connection checks, as no output types are
+    // encoded in Yail.
     this.setOutput(true, type);
     this.appendDummyInput()
         .appendField(optionList.tag)
