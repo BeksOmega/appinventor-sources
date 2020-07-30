@@ -146,6 +146,13 @@ Blockly.ComponentDatabase = function() {
 
   /**
    * Maps names of option lists to OptionLists.
+   * 
+   * This map is used to de-duplicate duplicated optionList info provided via
+   * the simple_components.json file, so that every option is represented
+   * exactly once in the component database. Everything that needs to reference
+   * an optionList should do so via the getOptionList function using the option
+   * lists's key. This field is used in conjunction with the processOptionList
+   * method to achieve this behavior.
    * @type {Object.<string, Option>}
    */
   this.optionLists_ = {};
@@ -455,10 +462,17 @@ Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
 /**
  * Processes data defining an OptionList (from simple_components.json) and
  * returns a HelperKey associated with the OptionList.
+ * 
+ * This function is used in conjunction with the optionLists_ field to remove
+ * duplicate optionList data provided via the simple_components.json file.
  * @param {!Object} data The data defining the OptionList.
  * @return {!HelperKey} The key associated with the OptionList.
  */
 Blockly.ComponentDatabase.prototype.processOptionList = function(data) {
+  // The first time an optionList is encountered its data is inserted into the
+  // optionLists_ map and its data is cached. All future calls to
+  // processOptionList do not process the option list, and just return
+  // a HelperKey which can be used to retrieve information from this map.
   if (!this.optionLists_[data.key]) {
     var options = [];
     for (var i = 0, option; option = data.options[i]; i++) {
