@@ -1048,6 +1048,7 @@ public final class YoungAndroidFormUpgrader {
       // ScreenAnimation dropdown blocks were added.
       // HorizontalAlignment and VerticalAlignment dropdown blocks were added.
       // Adds dropdown block for ScreenOrientation.
+      // Adds Permission dropdown block.
       srcCompVersion = 28;
     }
 
