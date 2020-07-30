@@ -126,7 +126,10 @@ Option = function() {};
  * @property {!string} className
  * @property {!string} tag
  * @property {!string} defaultOpt
+<<<<<<< HEAD
  * @property {!string} underlyingType
+=======
+>>>>>>> Add communication from Java to Blockly via JSON
  * @property {!Array.<!Option>} options
  */
 OptionList = function() {};
@@ -671,6 +674,16 @@ Blockly.ComponentDatabase.prototype.getGetterNamesForType = function(typeName) {
  */
 Blockly.ComponentDatabase.prototype.getOptionList = function(key) {
   return this.optionLists_[key];
+}
+
+/**
+ * Iterate over all option list definitions calling the callback function with
+ * the OptionList
+ *
+ * @param {function(!OptionList)} callback
+ */
+Blockly.ComponentDatabase.prototype.forEachOptionList = function(callback) {
+  goog.object.forEach(this.optionLists_, callback);
 }
 
 /**
