@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -419,37 +420,26 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
    */
   private void outputOptionList(String key, StringBuilder sb) {
     OptionList optList = optionLists.get(key);
-    sb.append("      \"className\": \"");
-    sb.append(optList.getClassName());
-    sb.append("\",\n");
-    sb.append("      \"key\": \"");
-    sb.append(key);
-    sb.append("\",\n");
-    sb.append("      \"tag\": \"");
-    sb.append(optList.getTagName());
-    sb.append("\",\n");
-    sb.append("      \"defaultOpt\": \"");
-    sb.append(optList.getDefault());
-    sb.append("\",\n");
-    sb.append("      \"underlyingType\": \"");
-    sb.append(optList.getUnderlyingType().toString());
-    sb.append("\",\n");
-    sb.append("      \"options\": [\n");
-    String separator = "";
+
+    StringJoiner optsJoiner = new StringJoiner(",\n", "[\n", "\n      ]\n");
     for (Option opt : optList.asCollection()) {
-      sb.append(separator);
-      sb.append("        { \"name\": \"");
-      sb.append(opt.name);
-      sb.append("\", \"value\": \"");
-      sb.append(opt.getValue());
-      sb.append("\", \"description\": ");
-      sb.append(formatDescription(opt.getDescription()));
-      sb.append(", \"deprecated\": \"");
-      sb.append(opt.isDeprecated());
-      sb.append("\" }");
-      separator = ",\n";
+      StringJoiner optJoiner = new StringJoiner(", ", "       { ", " }");
+      optJoiner.add("\"name\": \"" +  opt.name + "\"")
+          .add("\"value\": \"" +  opt.getValue() + "\"")
+          .add("\"description\": " + formatDescription(opt.getDescription()))
+          .add("\"deprecated\": \"" + opt.isDeprecated() + "\"");
+      optsJoiner.add(optJoiner.toString());
     }
-    sb.append("\n      ]\n");
+
+    StringJoiner sj = new StringJoiner(",\n      ", "      ", "");
+    sj.add("\"className\": \"" + optList.getClassName() + "\"")
+        .add("\"key\": \"" + key + "\"")
+        .add("\"tag\": \"" + optList.getTagName() + "\"")
+        .add("\"defaultOpt\": \"" + optList.getDefault() + "\"")
+        .add("\"underlyingType\": \"" + optList.getUnderlyingType().toString() + "\"")
+        .add("\"options\": " + optsJoiner.toString());
+
+    sb.append(sj.toString());
   }
 
   @Override
