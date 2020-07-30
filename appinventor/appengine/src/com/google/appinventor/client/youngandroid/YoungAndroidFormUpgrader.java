@@ -386,6 +386,8 @@ public final class YoungAndroidFormUpgrader {
         srcCompVersion = upgradeEv3GyroSensorProperties(componentProperties, srcCompVersion);
       } else if (componentType.equals("Ev3UltrasonicSensor")) {
         srcCompVersion = upgradeEv3UltrasonicSensorProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("NxtDirectCommands")) {
+        srcCompVersion = upgradeNxtDirectCommandsProperties(componentProperties, srcCompVersion);
       }
 
       if (srcCompVersion < sysCompVersion) {
@@ -1865,6 +1867,16 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 2) {
       // Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
       // Add UnltrasonicSensorMode dropdown block.
+      srcCompVersion = 2;
+    }
+  }
+
+  private static int upgradeNxtDirectCommandsProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // Adds dropdown blocks.
       srcCompVersion = 2;
     }
     return srcCompVersion;
