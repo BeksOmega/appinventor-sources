@@ -36,7 +36,9 @@ public enum NxtMotorPort implements OptionList<String> {
 
   static {
     for(NxtMotorPort port : NxtMotorPort.values()) {
-      lookup.put(port.toUnderlyingValue(), port);
+      String str = port.toUnderlyingValue();
+      lookup.put(str, port);
+      lookup.put(str.toLowerCase(), port);
     }
   }
 
