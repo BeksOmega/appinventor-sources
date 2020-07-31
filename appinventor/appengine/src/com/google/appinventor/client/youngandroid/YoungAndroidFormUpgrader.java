@@ -380,6 +380,10 @@ public final class YoungAndroidFormUpgrader {
         srcCompVersion = upgradeNavigationProperties(componentProperties, srcCompVersion);
       } else if (componentType.equals("YandexTranslate")) {
         srcCompVersion = upgradeYandexTranslateProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("Ev3ColorSensor")) {
+        srcCompVersion = upgradeEv3ColorSensorProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("Ev3GyroSensor")) {
+        srcCompVersion = upgradeEv3GyroSensorProperties(componentProperties, srcCompVersion);
       }
 
       if (srcCompVersion < sysCompVersion) {
@@ -1828,6 +1832,30 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 2) {
       // Version 2
       // The ApiKey property was added
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeEv3ColorSensorProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+      // Add ColorSensorMode dropdown.
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeEv3GyroSensorProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
+      // Add GyroSensorMode dropdown block.
       srcCompVersion = 2;
     }
     return srcCompVersion;

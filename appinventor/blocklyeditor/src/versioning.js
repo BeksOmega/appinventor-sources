@@ -1051,6 +1051,43 @@ Blockly.Versioning.makeSetterUseDropdown =
     }
   }
 
+Blockly.Versioning.methodToSetterWithValue =
+  function(componentType, methodName, propertyName, value) {
+    return function(blocksRep) {
+      console.log('running');
+      var dom = Blockly.Versioning.ensureDom(blocksRep);
+      var methods = Blockly.Versioning.findAllMethodCalls(
+          dom, componentType, methodName);
+      console.log('found methods: ', methods);
+      for (var i = 0, method; method = methods[i]; i++) {
+        method.setAttribute('type', 'component_set_get');
+        var mutation = Blockly.Versioning.firstChildWithTagName(method, 'mutation');
+        mutation.removeAttribute('method_name');
+        mutation.setAttribute('property_name', propertyName);
+        mutation.setAttribute('set_or_get', 'set');
+        var childText;
+        if (isNaN(value)) {
+          childText = '<value name="VALUE">' +
+              '<block type="text">' +
+                '<field name="TEXT">' + value + '</field>' +
+              '</block>' +
+            '</value>';
+        } else {
+          childText = '<value name="VALUE">' +
+              '<block type="math_number">' +
+                '<field name="NUM">' + value + '</field>' +
+              '</block>' +
+            '</value>';
+        }
+        console.log('child text:', childText);
+        var childXml = Blockly.Versioning.xmlBlockTextToDom(childText);
+        method.appendChild(childXml);
+        console.log('new method xml:', method);
+      }
+      return dom;
+    }
+  }
+
 /**
  * Gets the available option values for the given option list key.
  * @param {!Blockly.Workspace} workspace Used to get the component database.
@@ -2268,14 +2305,34 @@ Blockly.Versioning.AllUpgradeMaps =
   "Ev3ColorSensor": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
+    // Add ColorSensorMode dropdown.
+    2: [Blockly.Versioning.methodToSetterWithValue(
+          'Ev3ColorSensor', 'SetAmbientMode', 'Mode', 'ambient'),
+        Blockly.Versioning.methodToSetterWithValue(
+          'Ev3ColorSensor', 'SetColorMode', 'Mode', 'color'),
+        Blockly.Versioning.methodToSetterWithValue(
+          'Ev3ColorSensor', 'SetReflectedMode', 'Mode', 'reflected'),
+        Blockly.Versioning.makeSetterUseDropdown(
+         'Ev3ColorSensor', 'Mode', 'ColorSensorMode')]
 
   }, // End Ev3ColorSensor upgraders
 
   "Ev3GyroSensor": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
+    // Add GyroSensorMode dropdown block.
+    2: [Blockly.Versioning.methodToSetterWithValue(
+          'Ev3GyroSensor', 'SetAngleMode', 'Mode', 'angle'),
+        Blockly.Versioning.methodToSetterWithValue(
+          'Ev3GyroSensor', 'SetRateMode', 'Mode', 'rate'),
+        Blockly.Versioning.makeSetterUseDropdown(
+          'Ev3GyroSensor', 'Mode', 'GyroSensorMode')]
 
   }, // End Ev3GyroSensor upgraders
 
