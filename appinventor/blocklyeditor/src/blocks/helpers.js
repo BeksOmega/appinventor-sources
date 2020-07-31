@@ -113,7 +113,7 @@ Blockly.Blocks['helpers_dropdown'] = {
           translatedName: tag + ": " + i18nName,
           mutatorAttributes: {
             key: optionList.tag,
-            value: option.value
+            value: option.name
           }
         });
       }

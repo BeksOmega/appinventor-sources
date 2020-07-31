@@ -2659,7 +2659,7 @@ Blockly.Versioning.AllUpgradeMaps =
             'Form', 'AlignHorizontal', 'HorizontalAlignment'),
          Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'AlignVertical', 'VerticalAlignment'),
-         Blockly.Versoining.makeSetterUseDropdown(
+         Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'ScreenOrientation', 'ScreenOrientation'),
          Blockly.Versioning.upgradePermissionsToDropdown(
             'Form', 'AskForPermission', 0)]
