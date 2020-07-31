@@ -384,6 +384,8 @@ public final class YoungAndroidFormUpgrader {
         srcCompVersion = upgradeEv3ColorSensorProperties(componentProperties, srcCompVersion);
       } else if (componentType.equals("Ev3GyroSensor")) {
         srcCompVersion = upgradeEv3GyroSensorProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("NxtDirectCommands")) {
+        srcCompVersion = upgradeNxtDirectCommandsProperties(componentProperties, srcCompVersion);
       }
 
       if (srcCompVersion < sysCompVersion) {
@@ -1856,6 +1858,17 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 2) {
       // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
       // Add GyroSensorMode dropdown block.
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeNxtDirectCommandsProperties(
+    Map<String, JSONValue> componentProperties,
+    int srcCompVersion
+  ) {
+    if (srcCompVersion < 2) {
+      // Adds dropdown blocks.
       srcCompVersion = 2;
     }
     return srcCompVersion;
