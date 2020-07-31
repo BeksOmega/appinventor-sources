@@ -1304,7 +1304,11 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "noUpgrade",
 
     // AI2: LegacyMode property was added.
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    // Adds Sensitivity dropdown block.
+    5: Blockly.Versioning.makeSetterUseDropdown(
+          'AccelerometerSensor', 'Sensitivity', 'Sensitivity')
 
   }, // End Accelerometer upgraders
 
