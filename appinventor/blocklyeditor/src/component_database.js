@@ -41,7 +41,7 @@ ComponentInfo = function() {};
  * @typedef HelperKey
  * @type {object}
  * @property {!string} type
- * @property {!string} key
+ * @property {string=} key
  */
 HelperKey = function() {};
 
@@ -457,6 +457,11 @@ Blockly.ComponentDatabase.prototype.processHelper = function(helper) {
   switch (helper.type) {
     case "OPTION_LIST":
       return this.processOptionList(helper.data);
+    case "ASSET":
+      return {
+        type: "ASSET",
+        key: null
+      };
   }
   return null;
 }
