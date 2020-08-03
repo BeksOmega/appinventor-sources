@@ -186,7 +186,8 @@ Blockly.Blocks['helpers_assets'] = {
     this.addField();
 
     this.workspace.addChangeListener(function(e) {
-      if (e.type != AI.Events.SCREEN_SWITCH) {
+      if (e.type != AI.Events.SCREEN_SWITCH &&
+          !(e.type == Blockly.Events.MOVE)) {
         return;
       }
 
@@ -236,11 +237,37 @@ Blockly.Blocks['helpers_assets'] = {
       return [['', '']];
     }
 
+    // Must include the '' so .some returns true if no restrictions.
+    var restrictedFormats = [''];
+    var types = this.outputConnection.targetConnection &&
+        this.outputConnection.targetConnection.check_;
+    if (types) {
+      for (var i = 0, type; type = types[i]; i++) {
+        if (Array.isArray(type)) {
+          // Not actually a type check. An array in the type check array is used
+          // to restrict formats.
+          restrictedFormats = type;
+        }
+      }
+    }
+
     var assets = this.workspace.getAssetList();
     if (assets.length) {
-      return assets.map(function (elem) {
-        return [elem, elem];
+      var values = assets.map(function (elem) {
+        var assetValid = restrictedFormats.some(function(fileType) {
+          return elem.includes(fileType);
+        })
+        if (assetValid) {
+          return [elem, elem];
+        }
+        return undefined;  // Not necessary just more explicit.
       });
+      values = values.filter(function(elem) {
+        return elem !== undefined;
+      })
+      if (values.length) {
+        return values;
+      }
     }
 
     return [['', '']]
