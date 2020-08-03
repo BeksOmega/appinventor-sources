@@ -294,11 +294,21 @@ Blockly.Drawer.prototype.createAllComponentBlocks =
       if (!feature.helperKey) {
         return;
       }
-      var curKey = feature.helperKey;
-      containsKey = helperKeys.some(function(altKey) {
-        return altKey.key == curKey.key && altKey.type == curKey.type;
-      });
-      if (!containsKey) {
+
+      function addToHelpers(curKey) {
+        switch (curKey.type) {
+          case "OPTION_LIST":
+            return !helperKeys.some(function(altKey) {
+              return altKey.key == curKey.key && altKey.type == curKey.type;
+            });
+          default:  // Most types probably only want one instance in the drawer.
+            return !helperKeys.some(function(altKey) {
+              return altKey.type == curKey.type;
+            });
+        }
+      }
+
+      if (addToHelpers(feature.helperKey)) {
         helperKeys.push(feature.helperKey);
       }
     }
@@ -420,6 +430,8 @@ Blockly.Drawer.prototype.helperKeyToXML= function(helperKey) {
   switch(helperKey.type) {
     case 'OPTION_LIST':
       return this.blockTypeToXML('helpers_dropdown', {key: helperKey.key});
+    case 'ASSET':
+      return this.blockTypeToXML('helpers_assets');
   }
 }
 

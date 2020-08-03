@@ -727,7 +727,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * editor. This is associated with the OptionList data type, ie OptionList data always has an
    * OPTOIN_LIST style UI in the blocks editor (as of now).
    */
-  protected enum HelperType { OPTION_LIST }
+  protected enum HelperType { OPTION_LIST, ASSET }
 
   /**
    * A key that allows you to access info about a helper block.
@@ -760,6 +760,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * Returns the key to the specific helper data. Eg in the case of an option list helper, this
      * key could be used to look up values in the optionLists Map.
+     * If the helper block doesn't need any special data, this can just return null.
      * @return key to the helper data.
      */
     protected String getKey() {
@@ -1731,6 +1732,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     if (key != null) {
       return key;
     }
+    key = hasAssetsHelper(elem, type);
+    if (key != null) {
+      return key;
+    }
     // Add more possibilities here.
     return null;
   }
@@ -1942,6 +1947,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       description,
       elementUtils.isDeprecated(field)
     );
+  }
+
+  /**
+   * Returns the associated helper key if the element has an @Asset annotation. Null otherwise.
+   *
+   * @param elem the Element which represents a function (for return types) or a parameter.
+   * @param type the TypeMirror representing the type of that element.
+   * @return the associated helper key if the element has an @Asset annotation.
+   */
+  private HelperKey hasAssetsHelper(Element elem, TypeMirror type) {
+    for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
+      if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Asset")) {
+        return new HelperKey(HelperType.ASSET, null);
+      }
+    }
+    return null;
   }
 
   /**
