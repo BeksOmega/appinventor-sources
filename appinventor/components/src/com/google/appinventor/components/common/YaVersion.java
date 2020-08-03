@@ -514,7 +514,7 @@ public class YaVersion {
   // - BLOCKS_LANGUAGE_VERSION was incremented to 32
 
   // TODO: Bump this before merge. Include notes about all upgraded components.
-  public static final int YOUNG_ANDROID_VERSION = 207;
+  public static final int YOUNG_ANDROID_VERSION = 208;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -1434,10 +1434,10 @@ public class YaVersion {
   public static final String ACCEPTABLE_COMPANION_PACKAGE = "edu.mit.appinventor.aicompanion3";
 
   public static final String PREFERRED_COMPANION = "2.58e1";
-  public static final String COMPANION_UPDATE_URL = "docs/companions/MITAI2Companion.asc";
-  public static final String COMPANION_UPDATE_URL1 = "docs/companions/MITAI2Companion.apk";
+  public static final String COMPANION_UPDATE_URL = "gsoc-dropdowns.uc.r.appspot.com/docs/companions/MITAI2Companion.asc";
+  public static final String COMPANION_UPDATE_URL1 = "gsoc-dropdowns.uc.r.appspot.com/docs/companions/MITAI2Companion.apk";
   public static final String COMPANION_UPDATE_EMULATOR_URL = "Emulator.asc";
-  public static final String [] ACCEPTABLE_COMPANIONS = { "2.58a", "2.58au", "2.58e1" };
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.58a", "2.58au", "2.58e1", "2.59", "2.59u" };
 
   // Splash Screen Values
   public static final int SPLASH_SURVEY = 1;
