@@ -140,7 +140,7 @@ public final class Image extends AndroidViewComponent {
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET,
       defaultValue = "")
   @SimpleProperty
-  public void Picture(@Asset final String path) {
+  public void Picture(@Asset({".jpg", ".jpeg", ".png", ".gif"}) final String path) {
     if (MediaUtil.isExternalFile(path) &&
         container.$form().isDeniedPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
       container.$form().askPermission(Manifest.permission.READ_EXTERNAL_STORAGE,

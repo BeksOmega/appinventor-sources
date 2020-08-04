@@ -175,7 +175,7 @@ public class Sound extends AndroidNonvisibleComponent
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET,
       defaultValue = "")
   @SimpleProperty
-  public void Source(@Asset String path) {
+  public void Source(@Asset({".mp4", ".mp3", ".mpa", ".3gp", ".wav", ".ogg"}) String path) {
     sourcePath = (path == null) ? "" : path;
 
     // Clear the previous sound.
