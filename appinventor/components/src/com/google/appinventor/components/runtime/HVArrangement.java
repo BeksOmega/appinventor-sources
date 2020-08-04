@@ -342,7 +342,7 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET, defaultValue = "")
     @SimpleProperty(description = "Specifies the path of the background image for the %type%.  " +
             "If there is both an Image and a BackgroundColor, only the Image will be visible.")
-    public void Image(@Asset String path) {
+    public void Image(@Asset({".jpg", ".jpeg", ".png", ".gif"}) String path) {
         // If it's the same as on the prior call and the prior load was successful,
         // do nothing.
         if (path.equals(imagePath) && backgroundImageDrawable != null) {

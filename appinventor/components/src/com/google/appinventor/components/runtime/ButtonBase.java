@@ -333,7 +333,7 @@ public abstract class ButtonBase extends AndroidViewComponent
   @SimpleProperty(description = "Specifies the path of the image of the %type%.  " +
       "If there is both an Image and a BackgroundColor, only the Image will be " +
       "visible.")
-  public void Image(@Asset String path) {
+  public void Image(@Asset({".jpg", ".jpeg", ".png", ".gif"}) String path) {
     // If it's the same as on the prior call and the prior load was successful,
     // do nothing.
     if (path.equals(imagePath) && backgroundImageDrawable != null) {
