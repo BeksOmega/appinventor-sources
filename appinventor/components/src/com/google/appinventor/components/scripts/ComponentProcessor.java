@@ -209,6 +209,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    */
   protected final Map<String, OptionList> optionLists = Maps.newTreeMap();
 
+  /**
+   * A list of asset filters, which are in fact lists of strings. Initialized with an empty filter.
+   */
+  protected final List<List<String>> filters = new ArrayList<List<String>>() {{
+    add(new ArrayList<String>(0));
+  }};
+
   private final List<String> componentTypes = Lists.newArrayList();
 
   /**
@@ -736,15 +743,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * blocks for the current UI implementation in the blocks editor. In the future helper keys could
    * be used to define other kinds of helper blocks like range blocks, default color blocks, etc.
    */
-  protected final class HelperKey {
+  protected final class HelperKey<T> {
     private HelperType helperType;
 
-    private String key;
+    private T key;
 
     /**
      * Creates a HelperKey which can be used to access data about a helper block.
      */
-    protected HelperKey(HelperType type, String key) {
+    protected HelperKey(HelperType type, T key) {
       this.helperType = type;
       this.key = key;
     }
@@ -763,7 +770,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * If the helper block doesn't need any special data, this can just return null.
      * @return key to the helper data.
      */
-    protected String getKey() {
+    protected T getKey() {
       return key;
     }
   }
@@ -1811,7 +1818,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       }
     }
     // This helper key is storing info about an OptionList.
-    return new HelperKey(HelperType.OPTION_LIST, name);
+    return new HelperKey<String>(HelperType.OPTION_LIST, name);
   }
 
   /**
@@ -1959,7 +1966,24 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private HelperKey hasAssetsHelper(Element elem, TypeMirror type) {
     for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
       if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Asset")) {
-        return new HelperKey(HelperType.ASSET, null);
+        int index = 0;  // Index 0 is the empty filter.
+        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry:
+            mirror.getElementValues().entrySet()) {
+          // Make sure we are looking at the value attribute.
+          if (!entry.getKey().getSimpleName().contentEquals("value")) {
+            continue;
+          }
+          List<AnnotationValue> values = (List<AnnotationValue>)entry.getValue().getValue();
+          List<String> filter = new ArrayList<String>();
+          for (AnnotationValue v : values) {
+            filter.add((String)v.getValue());
+          }
+          if (!filters.contains(filter)) {
+            filters.add(filter);
+          }
+          index = filters.indexOf(filter);
+        }
+        return new HelperKey<Integer>(HelperType.ASSET, index);
       }
     }
     return null;

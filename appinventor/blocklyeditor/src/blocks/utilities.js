@@ -78,6 +78,8 @@ Blockly.Blocks.Utilities.helperKeyToBlocklyType = function(helperKey, block) {
   switch (helperKey.type) {
     case "OPTION_LIST":
       return utils.optionListKeyToBlocklyType(helperKey.key, block);
+    case "ASSET":
+      return utils.assetKeyToBlocklyType(helperKey.key, block);
   }
   return null;
 }
@@ -93,6 +95,17 @@ Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key, block) {
   var optionList = block.getTopWorkspace().getComponentDatabase()
       .getOptionList(key);
   return optionList.className + 'Enum';
+}
+
+/**
+ * Returns a filter array associated with the given key. This can be added to
+ * the connections type check. It causes any asset blocks attached to that
+ * connection to filter their dropdowns.
+ * @param {number=} key The key associated with a filter.
+ * @param {!Blockly.Block} block The block to apply the filter to.
+ */
+Blockly.Blocks.Utilities.assetKeyToBlocklyType = function(key, block) {
+  return block.getTopWorkspace().getComponentDatabase().getFilter(key);
 }
 
 

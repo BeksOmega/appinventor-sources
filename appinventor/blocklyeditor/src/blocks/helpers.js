@@ -192,7 +192,12 @@ Blockly.Blocks['helpers_assets'] = {
       }
 
       if (this.addField()) {
-        this.setFieldValue(this.getFieldValue('ASSET'), 'ASSET');
+        var value = this.getFieldValue('ASSET');
+        var options = this.generateOptions();
+        if (this.isInFlyout && options.length) {
+          value = options[0][1];
+        }
+        this.setFieldValue(value, 'ASSET');
       }
     }.bind(this));
   },
@@ -207,6 +212,9 @@ Blockly.Blocks['helpers_assets'] = {
   },
 
   addField: function() {
+    if (!this.workspace) {
+      return;
+    }
     var input = this.getInput('INPUT');
     var assets = this.workspace.getAssetList();
 
