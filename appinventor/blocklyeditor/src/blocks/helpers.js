@@ -199,7 +199,12 @@ Blockly.Blocks['helpers_assets'] = {
       }
 
       if (this.addField()) {
-        this.setFieldValue(this.getFieldValue('ASSET'), 'ASSET');
+        var value = this.getFieldValue('ASSET');
+        var options = this.generateOptions();
+        if (this.isInFlyout && options.length) {
+          value = options[0][1];
+        }
+        this.setFieldValue(value, 'ASSET');
       }
     }.bind(this));
   },
