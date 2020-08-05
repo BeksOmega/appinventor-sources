@@ -3,7 +3,7 @@ package beka.helpers;
 import com.google.appinventor.components.common.OptionList;
 import com.google.appinventor.components.common.Default;
 
-public enum Animal implements OptionList {
+public enum Animal implements OptionList<String> {
     Lion("lion"),
     @Default
     Giraffe("giraffe"),
@@ -17,7 +17,11 @@ public enum Animal implements OptionList {
         this.animal = anim;
     }
 
-    public String getValue() {
+    public String toUnderlyingValue() {
         return animal;
+    }
+
+    public static Animal fromUnderlyingValue(String val) {
+        return Animal.Lion;
     }
 }
