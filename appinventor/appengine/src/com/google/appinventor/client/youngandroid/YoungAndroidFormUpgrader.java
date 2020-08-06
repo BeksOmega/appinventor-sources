@@ -1803,6 +1803,10 @@ public final class YoungAndroidFormUpgrader {
       // The ApiKey property was added
       srcCompVersion = 2;
     }
+    if (srcCompVersion < 3) {
+      // Add YandexLang dropdown block.
+      srcCompVersion = 3;
+    }
     return srcCompVersion;
   }
 

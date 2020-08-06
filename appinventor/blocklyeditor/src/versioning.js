@@ -2872,7 +2872,11 @@ Blockly.Versioning.AllUpgradeMaps =
     1: "noUpgrade",
 
     // AI2: ApiKey property added
-    2: "noUpgrade"
+    2: "noUpgrade",
+
+    // Add YandexLang dropdown block.
+    3: Blockly.Versioning.makeMethodUseDropdown(
+        'YandexTranslate', 'RequestTranslation', 0, 'YandexLang')
 
   } // End YandexTranslate upgraders
 

@@ -1360,7 +1360,9 @@ public class YaVersion {
   // - Initial version.
   // For YANDEX_COMPONENT_VERSION 2:
   // - Added ApiKey property
-  public static final int YANDEX_COMPONENT_VERSION = 2;
+  // For YANDEX_COMPONENT_VERSION 3:
+  // - Add YandexLang dropdown block.
+  public static final int YANDEX_COMPONENT_VERSION = 3;
 
   //For PROXIMITYSENSOR_COMPONENT_VERSION: Initial Version
   public static final int PROXIMITYSENSOR_COMPONENT_VERSION = 1;
