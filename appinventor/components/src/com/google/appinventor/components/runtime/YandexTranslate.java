@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
@@ -20,6 +21,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.YandexLang;
 import com.google.appinventor.components.common.YaVersion;
 
 import com.google.appinventor.components.runtime.util.AsynchUtil;
@@ -113,7 +115,7 @@ public final class YandexTranslate extends AndroidNonvisibleComponent {
       "executed.\nNote: Yandex.Translate will attempt to detect the source language. You can " +
       "also specify prepending it to the language translation. I.e., es-ru will specify Spanish " +
       "to Russian translation.")
-  public void RequestTranslation(final String languageToTranslateTo,
+  public void RequestTranslation(@Options(YandexLang.class) final String languageToTranslateTo,
                                  final String textToTranslate) {
 
     if (TextUtils.isEmpty(yandexKey) &&
@@ -137,6 +139,18 @@ public final class YandexTranslate extends AndroidNonvisibleComponent {
         }
       }
     });
+  }
+
+  /**
+   * Sends a request to translate the given text to the given language.
+   */
+  public void RequestTranslationAbstract(
+    YandexLang languageToTranslateTo,
+    String textToTranslate
+  ) {
+    // Usually when we are upgrading components to use dropdown blocks we make the Abstract function
+    // the "true" function. But in this case I think it makes more sense to use the concret one.
+    RequestTranslation(languageToTranslateTo.toUnderlyingValue(), textToTranslate);
   }
 
   /**
