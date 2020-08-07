@@ -141,11 +141,21 @@ Blockly.Blocks['helpers_screen_names'] = {
     this.setFieldValue(value, 'SCREEN');
   },
 
-  generateOptions: function() {
+  getScreens: function() {
     if (!this.workspace) {
-      return [['', '']];
+      return [];
     }
-    var screens = this.workspace.getScreenList();
+    var screens = Blockly.mainWorkspace.getScreenList();
+    screens.splice(screens.indexOf('Screen1'), 1);
+    console.log(screens);
+    return screens;
+  },
+
+  generateOptions: function() {
+    var screens = this.getScreens();
+    if (!screens.length) {
+      return [['', '']]
+    }
     return screens.map(function (elem) {
       return [elem, elem];
     });
@@ -154,7 +164,7 @@ Blockly.Blocks['helpers_screen_names'] = {
   typeblock: function() {
     var tb = [];
 
-    var screens = Blockly.mainWorkspace.getScreenList();
+    var screens = this.getScreens();
     for (var i = 0, screen; (screen = screens[i]); i++) {
       tb.push({
         translatedName: Blockly.Msg.LANG_SCREENS_TITLE + screen,
