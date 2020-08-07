@@ -1431,7 +1431,9 @@
 
 (define (coerce-to-key arg)
   (cond
-   ;;; TODO: I don't understand why these values have to be coerced.
+   ;;; TODO: Beka and Lyn don't understand why these values have to be coerced.
+   ;;;   Eg if (number? arg) is true we just pass the arg to a procedure that returns
+   ;;;   arg if (number? arg) is true. So why don't we just return arg here?
    ((number? arg) (coerce-to-number arg))
    ((string? arg) (coerce-to-string arg))
    ((instance? arg com.google.appinventor.components.runtime.Component) arg)
