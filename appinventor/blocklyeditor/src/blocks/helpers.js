@@ -161,7 +161,7 @@ Blockly.Blocks['helpers_screen_names'] = {
   typeblock: function() {
     var tb = [];
 
-    var screens = Blockly.mainWorkspace.getScreenList();
+    var screens = this.getScreens();
     for (var i = 0, screen; (screen = screens[i]); i++) {
       tb.push({
         translatedName: Blockly.Msg.LANG_SCREENS_TITLE + screen,
