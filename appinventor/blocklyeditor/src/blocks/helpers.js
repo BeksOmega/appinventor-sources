@@ -142,6 +142,9 @@ Blockly.Blocks['helpers_screen_names'] = {
   },
 
   generateOptions: function() {
+    if (!this.workspace) {
+      return [['', '']];
+    }
     var screens = this.workspace.getScreenList();
     return screens.map(function (elem) {
       return [elem, elem];
