@@ -110,7 +110,7 @@ Blockly.Blocks['helpers_dropdown'] = {
         var i18nName = db.getInternationalizedOptionName(key, option.name);
         tb.push({
           // TODO: This doesn't handle rtl langs, anyway to fix that?
-          translatedName: tag + ": " + i18nName,
+          translatedName: tag + i18nName,
           mutatorAttributes: {
             key: optionList.tag,
             value: option.name
