@@ -977,6 +977,26 @@ Blockly.Versioning.changePropertyName = function(componentType, oldPropertyName,
   }
 };
 
+
+Blockly.Versioning.makeMethodUseHelper =
+  function(componentType, methodName, argNum, replaceFunc) {
+    return function(blocksRep, workspace) {
+      var dom = Blockly.Versioning.ensureDom(blocksRep);
+      var methodNodes = Blockly.Versioning
+          .findAllMethodCalls(dom, componentType, methodName);
+      for (var i = 0, method; method = methodNodes[i]; i++) {
+        for (var j = 0, child; child = method.children[j]; j++) {
+          if (child.tagName == 'value' && 
+              child.getAttribute('name') == 'ARG' + argNum) {
+            replaceFunc(child);
+            break;
+          }
+        }
+      }
+      return dom;
+    }
+  }
+
 /**
  * Upgrades the given method param to use a dropdown. Upgrades iff the block
  * currently used as the arguement is a constant (like a number or text block).
@@ -988,37 +1008,22 @@ Blockly.Versioning.changePropertyName = function(componentType, oldPropertyName,
 Blockly.Versioning.makeMethodUseDropdown =
   function(componentType, methodName, argNum, dropdownKey) {
     return function (blocksRep, workspace) {
-      var valueMap = Blockly.Versioning
-          .getOptionListValueMap(workspace, dropdownKey);
-      var dom = Blockly.Versioning.ensureDom(blocksRep);
-      var methodNodes = Blockly.Versioning
-          .findAllMethodCalls(dom, componentType, methodName);
-      for (var i = 0, method; method = methodNodes[i]; i++) {
-        for (var j = 0, child; child = method.children[j]; j++) {
-          if (child.tagName == 'value' && 
-              child.getAttribute('name') == 'ARG' + argNum) {
-            Blockly.Versioning.tryReplaceTargetBlock(
-                child, valueMap, dropdownKey);
-            break;
-          }
-        }
+      var valueMap = Blockly.Versioning.getOptionListValueMap(
+          workspace, dropdownKey);
+      var replaceFunc = function(node) {
+        Blockly.Versioning.tryReplaceBlockWithDropdown(
+            node, valueMap, dropdownKey);
       }
-      return blocksRep;
+      // makeMethodUseHelper returns a function.
+      var replaceBlocks = Blockly.Versioning.makeMethodUseHelper(
+          componentType, methodName, argNum, replaceFunc);
+      return replaceBlocks(blocksRep, workspace);
     }
   }
 
-/**
- * Upgrades the given setter to use a dropdown. Upgrades iff the block
- * currently used as the arguement is a constant (like a number or text block).
- * @param {string} componentType Name of the component type for method.
- * @param {string} propertyName Name of the property.
- * @param {string} dropdownKey The key for the dropdown block we want to use now.
- */
-Blockly.Versioning.makeSetterUseDropdown =
-  function(componentType, propertyName, dropdownKey) {
+Blockly.Versioning.makeSetterUseHelper =
+  function(componentType, propertyName, replaceFunc) {
     return function(blocksRep, workspace) {
-      var valueMap = Blockly.Versioning
-          .getOptionListValueMap(workspace, dropdownKey);
       var dom = Blockly.Versioning.ensureDom(blocksRep);
       var props = Blockly.Versioning
           .findAllPropertyBlocks(dom, componentType, propertyName);
@@ -1027,8 +1032,7 @@ Blockly.Versioning.makeSetterUseDropdown =
         if (mutation.getAttribute('set_or_get') != 'set') {
           continue;
         }
-        var value = Blockly.Versioning.firstChildWithTagName(prop, 'value');
-        Blockly.Versioning.tryReplaceTargetBlock(value, valueMap, dropdownKey);
+        replaceFunc(Blockly.Versioning.firstChildWithTagName(prop, 'value'));
       }
       return dom;
     }
@@ -1068,6 +1072,29 @@ Blockly.Versioning.methodToSetterWithValue =
   }
 
 /**
+ * Upgrades the given setter to use a dropdown. Upgrades iff the block
+ * currently used as the arguement is a constant (like a number or text block).
+ * @param {string} componentType Name of the component type for method.
+ * @param {string} propertyName Name of the property.
+ * @param {string} dropdownKey The key for the dropdown block we want to use now.
+ */
+Blockly.Versioning.makeSetterUseDropdown =
+  function(componentType, propertyName, dropdownKey) {
+    return function(blocksRep, workspace) {
+      var valueMap = Blockly.Versioning.getOptionListValueMap(
+          workspace, dropdownKey);
+      var replaceFunc = function(node) {
+        Blockly.Versioning.tryReplaceBlockWithDropdown(
+            node, valueMap, dropdownKey);
+      }
+      // makeSetterUseHelper returns a function.
+      var replaceBlocks = Blockly.Versioning.makeSetterUseHelper(
+        componentType, propertyName, replaceFunc);
+      return replaceBlocks(blocksRep, workspace);
+    }
+  }
+
+/**
  * Gets the available option values for the given option list key.
  * @param {!Blockly.Workspace} workspace Used to get the component database.
  * @param {string} key The key to the option list.
@@ -1094,7 +1121,7 @@ Blockly.Versioning.getOptionListValueMap = function(workspace, key) {
  *     enum constant names.
  * @param {string} dropdownKey The key for the dropdown block we want to create.
  */
-Blockly.Versioning.tryReplaceTargetBlock =
+Blockly.Versioning.tryReplaceBlockWithDropdown =
   function(valueNode, valueToNameMap, dropdownKey) {
     if (!valueNode) {
       return;
