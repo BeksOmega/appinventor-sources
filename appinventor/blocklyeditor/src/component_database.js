@@ -552,6 +552,7 @@ Blockly.ComponentDatabase.prototype.populateTranslations = function(translations
         break;
       case 'OPTIONLIST':
         this.i18nOptionListTags_[jsKey] = translation;
+        break;
     }
   }
 };
