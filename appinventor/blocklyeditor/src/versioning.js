@@ -1195,6 +1195,41 @@ Blockly.Versioning.tryReplaceBlockWithScreen = function(valueNode) {
 }
 
 /**
+ * Replaces the block currently attached to the passed value input with an
+ * assets block. the current block is replaced iff it is a text block.
+ * @param {Element} valueNode The node to modify.
+ */
+Blockly.Versioning.tryReplaceBlockWithAssets = function(valueNode) {
+  if (!valueNode) {
+    return;
+  }
+
+  // The node describing the value input's target block.
+  var targetNode = Blockly.Versioning
+      .firstChildWithTagName(valueNode, 'block');
+  if (!targetNode) {
+    return;
+  }
+
+  var name = targetNode.getAttribute('type');
+  if (name != 'text') {
+    return;
+  }
+  var field = Blockly.Versioning.firstChildWithTagName(targetNode, 'field');
+  var targetValue = field.textContent;
+
+  valueNode.removeChild(targetNode);
+  var newBlock = document.createElement('block');
+  newBlock.setAttribute('type', 'helpers_assets');
+  var field = document.createElement('field');
+  field.setAttribute('name', 'ASSET');
+  var option = document.createTextNode(targetValue);
+  field.appendChild(option);
+  newBlock.appendChild(field);
+  valueNode.appendChild(newBlock);
+}
+
+/**
  * Returns the list of top-level blocks that are event handlers for the given eventName for
  * componentType.
  * @param dom  DOM for XML workspace
@@ -1548,7 +1583,11 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI2: Added TouchUp and TouchDown events;
     // FontSize, FontBold, FontItalic properties made visible in block editor
-    6: "noUpgrade"
+    6: "noUpgrade",
+
+    // Assets helper block was added.
+    7: Blockly.Versioning.makeSetterUseHelper(
+        'Button', 'Image', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End BarcodeScanner upgraders
 
@@ -1638,7 +1677,11 @@ Blockly.Versioning.AllUpgradeMaps =
 
     //  BackgroundImageinBase64 was added
     // No blocks need to be modified to upgrade to version 13.
-    13: "noUpgrade"
+    13: "noUpgrade",
+
+    // Assets helper block was added.
+    14: Blockly.Versioning.makeSetterUseHelper(
+        'Canvas', 'BackgroundImage', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End Canvas upgraders
 
@@ -1720,7 +1763,11 @@ Blockly.Versioning.AllUpgradeMaps =
     2: "noUpgrade",
 
     // AI2: SetDateToDisplayFromInstant method and Instant property are added.
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // Assets helper block was added.
+    4: Blockly.Versioning.makeSetterUseHelper(
+        'DatePicker', 'Image', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End DatePicker upgraders
 
@@ -1815,10 +1862,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For HORIZONTALARRANGEMENT_COMPONENT_VERSION 4:
     // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+    // - Assets helper block was added.
     4: [Blockly.Versioning.makeSetterUseDropdown(
            'HorizontalArrangement', 'AlignHorizontal', 'HorizontalAlignment'),
         Blockly.Versioning.makeSetterUseDropdown(
-           'HorizontalArrangement', 'AlignVertical', 'VerticalAlignment')]
+           'HorizontalArrangement', 'AlignVertical', 'VerticalAlignment'),
+        Blockly.Versioning.makeSetterUseHelper(
+           'HorizontalArrangement', 'Image', Blockly.Versioning.tryReplaceBlockWithAssets)]
 
   }, // End HorizontalArrangement upgraders
 
@@ -1829,10 +1879,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For HORIZONTALSCROLLARRANGEMENT_COMPONENT_VERSION 2:
     // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+    // - Assets helper block was added.
     2: [Blockly.Versioning.makeSetterUseDropdown(
            'HorizontalScrollArrangement', 'AlignHorizontal', 'HorizontalAlignment'),
         Blockly.Versioning.makeSetterUseDropdown(
-           'HorizontalScrollArrangement', 'AlignVertical', 'VerticalAlignment')]
+           'HorizontalScrollArrangement', 'AlignVertical', 'VerticalAlignment'),
+        Blockly.Versioning.makeSetterUseHelper('HorizontalScrollArrangement', 'Image',
+           Blockly.Versioning.tryReplaceBlockWithAssets)]
 
   }, // End HorizontalScrollArrangement upgraders
 
@@ -1850,7 +1903,11 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // Click event was added
     // The Clickable property was added.
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    // Assets helper block was added.
+    5: Blockly.Versioning.makeSetterUseHelper(
+        'Image', 'Picture', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End Image upgraders
 
@@ -1911,7 +1968,10 @@ Blockly.Versioning.AllUpgradeMaps =
     6: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
 
     // Adds dropdown blocks for Direction.
-    7: Blockly.Versioning.makeMethodUseDropdown('Sprite', 'Bounce', 0, 'Direction')
+    // Assest helper block was added.
+    7: [Blockly.Versioning.makeMethodUseDropdown('ImageSprite', 'Bounce', 0, 'Direction'),
+        Blockly.Versioning.makeSetterUseHelper('ImageSprite', 'Picture',
+            Blockly.Versioning.tryReplaceBlockWithAssets)],
 
   }, // End ImageSprite upgraders
 
@@ -2218,10 +2278,14 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For MARKER_COMPONENT_VERSION 4:
     // - Add AlignHorizontal and AlignVertical dropdown blocks.
+    // - Asset helper block was added.
     4: [Blockly.Versioning.makeSetterUseDropdown(
            'Marker', 'AnchorHorizontal', 'HorizontalAlignment'),
         Blockly.Versioning.makeSetterUseDropdown(
-           'Marker', 'AnchorVertical', 'VerticalAlignment')]
+           'Marker', 'AnchorVertical', 'VerticalAlignment'),
+        Blockly.Versioning.makeSetterUseHelper('Marker', 'ImageAsset',
+            Blockly.Versioning.tryReplaceBlockWithAssets)],
+
   }, // End Marker upgraders
 
   "Polygon": {
@@ -2712,7 +2776,9 @@ Blockly.Versioning.AllUpgradeMaps =
          Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'AlignVertical', 'VerticalAlignment'),
          Blockly.Versioning.makeSetterUseDropdown(
-            'Form', 'ScreenOrientation', 'ScreenOrientation')]
+            'Form', 'ScreenOrientation', 'ScreenOrientation'),
+         Blockly.Versioning.makeSetterUseHelper(
+           'Form', 'BackgroundImage', Blockly.Versioning.tryReplaceBlockWithAssets)]
 
   }, // End Screen
 
@@ -2747,7 +2813,11 @@ Blockly.Versioning.AllUpgradeMaps =
             "Please use the Screen.ErrorOccurred event instead.");
       }
     */
-    3: "ai1CantDoUpgrade" // Just indicates we couldn't do upgrade even if we wanted to
+    3: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
+
+    // Assets helper block was added.
+    4: Blockly.Versioning.makeSetterUseHelper(
+        'Sound', 'Source', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End Sound upgraders
 
@@ -2863,7 +2933,11 @@ Blockly.Versioning.AllUpgradeMaps =
     2: "noUpgrade",
 
     // AI2: SetTimeToDisplayFromInstant method and Instant property are added.
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // Assets helper block was added.
+    4: Blockly.Versioning.makeSetterUseHelper(
+        'TimePicker', 'Image', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End TimePicker upgraders
 
@@ -2946,10 +3020,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For VERTICALARRANGEMENT_COMPONENT_VERSION 4:
     // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+    // - Assets block was added.
     4: [Blockly.Versioning.makeSetterUseDropdown(
            'VerticalArrangement', 'AlignHorizontal', 'HorizontalAlignment'),
         Blockly.Versioning.makeSetterUseDropdown(
-           'VerticalArrangement', 'AlignVertical', 'VerticalAlignment')]
+           'VerticalArrangement', 'AlignVertical', 'VerticalAlignment'),
+        Blockly.Versioning.makeSetterUseHelper('VerticalArrangement', 'Image',
+           Blockly.Versioning.tryReplaceBlockWithAssets)]
   }, // End VerticalArrangement upgraders
 
   "VerticalScrollArrangement": {
@@ -2959,10 +3036,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For VERTICALSCROLLARRANGEMENT_COMPONENT_VERSION 2:
     // - Add HorizontalAlignment and VerticalAlignment dropdown blocks.
+    // - Assets block was added.
     2: [Blockly.Versioning.makeSetterUseDropdown(
            'VerticalScrollArrangement', 'AlignHorizontal', 'HorizontalAlignment'),
         Blockly.Versioning.makeSetterUseDropdown(
-           'VerticalScrollArrangement', 'AlignVertical', 'VerticalAlignment')]
+           'VerticalScrollArrangement', 'AlignVertical', 'VerticalAlignment'),
+        Blockly.Versioning.makeSetterUseHelper('VerticalScrollArrangement', 'Image',
+           Blockly.Versioning.tryReplaceBlockWithAssets)]
   }, // End VerticalScrollArrangement upgraders
 
   "VideoPlayer": {
@@ -2989,7 +3069,11 @@ Blockly.Versioning.AllUpgradeMaps =
     5: "noUpgrade",
 
     // AI2: Stop method was added to the VideoPlayer.
-    6: "noUpgrade"
+    6: "noUpgrade",
+
+    // Assets helper block was added.
+    7: Blockly.Versioning.makeSetterUseHelper(
+        'VideoPlayer', 'Source', Blockly.Versioning.tryReplaceBlockWithAssets)
 
   }, // End VideoPlayer upgraders
 
