@@ -23,6 +23,8 @@ import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPal
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.ComponentDatabaseChangeListener;
+import com.google.appinventor.client.explorer.project.ProjectChangeListener;
+import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.shared.properties.json.JSONArray;
@@ -30,7 +32,9 @@ import com.google.appinventor.shared.properties.json.JSONValue;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Callback;
@@ -62,7 +66,8 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author sharon@google.com (Sharon Perl) added Blockly functionality
  */
 public final class YaBlocksEditor extends FileEditor
-    implements FormChangeListener, BlockDrawerSelectionListener, ComponentDatabaseChangeListener, BlocklyWorkspaceChangeListener {
+    implements FormChangeListener, BlockDrawerSelectionListener, ComponentDatabaseChangeListener, BlocklyWorkspaceChangeListener,
+    ProjectChangeListener {
 
   // A constant to substract from the total height of the Viewer window, set through
   // the computed height of the user's window (Window.getClientHeight())
@@ -159,6 +164,10 @@ public final class YaBlocksEditor extends FileEditor
       palettePanel = null;
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
     }
+
+    Project project = Ode.getInstance().getProjectManager().getProject(blocksNode.getProjectId());
+    project.addProjectChangeListener(this);
+    onProjectLoaded(project);
   }
 
   // FileEditor methods
@@ -715,6 +724,30 @@ public final class YaBlocksEditor extends FileEditor
   @Override
   public void makeActiveWorkspace() {
     blocksArea.makeActive();
+  }
+
+  @Override
+  public void onProjectLoaded(Project project) {
+    for (ProjectNode node : project.getRootNode().getAllSourceNodes()) {
+      if (node instanceof YoungAndroidSourceNode) {
+        addScreen(((YoungAndroidSourceNode)node).getFormName());
+      }
+    }
+  }
+
+  @Override
+  public void onProjectNodeAdded(Project project, ProjectNode node) {
+    if (node instanceof YoungAndroidSourceNode) {
+      addScreen(((YoungAndroidSourceNode)node).getFormName());
+    }
+  }
+
+
+  @Override
+  public void onProjectNodeRemoved(Project project, ProjectNode node) {
+    if (node instanceof YoungAndroidSourceNode) {
+      removeScreen(((YoungAndroidSourceNode)node).getFormName());
+    }
   }
 
   private static native void set(JavaScriptObject jso, String key, String value)/*-{

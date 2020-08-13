@@ -98,15 +98,11 @@ public class DesignToolbar extends Toolbar {
         return false;
       }
       screens.put(name, new Screen(name, formEditor, blocksEditor));
-      ((YaBlocksEditor) blocksEditor).addScreen(name);
       return true;
     }
 
     public void removeScreen(String name) {
-      if (screens.containsKey(name)) {
-        Screen screen = screens.remove(name);
-        ((YaBlocksEditor) screen.blocksEditor).removeScreen(name);
-      }
+      screens.remove(name);
     }
 
     public void setCurrentScreen(String name) {
@@ -408,16 +404,8 @@ public class DesignToolbar extends Toolbar {
         OdeLog.wlog("DesignToolbar: ignoring call to switchToProject for current project");
         return true;
       }
-
-      // Clear screens.
       pushedScreens.clear();  // Effectively switching applications; clear stack of screens.
       clearDropDownMenu(WIDGET_NAME_SCREENS_DROPDOWN);
-      if (currentProject != null) {
-        for (Screen s : currentProject.screens.values()) {
-          ((YaBlocksEditor) s.blocksEditor).removeScreen(s.screenName);
-        }
-      }
-
       OdeLog.log("DesignToolbar: switching to existing project " + projectName + " with id "
           + projectId);
       currentProject = project;
