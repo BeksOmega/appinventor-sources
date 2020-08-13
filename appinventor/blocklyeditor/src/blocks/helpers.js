@@ -142,16 +142,15 @@ Blockly.Blocks['helpers_screen_names'] = {
   },
 
   getScreens: function() {
-    if (!this.workspace) {
-      return [];
-    }
     var screens = Blockly.mainWorkspace.getScreenList();
     screens.splice(screens.indexOf('Screen1'), 1);
-    console.log(screens);
     return screens;
   },
 
   generateOptions: function() {
+    if (!this.workspace) {
+      return [['', '']]
+    }
     var screens = this.getScreens();
     if (!screens.length) {
       return [['', '']]

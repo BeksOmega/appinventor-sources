@@ -747,22 +747,20 @@ Blockly.Versioning.v17_translateComponentSetGetProperty = function(blockElem) {
  Upgrade screen names to use dropdown block.
  ******************************************************************************/
 
-Blockly.Versioning.makeScreenNamesBeDropdowns = function () {
-  return function(blocksRep, workspace) {
-    var dom = Blockly.Versioning.ensureDom(blocksRep);
-    for (var i = 0, block; block = dom.children[i]; i++) {
-      if (block.tagName == 'block' &&
-          (block.getAttribute('type') == 'controls_openAnotherScreen' ||
-          block.getAttribute('type') == 'controls_openAnotherScreenWithStartValue')) {
-        var value = Blockly.Versioning.firstChildWithTagName(block, 'value');
-        var name = value.getAttribute('name');
-        if (name == 'SCREENNAME' || name == 'SCREEN') {
-          Blockly.Versioning.tryReplaceBlockWithScreen(value);
-        }
+Blockly.Versioning.makeScreenNamesBeDropdowns = function (blocksRep, workspace) {
+  var dom = Blockly.Versioning.ensureDom(blocksRep);
+  for (var i = 0, block; block = dom.children[i]; i++) {
+    if (block.tagName == 'block' &&
+        (block.getAttribute('type') == 'controls_openAnotherScreen' ||
+        block.getAttribute('type') == 'controls_openAnotherScreenWithStartValue')) {
+      var value = Blockly.Versioning.firstChildWithTagName(block, 'value');
+      var name = value.getAttribute('name');
+      if (name == 'SCREENNAME' || name == 'SCREEN') {
+        Blockly.Versioning.tryReplaceBlockWithScreen(value);
       }
     }
-    return blocksRep;
   }
+  return blocksRep;
 };
 
 /******************************************************************************
@@ -2021,7 +2019,7 @@ Blockly.Versioning.AllUpgradeMaps =
     32: "noUpgrade",
 
     // AI2: Add screen names dropdown block.
-    33: Blockly.Versioning.makeScreenNamesBeDropdowns(),
+    33: Blockly.Versioning.makeScreenNamesBeDropdowns,
 
   }, // End Language upgraders
 
