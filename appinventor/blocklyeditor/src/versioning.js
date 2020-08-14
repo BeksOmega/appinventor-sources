@@ -1097,6 +1097,12 @@ Blockly.Versioning.tryReplaceTargetBlock =
     valueNode.appendChild(newBlock);
   }
 
+/**
+ * Replaces the block currently attached to the passed value input with a screen
+ * names block. The current block is replaced iff it is a constant (eg a text or
+ * number block). 
+ * @param {Element} valueNode The node to modify.
+ */
 Blockly.Versioning.tryReplaceBlockWithScreen = function(valueNode) {
   if (!valueNode) {
     return;
