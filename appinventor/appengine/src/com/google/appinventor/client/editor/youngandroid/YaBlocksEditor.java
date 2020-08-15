@@ -114,8 +114,11 @@ public final class YaBlocksEditor extends FileEditor
   // blocks area again.
   private Set<String> componentUuids = new HashSet<String>();
 
-  // The form editor associated with this blocks editor
+  // The form editor associated with this blocks editor.
   private YaFormEditor myFormEditor;
+
+  // The project associated with this blocks editor.
+  private Project project;
 
   YaBlocksEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
@@ -165,7 +168,7 @@ public final class YaBlocksEditor extends FileEditor
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
     }
 
-    Project project = Ode.getInstance().getProjectManager().getProject(blocksNode.getProjectId());
+    project = Ode.getInstance().getProjectManager().getProject(blocksNode.getProjectId());
     project.addProjectChangeListener(this);
     onProjectLoaded(project);
   }
@@ -278,8 +281,10 @@ public final class YaBlocksEditor extends FileEditor
   public void onClose() {
     // our partner YaFormEditor added us as a FormChangeListener, but we remove ourself.
     getForm().removeFormChangeListener(this);
+    project.removeProjectChangeListener(this);
     BlockSelectorBox.getBlockSelectorBox().removeBlockDrawerSelectionListener(this);
     formToBlocksEditor.remove(fullFormName);
+
   }
 
   public static void toggleWarning() {

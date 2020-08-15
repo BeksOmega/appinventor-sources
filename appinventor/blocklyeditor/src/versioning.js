@@ -749,10 +749,10 @@ Blockly.Versioning.v17_translateComponentSetGetProperty = function(blockElem) {
 
 Blockly.Versioning.makeScreenNamesBeDropdowns = function (blocksRep, workspace) {
   var dom = Blockly.Versioning.ensureDom(blocksRep);
-  for (var i = 0, block; block = dom.children[i]; i++) {
-    if (block.tagName == 'block' &&
-        (block.getAttribute('type') == 'controls_openAnotherScreen' ||
-        block.getAttribute('type') == 'controls_openAnotherScreenWithStartValue')) {
+  var allBlocks = dom.getElementsByTagName('block');
+  for (var i = 0, block; block = allBlocks[i]; i++) {
+    if (block.getAttribute('type') == 'controls_openAnotherScreen' ||
+        block.getAttribute('type') == 'controls_openAnotherScreenWithStartValue') {
       var value = Blockly.Versioning.firstChildWithTagName(block, 'value');
       var name = value.getAttribute('name');
       if (name == 'SCREENNAME' || name == 'SCREEN') {
