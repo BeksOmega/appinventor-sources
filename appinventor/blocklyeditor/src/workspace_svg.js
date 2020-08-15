@@ -380,7 +380,7 @@ Blockly.WorkspaceSvg.prototype.getProcedureDatabase = function() {
  * @param {string} name The name of the new screen.
  */
 Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
-  if (!this.screenList_.includes(name)) {
+  if (this.screenList_.indexOf(name) == -1) {
     this.screenList_.push(name);
     this.typeBlock_.needsReload.screens = true;
   }
@@ -392,7 +392,7 @@ Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
  * @param {string} name The name of the screen to remove.
  */
 Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
-  if (this.screenList_.includes(name)) {
+  if (this.screenList_.indexOf(name) != -1) {
     this.screenList_.splice(this.screenList_.indexOf(name), 1);
     this.typeBlock_.needsReload.screens = true;
   }
