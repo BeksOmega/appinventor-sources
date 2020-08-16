@@ -29,7 +29,7 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.MapType;
-import com.google.appinventor.components.common.Units;
+import com.google.appinventor.components.common.ScaleUnits;
 import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.LocationSensor;
 import com.google.appinventor.components.runtime.util.MapFactory.HasFill;
@@ -1330,7 +1330,7 @@ class NativeOpenStreetMapController implements MapController, MapListener {
   }
 
   @Override
-  public void setScaleUnitsAbstract(Units units) {
+  public void setScaleUnitsAbstract(ScaleUnits units) {
     switch (units) {
       case Metric:
         scaleBar.setUnitsOfMeasure(UnitsOfMeasure.metric);
@@ -1343,12 +1343,12 @@ class NativeOpenStreetMapController implements MapController, MapListener {
   }
 
   @Override
-  public Units getScaleUnitsAbstract() {
+  public ScaleUnits getScaleUnitsAbstract() {
     switch (scaleBar.getUnitsOfMeasure()) {
       case imperial:
-        return Units.Imperial;
+        return ScaleUnits.Imperial;
       case metric:
-        return Units.Metric;
+        return ScaleUnits.Metric;
       default:
         throw new IllegalStateException("Somehow we have an unallowed unit system");
     }

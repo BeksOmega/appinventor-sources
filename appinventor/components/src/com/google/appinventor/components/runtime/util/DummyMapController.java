@@ -7,7 +7,7 @@ package com.google.appinventor.components.runtime.util;
 
 import android.view.View;
 import com.google.appinventor.components.common.MapType;
-import com.google.appinventor.components.common.Units;
+import com.google.appinventor.components.common.ScaleUnits;
 import com.google.appinventor.components.runtime.LocationSensor;
 import com.google.appinventor.components.runtime.util.MapFactory.HasFill;
 import com.google.appinventor.components.runtime.util.MapFactory.HasStroke;
@@ -304,12 +304,12 @@ class DummyMapController implements MapController {
   }
 
   @Override
-  public void setScaleUnitsAbstract(Units units) {
+  public void setScaleUnitsAbstract(ScaleUnits units) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Units getScaleUnitsAbstract() {
+  public ScaleUnits getScaleUnitsAbstract() {
     throw new UnsupportedOperationException();
   }
 }

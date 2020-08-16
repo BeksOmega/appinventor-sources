@@ -2124,7 +2124,7 @@ Blockly.Versioning.AllUpgradeMaps =
     // AI2:
     // - Adds Units and MapType dropdowns.
     6: [Blockly.Versioning.makeSetterUseDropdown(
-           'Map', 'ScaleUnits', 'Units'),
+          'Map', 'ScaleUnits', 'Units'),
         Blockly.Versioning.makeSetterUseDropdown(
           'Map', 'MapType', 'MapType')]
 
@@ -2177,7 +2177,7 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // Adds TransportMethod dropdown.
     2: [Blockly.Versioning.makeSetterUseDropdown(
-      'Navigation', 'TransportationMethod', 'TransportMethod')]
+          'Navigation', 'TransportationMethod', 'TransportMethod')]
 
   }, // End Navigation upgraders.
 

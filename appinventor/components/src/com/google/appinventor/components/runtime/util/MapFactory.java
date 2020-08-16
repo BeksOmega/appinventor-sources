@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.appinventor.components.common.MapType;
-import com.google.appinventor.components.common.Units;
+import com.google.appinventor.components.common.ScaleUnits;
 import com.google.appinventor.components.runtime.Component;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.Form;
@@ -591,12 +591,12 @@ public final class MapFactory {
     /**
      * Sets the units for the scale.
      */
-    void setScaleUnitsAbstract(Units units);
+    void setScaleUnitsAbstract(ScaleUnits units);
 
     /**
      * Returns the units for the scale.
      */
-    Units getScaleUnitsAbstract();
+    ScaleUnits getScaleUnitsAbstract();
   }
 
   /**

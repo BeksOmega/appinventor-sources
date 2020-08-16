@@ -30,7 +30,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.MapType;
 import com.google.appinventor.components.common.PropertyTypeConstants;
-import com.google.appinventor.components.common.Units;
+import com.google.appinventor.components.common.ScaleUnits;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.MapFactory.MapCircle;
 import com.google.appinventor.components.runtime.util.MapFactory.MapController;
@@ -530,9 +530,9 @@ public class Map extends MapFeatureContainerBase implements MapEventListener {
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_MAP_UNIT_SYSTEM,
       defaultValue = "1")
   @SimpleProperty
-  public void ScaleUnits(@Options(Units.class) int units) {
-    // Make sure units is a valid Units.
-    Units scaleUnits = Units.fromUnderlyingValue(units);
+  public void ScaleUnits(@Options(ScaleUnits.class) int units) {
+    // Make sure units is a valid ScaleUnits.
+    ScaleUnits scaleUnits = ScaleUnits.fromUnderlyingValue(units);
     if (scaleUnits == null) {
       $form().dispatchErrorOccurredEvent(this, "ScaleUnits",
           ErrorMessages.ERROR_INVALID_UNIT_SYSTEM, units);
@@ -544,19 +544,19 @@ public class Map extends MapFeatureContainerBase implements MapEventListener {
   /**
    * Sets the system of measurement used by the map.
    */
-  public void ScaleUnitsAbstract(Units units) {
+  public void ScaleUnitsAbstract(ScaleUnits units) {
     mapController.setScaleUnitsAbstract(units);
   }
 
   @SimpleProperty
-  public @Options(Units.class) int ScaleUnits() {
+  public @Options(ScaleUnits.class) int ScaleUnits() {
     return ScaleUnitsAbstract().toUnderlyingValue();
   }
 
   /**
    * Returns the system of measurement used by the map.
    */
-  public Units ScaleUnitsAbstract() {
+  public ScaleUnits ScaleUnitsAbstract() {
     return mapController.getScaleUnitsAbstract();
   }
 

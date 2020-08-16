@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Defines a Units type used by the Map component.
+ * Defines a ScaleUnits type used by the Map component.
  */
-public enum Units implements OptionList<Integer> {
+public enum ScaleUnits implements OptionList<Integer> {
   Metric(1),
   Imperial(2);
 
   private Integer value;
 
-  Units(Integer value) {
+  ScaleUnits(Integer value) {
     this.value = value;
   }
 
@@ -25,15 +25,15 @@ public enum Units implements OptionList<Integer> {
     return value;
   }
 
-  private static final Map<Integer, Units> lookup = new HashMap<>();
+  private static final Map<Integer, ScaleUnits> lookup = new HashMap<>();
 
   static {
-    for(Units unit : Units.values()) {
+    for(ScaleUnits unit : ScaleUnits.values()) {
       lookup.put(unit.toUnderlyingValue(), unit);
     }
   }
 
-  public static Units fromUnderlyingValue(Integer unit) {
+  public static ScaleUnits fromUnderlyingValue(Integer unit) {
     return lookup.get(unit);
   }
 }
