@@ -1489,51 +1489,13 @@ public class Form extends AppInventorCompatActivity
    * Sets the requested screen orientation.
    */
   public void ScreenOrientationAbstract(ScreenOrientation orientation) {
-    switch (orientation) {
-      case Behind:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
-        break;
-      case Landscape:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        break;
-      case NoSensor:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-        break;
-      case Portrait:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        break;
-      case Sensor:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        break;
-      case Unspecified:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        break;
-      case User:
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-        break;
-    }
-    if (SdkLevel.getLevel() < SdkLevel.LEVEL_GINGERBREAD) {
+    int orientationConst = orientation.getOrientationConstant();
+    if (orientationConst > 5 && SdkLevel.getLevel() < SdkLevel.LEVEL_GINGERBREAD) {
       dispatchErrorOccurredEvent(this, "ScreenOrientation",
           ErrorMessages.ERROR_INVALID_SCREEN_ORIENTATION, orientation);
       return;
     }
-    switch (orientation) {
-      case FullSensor:
-        setRequestedOrientation(10); // ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-        break;
-      case ReverseLandscape:
-        setRequestedOrientation(8); // ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-        break;
-      case ReversePortrait:
-        setRequestedOrientation(9); // ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-        break;
-      case SensorLandscape:
-        setRequestedOrientation(6); // ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        break;
-      case SensorPortrait:
-        setRequestedOrientation(7); // ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-        break;
-    }
+    setRequestedOrientation(orientationConst);
   }
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,

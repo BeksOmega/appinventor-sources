@@ -12,27 +12,33 @@ import java.util.Map;
  * Defines a ScreenOrientation type used by the Form component to specify orientation.
  */
 public enum ScreenOrientation implements OptionList<String> {
-  Unspecified("unspecified"),
-  Landscape("landscape"),
-  Portrait("portrait"),
-  Sensor("sensor"),
-  User("user"),
-  Behind("behind"),
-  NoSensor("nosensor"),
-  FullSensor("fullSensor"),
-  ReverseLandscape("reverseLandscape"),
-  ReversePortrait("reversePortrait"),
-  SensorLandscape("sensorLandscape"),
-  SensorPortrait("sensorPortrait");
+  Unspecified("unspecified", 4),  // Should be -1, but we match sensor.
+  Landscape("landscape", 0),
+  Portrait("portrait", 1),
+  Sensor("sensor", 4),
+  User("user", 2),
+  Behind("behind", 3),
+  NoSensor("nosensor", 5),
+  FullSensor("fullSensor", 10),
+  ReverseLandscape("reverseLandscape", 8),
+  ReversePortrait("reversePortrait", 9),
+  SensorLandscape("sensorLandscape", 6),
+  SensorPortrait("sensorPortrait", 7);
 
   private String value;
+  private int orientationConst;
 
-  ScreenOrientation(String anim) {
-    this.value = anim;
+  ScreenOrientation(String val, int orientation) {
+    this.value = val;
+    this.orientationConst = orientation;
   }
 
   public String toUnderlyingValue() {
     return value;
+  }
+
+  public int getOrientationConstant() {
+    return orientationConst;
   }
 
   private static final Map<String, ScreenOrientation> lookup = new HashMap<>();
