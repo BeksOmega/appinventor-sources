@@ -392,8 +392,9 @@ Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
  * @param {string} name The name of the screen to remove.
  */
 Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
-  if (this.screenList_.indexOf(name) != -1) {
-    this.screenList_.splice(this.screenList_.indexOf(name), 1);
+  var index = this.screenList_.indexOf(name);
+  if (index != -1) {
+    this.screenList_.splice(index, 1);
     this.typeBlock_.needsReload.screens = true;
   }
 }
