@@ -404,7 +404,7 @@ Blockly.WorkspaceSvg.prototype.removeScreen = function(name) {
  * @return {!Array<string>} The list of screen names.
  */
 Blockly.WorkspaceSvg.prototype.getScreenList = function() {
-  return this.screenList_.slice();  // Return a clone.
+  return this.screenList_;
 };
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
