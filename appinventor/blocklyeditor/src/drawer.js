@@ -135,9 +135,9 @@ Blockly.Drawer.buildToolkitTree_ = function(jsonToolkit) {
 Blockly.Drawer.prototype.showBuiltin = function(drawerName) {
   drawerName = Blockly.Drawer.PREFIX_ + drawerName;
   var blockSet = this.options.languageTree[drawerName];
-  if(drawerName == "cat_Procedures") {
+  if (drawerName == "cat_Procedures") {
     var newBlockSet = [];
-    for(var i=0;i<blockSet.length;i++) {
+    for (var i = 0; i < blockSet.length; i++) {
       if(!(blockSet[i] == "procedures_callnoreturn" // Include callnoreturn only if at least one defnoreturn declaration
            && this.workspace_.getProcedureDatabase().voidProcedures == 0)
          &&
@@ -209,7 +209,7 @@ Blockly.Drawer.prototype.isShowing = function() {
 
 Blockly.Drawer.prototype.blockListToXMLArray = function(blockList) {
   var xmlArray = [];
-  for(var i = 0; i < blockList.length; i++) {
+  for (var i = 0; i < blockList.length; i++) {
     Array.prototype.push.apply(
         xmlArray, this.blockTypeToXMLArray(blockList[i], null));
   }
@@ -463,16 +463,6 @@ Blockly.Drawer.prototype.blockTypeToXMLArray =
 Blockly.Drawer.prototype.blockTypeToXML = function(blockType, mutatorAttributes) {
     var utils = Blockly.Util.xml;
 
-    function defaultCase() {
-      var xmlString = Blockly.Drawer.getDefaultXMLString(
-          blockType, mutatorAttributes);
-      if (xmlString != null) {
-        return Blockly.Xml.textToDom(xmlString);
-      } else {
-        return utils.blockTypeToXML(blockType, mutatorAttributes);
-      }
-    }
-
     if (mutatorAttributes && mutatorAttributes['is_generic'] === undefined) {
       mutatorAttributes['is_generic'] = !mutatorAttributes['instance_name']
     }
@@ -485,7 +475,13 @@ Blockly.Drawer.prototype.blockTypeToXML = function(blockType, mutatorAttributes)
         return Blockly.Xml.textToDom(
             utils.procedureCallersXMLString(true, this.workspace_));
       default:
-        return defaultCase();
+        var xmlString = Blockly.Drawer.getDefaultXMLString(
+            blockType, mutatorAttributes);
+        if (xmlString != null) {
+          return Blockly.Xml.textToDom(xmlString);
+        } else {
+          return utils.blockTypeToXML(blockType, mutatorAttributes);
+        }
     }
 }
 
@@ -508,7 +504,7 @@ Blockly.Drawer.getDefaultXMLString = function(blockType, mutatorAttributes) {
     var matchingAttributes;
     var allMatch;
     //go through each of the possible matching cases
-    for(var i=0;i<possibleMutatorDefaults.length;i++) {
+    for (var i=0;i<possibleMutatorDefaults.length;i++) {
       matchingAttributes = possibleMutatorDefaults[i].matchingMutatorAttributes;
       //if the object doesn't have a matchingAttributes object, then skip it
       if(!matchingAttributes) {
@@ -517,7 +513,7 @@ Blockly.Drawer.getDefaultXMLString = function(blockType, mutatorAttributes) {
       //go through each of the mutator attributes.
       //if one attribute does not match then move to the next possibility
       allMatch = true;
-      for(var mutatorAttribute in matchingAttributes) {
+      for (var mutatorAttribute in matchingAttributes) {
         if (!matchingAttributes.hasOwnProperty(mutatorAttribute)) continue;
         if(mutatorAttributes[mutatorAttribute] != matchingAttributes[mutatorAttribute]){
           allMatch = false;

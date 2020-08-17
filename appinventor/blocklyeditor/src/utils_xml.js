@@ -27,7 +27,7 @@ Blockly.Util.xml.XMLToArray = function(xml) {
   // [lyn, 11/10/13] Use goog.dom.getChildren rather than .children or
   //   .childNodes to make this code work across browsers.
   var children = goog.dom.getChildren(xml);
-  for(var i = 0, child; child = children[i]; i++) {
+  for (var i = 0, child; child = children[i]; i++) {
     xmlArray.push(child);
   }
   return xmlArray;
@@ -55,7 +55,7 @@ Blockly.Util.xml.blockTypeToXML = function(blockType, opt_attributes) {
  */
 Blockly.Util.xml.mutatorAttributesXmlString = function(mutatorAttributes){
   var xmlString = '<mutation ';
-  for(var attributeName in mutatorAttributes) {
+  for (var attributeName in mutatorAttributes) {
     if (!mutatorAttributes.hasOwnProperty(attributeName)) {
       continue;
     }
@@ -135,7 +135,7 @@ Blockly.Util.xml.valueInputXml = function(name) {
 }
 
 /**
- * Creates an XML Array which defines the block for the given helper key.
+ * Creates the xml which defines the block for the given helper key.
  * @param {HelperKey} helperKey The helper key we want to get the block for.
  */
 Blockly.Util.xml.helperKeyToXML= function(helperKey) {
@@ -146,6 +146,8 @@ Blockly.Util.xml.helperKeyToXML= function(helperKey) {
 }
 
 /**
+ * Creates xml for a value input with the given name with a helper defined by
+ * the given helper key attached.
  * @param {string} name The name of the value input.
  * @param {HelperKey} helperKey Key defining the helper block to create.
  * @return {!Node} XML nodes defining a value input with a helper block attached.
