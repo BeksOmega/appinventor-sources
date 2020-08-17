@@ -2687,7 +2687,7 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // Adds ReceivingState dropdown block.
     5: Blockly.Versioning.makeSetterUseDropdown(
-        'Texting', 'ReceivingEnabled', 'ReceivingState')
+         'Texting', 'ReceivingEnabled', 'ReceivingState')
 
   }, // End Texting
 

@@ -293,8 +293,13 @@ public class PhoneCall extends AndroidNonvisibleComponent implements Component, 
    */
   private class CallStateReceiver extends BroadcastReceiver {
 
-    private CallStatus status; // 0:undetermined, 1:incoming ringed, 2:outgoing dialled,
-                        // 3: incoming answered
+    /**
+     * Defines the current status of the call.
+     * 1: Incoming ringed
+     * 2: Outgoing dialled
+     * 3: Incoming answered
+     */
+    private CallStatus status;
     private String number;
 
     public CallStateReceiver() {
@@ -305,9 +310,9 @@ public class PhoneCall extends AndroidNonvisibleComponent implements Component, 
     @Override
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
-      if(TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)){
+      if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-        if(TelephonyManager.EXTRA_STATE_RINGING.equals(state)){
+        if (TelephonyManager.EXTRA_STATE_RINGING.equals(state)) {
           status = CallStatus.INCOMING_WAITING;
           number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
           if (number == null) {
@@ -316,8 +321,8 @@ public class PhoneCall extends AndroidNonvisibleComponent implements Component, 
             return;
           }
           PhoneCallStartedAbstract(StartedStatus.Incoming, number);
-        } else if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state)){
-          if(status == CallStatus.INCOMING_WAITING){
+        } else if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state)) {
+          if (status == CallStatus.INCOMING_WAITING) {
             status = CallStatus.INCOMING_ANSWERED;
             IncomingCallAnswered(number);
           }
