@@ -68,7 +68,7 @@ Blockly.Blocks.Utilities.YailTypeToBlocklyType = function(yail,inputOrOutput) {
  *     type of.
  * @param {!Blockly.Block} block The block which we will apply the type to. Used
  *     to access the component database etc.
- * @return {string?} The correct string representation of the type, or null.
+ * @return {*} Something to add to the components array, or null/undefined.
  */
 Blockly.Blocks.Utilities.helperKeyToBlocklyType = function(helperKey, block) {
   if (!helperKey) {
@@ -103,6 +103,8 @@ Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key, block) {
  * connection to filter their dropdowns.
  * @param {number=} key The key associated with a filter.
  * @param {!Blockly.Block} block The block to apply the filter to.
+ * @return {Array<!string>} An array of filters for use in filtering an
+ *     attached assets block.
  */
 Blockly.Blocks.Utilities.assetKeyToBlocklyType = function(key, block) {
   return block.getTopWorkspace().getComponentDatabase().getFilter(key);

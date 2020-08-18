@@ -38,7 +38,7 @@ Blockly.Yail['helpers_screen_names'] = function() {
 Blockly.Yail['helpers_assets'] = function() {
   var field = this.getField('ASSET');
   if (!field) {
-    return [Blockly.Yail.quote_(' '), Blockly.Yail.ORDER_ATOMIC];
+    return [Blockly.Yail.quote_(''), Blockly.Yail.ORDER_ATOMIC];
   }
   return [Blockly.Yail.quote_(field.getValue()), Blockly.Yail.ORDER_ATOMIC];
 }

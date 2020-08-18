@@ -134,12 +134,12 @@ Blockly.Blocks['helpers_screen_names'] = {
     this.setOutput(true, utils.YailTypeToBlocklyType('text', utils.OUTPUT));
     this.appendDummyInput()
         .appendField(dropdown, 'SCREEN');
+  },
 
-    this.workspace.addChangeListener(function(e) {
-      if (e.type == AI.Events.SCREEN_SWITCH) {
-        this.setFieldValue(this.getFieldValue('SCREEN'), 'SCREEN');
-      }
-    }.bind(this));
+  onchange: function(e) {
+    if (e.type == AI.Events.SCREEN_SWITCH) {
+      this.setFieldValue(this.getFieldValue('SCREEN'), 'SCREEN');
+    }
   },
 
   domToMutation: function(xml) {
@@ -191,22 +191,22 @@ Blockly.Blocks['helpers_assets'] = {
     this.appendDummyInput('INPUT')
 
     this.addField();
+  },
 
-    this.workspace.addChangeListener(function(e) {
-      if (e.type != AI.Events.SCREEN_SWITCH &&
-          !(e.type == Blockly.Events.MOVE)) {
-        return;
-      }
+  onchange: function(e) {
+    if (e.type != AI.Events.SCREEN_SWITCH &&
+        !(e.type == Blockly.Events.MOVE)) {
+      return;
+    }
 
-      if (this.addField()) {
-        var value = this.getFieldValue('ASSET');
-        var options = this.generateOptions();
-        if (this.isInFlyout && options.length) {
-          value = options[0][1];
-        }
-        this.setFieldValue(value, 'ASSET');
+    if (this.addField()) {
+      var value = this.getFieldValue('ASSET');
+      var options = this.generateOptions();
+      if (this.isInFlyout && options.length) {
+        value = options[0][1];
       }
-    }.bind(this));
+      this.setFieldValue(value, 'ASSET');
+    }
   },
 
   domToMutation: function(xml) {

@@ -2767,6 +2767,7 @@ Blockly.Versioning.AllUpgradeMaps =
     // - Adds dropdown blocks for ScreenAnimation.
     // - Adds dropdown blocks for HorizontalAlignment and VerticalAlignment.
     // - Adds dropdown block for ScreenOrientation.
+    // - Assets helper block was added.
     28: [Blockly.Versioning.makeSetterUseDropdown(
             'Form', 'OpenScreenAnimation', 'ScreenAnimation'),
          Blockly.Versioning.makeSetterUseDropdown(

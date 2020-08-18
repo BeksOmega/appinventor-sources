@@ -1967,7 +1967,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
       if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Asset")) {
         int index = 0;  // Index 0 is the empty filter.
-        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry:
+        for (Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
             mirror.getElementValues().entrySet()) {
           // Make sure we are looking at the value attribute.
           if (!entry.getKey().getSimpleName().contentEquals("value")) {
@@ -1976,8 +1976,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           List<AnnotationValue> values = (List<AnnotationValue>)entry.getValue().getValue();
           List<String> filter = new ArrayList<String>();
           for (AnnotationValue v : values) {
-            filter.add((String)v.getValue());
+            filter.add(((String)v.getValue()).toLowerCase());
           }
+          Collections.sort(filter);
           if (!filters.contains(filter)) {
             filters.add(filter);
           }

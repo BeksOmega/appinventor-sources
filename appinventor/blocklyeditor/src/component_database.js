@@ -529,7 +529,7 @@ Blockly.ComponentDatabase.prototype.processAssetHelper = function(data) {
     }
   }
   // We have to do this because js is very restrictive with array equality.
-  var findIndex = function(acc, cur, idx) {
+  function findIndex(acc, cur, idx) {
     if (acc != -1) {
       return acc;
     }
@@ -544,6 +544,8 @@ Blockly.ComponentDatabase.prototype.processAssetHelper = function(data) {
 
   var index = this.filters_.reduce(findIndex, -1);
   if (index == -1) {
+    // TODO: If filters_ was instead a sorted list we could optimize index
+    //   finding algorithm using a binary search.
     this.filters_.push(filter);
     index = this.filters_.length - 1;
   }
