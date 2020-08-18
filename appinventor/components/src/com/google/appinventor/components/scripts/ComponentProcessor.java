@@ -247,7 +247,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The helper key associated with this parameter, if any.
      */
-    protected HelperKey helper;
+    protected HelperKey<?> helper;
 
     /**
      * Constructs a Parameter.
@@ -270,7 +270,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns the HelperKey associated with this parameter, if one exists. Null otherwise.
      * @return the HelperKey associated with this parameter.
      */
-    protected HelperKey getHelperKey() {
+    protected HelperKey<?> getHelperKey() {
       return helper;
     }
 
@@ -521,7 +521,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The helper key associated with this method's return type.
      */
-    private HelperKey returnHelperKey;
+    private HelperKey<?> returnHelperKey;
     /**
      * Is this method's return type an integer which represents a color?
      */
@@ -557,7 +557,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * 
      * @return the helper key associated with the return type of this method.
      */
-    protected HelperKey getReturnHelperKey() {
+    protected HelperKey<?> getReturnHelperKey() {
       return returnHelperKey;
     }
 
@@ -599,7 +599,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private boolean writable;
     private String componentInfoName;
     private boolean color;
-    private HelperKey helper;
+    private HelperKey<?> helper;
 
     protected Property(
       String name,
@@ -699,7 +699,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns the HelperKey associated with this property, if one exists. Null otherwise.
      * @return the HelperKey associated with this property, if one exists.
      */
-    protected HelperKey getHelperKey() {
+    protected HelperKey<?> getHelperKey() {
       return helper;
     }
 
@@ -1733,8 +1733,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return The created HelperKey if the element does indeed define a helper, null otherwise.
    */
-  private HelperKey elementToHelperKey(Element elem, TypeMirror type) {
-    HelperKey key;
+  private HelperKey<?> elementToHelperKey(Element elem, TypeMirror type) {
+    HelperKey<?> key;
     key = hasOptionListHelper(elem, type);
     if (key != null) {
       return key;
@@ -1755,7 +1755,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return the associated helper key if the element has an OptionList assciated with it.
    */
-  private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
+  private HelperKey<?> hasOptionListHelper(Element elem, TypeMirror type) {
     // Check if the elem type is an OptionList
     if (isOptionList(type)) {
       throw new RuntimeException("Using OptionLists as parameter types is not yet supported. Please " +
@@ -1808,7 +1808,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param element the Element describing a class which implements the OptionList interface.
    * @return the HelperKey associated with the given element.
    */
-  private HelperKey optionListToHelperKey(Element optionList) {
+  private HelperKey<String> optionListToHelperKey(Element optionList) {
     String name = optionList.getSimpleName().toString();
     // We haven't seen this type of option list before, so add it.
     if (optionLists.get(name) == null) {
@@ -1963,7 +1963,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return the associated helper key if the element has an @Asset annotation.
    */
-  private HelperKey hasAssetsHelper(Element elem, TypeMirror type) {
+  private HelperKey<Integer> hasAssetsHelper(Element elem, TypeMirror type) {
     for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
       if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Asset")) {
         int index = 0;  // Index 0 is the empty filter.
