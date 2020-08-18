@@ -384,6 +384,7 @@ Blockly.WorkspaceSvg.prototype.addScreen = function(name) {
     this.screenList_.push(name);
     this.typeBlock_.needsReload.screens = true;
   }
+};
 
 //noinspection JSUnusedGlobalSymbols Called from BlocklyPanel.java
 /**
