@@ -1867,6 +1867,7 @@ public final class YoungAndroidFormUpgrader {
   ) {
     if (srcCompVersion < 2) {
       // Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
+      // Add UnltrasonicSensorMode dropdown block.
       srcCompVersion = 2;
     }
     return srcCompVersion;

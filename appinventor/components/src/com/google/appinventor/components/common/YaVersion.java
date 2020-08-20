@@ -514,7 +514,7 @@ public class YaVersion {
   // - BLOCKS_LANGUAGE_VERSION was incremented to 32
 
   // TODO: Bump this before merge. Include notes about all upgraded components.
-  public static final int YOUNG_ANDROID_VERSION = 207;
+  public static final int YOUNG_ANDROID_VERSION = 208;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -1089,6 +1089,7 @@ public class YaVersion {
 
   // For EV3_ULTRASONICSENSOR_COMPONENT_VERSION 2:
   // - Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
+  // - Add UltrasonicSensorMode dropdown block.
   public static final int EV3_ULTRASONICSENSOR_COMPONENT_VERSION = 2;
 
   public static final int EV3_SOUND_COMPONENT_VERSION = 1;
