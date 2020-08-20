@@ -1087,7 +1087,9 @@ public class YaVersion {
 
   public static final int EV3_TOUCHSENSOR_COMPONENT_VERSION = 1;
 
-  public static final int EV3_ULTRASONICSENSOR_COMPONENT_VERSION = 1;
+  // For EV3_ULTRASONICSENSOR_COMPONENT_VERSION 2:
+  // - Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
+  public static final int EV3_ULTRASONICSENSOR_COMPONENT_VERSION = 2;
 
   public static final int EV3_SOUND_COMPONENT_VERSION = 1;
 

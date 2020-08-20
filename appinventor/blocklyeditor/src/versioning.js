@@ -2368,7 +2368,13 @@ Blockly.Versioning.AllUpgradeMaps =
   "Ev3UltrasonicSensor": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    // Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
+    2: [Blockly.Versioning.methodToSetterWithValue(
+          'Ev3UltrasonicSensor', 'SetCmUnit', 'Unit', 'cm'),
+        Blockly.Versioning.methodToSetterWithValue(
+          'Ev3UltrasonicSensor', 'SetInchUnit', 'Unit', 'inch')]
 
   }, // End Ev3UltrasonicSensor upgraders
 

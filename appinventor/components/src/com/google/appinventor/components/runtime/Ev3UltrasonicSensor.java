@@ -292,6 +292,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
    * Measure the distance in centimeters.
    */
   @SimpleFunction(description = "Measure the distance in centimeters.")
+  @Deprecated
   public void SetCmUnit() {
     setMode(UltrasonicSensorMode.Centimeters);
   }
@@ -300,6 +301,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
    * Measure the distance in inches.
    */
   @SimpleFunction(description = "Measure the distance in inches.")
+  @Deprecated
   public void SetInchUnit() {
     setMode(UltrasonicSensorMode.Inches);
   }
