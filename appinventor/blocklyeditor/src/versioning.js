@@ -988,7 +988,7 @@ Blockly.Versioning.makeMethodUseHelper =
         for (var j = 0, child; child = method.children[j]; j++) {
           if (child.tagName == 'value' && 
               child.getAttribute('name') == 'ARG' + argNum) {
-            replaceFunc(child);
+            replaceFunc(child, workspace);
             break;
           }
         }
@@ -1032,7 +1032,8 @@ Blockly.Versioning.makeSetterUseHelper =
         if (mutation.getAttribute('set_or_get') != 'set') {
           continue;
         }
-        replaceFunc(Blockly.Versioning.firstChildWithTagName(prop, 'value'));
+        replaceFunc(Blockly.Versioning.firstChildWithTagName(prop, 'value'),
+            workspace);
       }
       return dom;
     }
@@ -1199,7 +1200,7 @@ Blockly.Versioning.tryReplaceBlockWithScreen = function(valueNode) {
  * assets block. the current block is replaced iff it is a text block.
  * @param {Element} valueNode The node to modify.
  */
-Blockly.Versioning.tryReplaceBlockWithAssets = function(valueNode) {
+Blockly.Versioning.tryReplaceBlockWithAssets = function(valueNode, workspace) {
   if (!valueNode) {
     return;
   }
@@ -1217,6 +1218,10 @@ Blockly.Versioning.tryReplaceBlockWithAssets = function(valueNode) {
   }
   var field = Blockly.Versioning.firstChildWithTagName(targetNode, 'field');
   var targetValue = field.textContent;
+  if (workspace.getAssetList().indexOf(targetValue) == -1) {
+    // This is probably an http request or something. Don't upgrade.
+    return;
+  }
 
   valueNode.removeChild(targetNode);
   var newBlock = document.createElement('block');
