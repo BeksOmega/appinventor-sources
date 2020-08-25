@@ -175,12 +175,16 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
     // Make sure mode is a valid NxtMotorMode.
     NxtMotorMode motorMode = NxtMotorMode.fromUnderlyingValue(mode);
     if (motorMode == null) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_INVALID_MOTOR_MODE, mode);
       return;
     }
 
     // Make sure regulationMode is a valid NxtRegulationMode.
     NxtRegulationMode regMode = NxtRegulationMode.fromUnderlyingValue(regulationMode);
     if (regMode == null) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_INVALID_REGULATION_MODE, regMode);
       return;
     }
 
@@ -219,12 +223,16 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
     // Make sure sensorType is a valid NxtSensorType.
     NxtSensorType type = NxtSensorType.fromUnderlyingValue(sensorType);
     if (type == null) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_INVALID_SENSOR_TYPE, type);
       return;
     }
 
     // Make sure sensorMode is a valid NxtSensorMode.
     NxtSensorMode mode = NxtSensorMode.fromUnderlyingValue(sensorMode);
     if (mode == null) {
+      form.dispatchErrorOccurredEvent(this, functionName,
+          ErrorMessages.ERROR_NXT_INVALID_SENSOR_MODE, mode);
       return;
     }
 
