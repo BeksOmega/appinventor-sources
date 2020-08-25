@@ -46,6 +46,3 @@ public enum NxtMotorMode implements OptionList<Integer> {
     return lookup.get(mode);
   }
 }
-
-
-

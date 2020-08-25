@@ -1,4 +1,3 @@
-
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2020 MIT, All rights reserved
 // Released under the Apache License, Version 2.0

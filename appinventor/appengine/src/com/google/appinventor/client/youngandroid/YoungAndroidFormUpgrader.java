@@ -1872,9 +1872,8 @@ public final class YoungAndroidFormUpgrader {
   }
 
   private static int upgradeNxtDirectCommandsProperties(
-    Map<String, JSONValue> componentProperties,
-    int srcCompVersion
-  ) {
+      Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
     if (srcCompVersion < 2) {
       // Adds dropdown blocks.
       srcCompVersion = 2;
@@ -1921,5 +1920,4 @@ public final class YoungAndroidFormUpgrader {
     dialogBox.center();
     dialogBox.show();
   }
-
 }

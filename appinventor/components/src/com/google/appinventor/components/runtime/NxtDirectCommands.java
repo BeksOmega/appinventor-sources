@@ -152,14 +152,13 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
 
   @SimpleFunction(description = "Sets the output state of a motor on the robot.")
   public void SetOutputState(
-    @Options(NxtMotorPort.class) String motorPortLetter,
-    int power,
-    @Options(NxtMotorMode.class) int mode,
-    @Options(NxtRegulationMode.class) int regulationMode,
-    int turnRatio,
-    @Options(NxtRunState.class) int runState,
-    long tachoLimit
-  ) {
+      @Options(NxtMotorPort.class) String motorPortLetter,
+      int power,
+      @Options(NxtMotorMode.class) int mode,
+      @Options(NxtRegulationMode.class) int regulationMode,
+      int turnRatio,
+      @Options(NxtRunState.class) int runState,
+      long tachoLimit) {
     String functionName = "SetOutputState";
     if (!checkBluetooth(functionName)) {
       return;
@@ -201,10 +200,9 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
 
   @SimpleFunction(description = "Configure an input sensor on the robot.")
   public void SetInputMode(
-    @Options(NxtSensorPort.class) String sensorPortLetter,
-    @Options(NxtSensorType.class) int sensorType,
-    @Options(NxtSensorMode.class) int sensorMode
-  ) {
+      @Options(NxtSensorPort.class) String sensorPortLetter,
+      @Options(NxtSensorType.class) int sensorType,
+      @Options(NxtSensorMode.class) int sensorMode) {
     String functionName = "SetInputMode";
     if (!checkBluetooth(functionName)) {
       return;
@@ -343,9 +341,8 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
 
   @SimpleFunction(description = "Reset motor position.")
   public void ResetMotorPosition(
-    @Options(NxtMotorPort.class) String motorPortLetter,
-    boolean relative
-  ) {
+      @Options(NxtMotorPort.class) String motorPortLetter,
+      boolean relative) {
     String functionName = "ResetMotorPosition";
     if (!checkBluetooth(functionName)) {
       return;
@@ -447,10 +444,9 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
   @SimpleFunction(description = "Writes low speed data to an input sensor on the robot. " +
       "Assumes sensor type has been configured via SetInputMode.")
   public void LsWrite(
-    @Options(NxtSensorPort.class) String sensorPortLetter,
-    YailList list,
-    int rxDataLength
-  ) {
+      @Options(NxtSensorPort.class) String sensorPortLetter,
+      YailList list,
+      int rxDataLength) {
     String functionName = "LsWrite";
     if (!checkBluetooth(functionName)) {
       return;
@@ -499,7 +495,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
 
   @SimpleFunction(description = "Reads unsigned low speed data from an input sensor on the " +
       "robot. Assumes sensor type has been configured via SetInputMode.")
-  public List<Integer> LsRead(@Options(NxtSensorPort.class)String sensorPortLetter) {
+  public List<Integer> LsRead(@Options(NxtSensorPort.class) String sensorPortLetter) {
     String functionName = "LsRead";
     if (!checkBluetooth(functionName)) {
       return new ArrayList<Integer>();

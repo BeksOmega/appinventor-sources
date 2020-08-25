@@ -47,5 +47,3 @@ public enum NxtRegulationMode implements OptionList<Integer> {
     return lookup.get(mode);
   }
 }
-
-

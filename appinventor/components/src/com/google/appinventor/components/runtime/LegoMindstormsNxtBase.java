@@ -164,15 +164,14 @@ public class LegoMindstormsNxtBase extends AndroidNonvisibleComponent
   }
 
   protected final void setOutputState(
-    String functionName,
-    NxtMotorPort port,
-    int power,
-    NxtMotorMode mode,
-    NxtRegulationMode regulationMode,
-    int turnRatio,
-    NxtRunState runState,
-    long tachoLimit
-  ) {
+      String functionName,
+      NxtMotorPort port,
+      int power,
+      NxtMotorMode mode,
+      NxtRegulationMode regulationMode,
+      int turnRatio,
+      NxtRunState runState,
+      long tachoLimit) {
     setOutputState(
         functionName,
         port.toInt(),
@@ -195,11 +194,10 @@ public class LegoMindstormsNxtBase extends AndroidNonvisibleComponent
   }
 
   protected final void setInputMode(
-    String functionName,
-    NxtSensorPort port,
-    NxtSensorType type,
-    NxtSensorMode mode
-  ) {
+      String functionName,
+      NxtSensorPort port,
+      NxtSensorType type,
+      NxtSensorMode mode) {
     setInputMode(functionName, port.toInt(), type.toUnderlyingValue(), mode.toUnderlyingValue());
   }
 
