@@ -1838,7 +1838,8 @@ public final class YoungAndroidFormUpgrader {
   }
 
   private static int upgradeEv3ColorSensorProperties(
-      Map<String, JSONValue> componentProperties, int srcCompVersion) {
+      Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
     if (srcCompVersion < 2) {
       // Remove SetAmbientMode, SetColorMode, and SetReflectedMode. Use Mode setter instead.
       // Add ColorSensorMode dropdown.
@@ -1848,7 +1849,8 @@ public final class YoungAndroidFormUpgrader {
   }
 
   private static int upgradeEv3GyroSensorProperties(
-      Map<String, JSONValue> componentProperties, int srcCompVersion) {
+      Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
     if (srcCompVersion < 2) {
       // Remove SetAngleMode and SetRateMode. Use Mode setter instead.
       // Add GyroSensorMode dropdown block.
@@ -1858,7 +1860,8 @@ public final class YoungAndroidFormUpgrader {
   }
 
   private static int upgradeEv3UltrasonicSensorProperties(
-      Map<String, JSONValue> componentProperties, int srcCompVersion) {
+      Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
     if (srcCompVersion < 2) {
       // Remove SetCmUnit and SetInchUnit. Use Unit setter instead.
       // Add UnltrasonicSensorMode dropdown block.
