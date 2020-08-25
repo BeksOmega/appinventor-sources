@@ -15,7 +15,7 @@ import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
-import com.google.appinventor.components.common.UltrasonicSensorMode;
+import com.google.appinventor.components.common.UltrasonicSensorUnit;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import android.os.Handler;
@@ -43,7 +43,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
   private static final int DEFAULT_TOP_OF_RANGE = 90;
   private static final int DELAY_MILLISECONDS = 50;
 
-  private UltrasonicSensorMode mode = UltrasonicSensorMode.Centimeters;
+  private UltrasonicSensorUnit mode = UltrasonicSensorUnit.Centimeters;
   private Handler eventHandler;
   private final Runnable sensorValueChecker;
   private double previousDistance = -1.0;
@@ -98,7 +98,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
     BelowRangeEventEnabled(false);
     AboveRangeEventEnabled(false);
     WithinRangeEventEnabled(false);
-    UnitAbstract(UltrasonicSensorMode.Centimeters);
+    UnitAbstract(UltrasonicSensorUnit.Centimeters);
   }
 
   @SimpleFunction(description = "Returns the current distance in centimeters as a value between " +
@@ -109,8 +109,8 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
   }
 
   private double getDistance(String functionName) {
-    double distance = readInputSI(
-      functionName, 0, sensorPortNumber, SENSOR_TYPE, mode.toInt());
+    double distance = readInputSI(functionName, 0, sensorPortNumber, SENSOR_TYPE,
+        mode.toInt());
     return distance == 255 ? -1.0 : distance;
   }
 
@@ -252,11 +252,11 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
    * Specifies the unit of distance.
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_LEGO_EV3_ULTRASONIC_SENSOR_MODE,
-                    defaultValue = "cm")
+      defaultValue = "cm")
   @SimpleProperty
-  public void Unit(@Options(UltrasonicSensorMode.class) String unitName) {
-    // Make sure unitName is a valid UltrasonicSensorMode.
-    UltrasonicSensorMode unit = UltrasonicSensorMode.fromUnderlyingValue(unitName);
+  public void Unit(@Options(UltrasonicSensorUnit.class) String unitName) {
+    // Make sure unitName is a valid UltrasonicSensorUnit.
+    UltrasonicSensorUnit unit = UltrasonicSensorUnit.fromUnderlyingValue(unitName);
     if (unit == null) {
       form.dispatchErrorOccurredEvent(
         this, "Unit", ErrorMessages.ERROR_EV3_ILLEGAL_ARGUMENT, unitName);
@@ -268,7 +268,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
   /**
    * Sets the unit of this ultrasonic sensor.
    */
-  public void UnitAbstract(UltrasonicSensorMode unit) {
+  public void UnitAbstract(UltrasonicSensorUnit unit) {
     setMode(unit);
   }
 
@@ -277,14 +277,14 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
    */
   @SimpleProperty(description = "The distance unit, which can be either \"cm\" or \"inch\".",
                   category = PropertyCategory.BEHAVIOR)
-  public @Options(UltrasonicSensorMode.class) String Unit() {
+  public @Options(UltrasonicSensorUnit.class) String Unit() {
     return mode.toUnderlyingValue();
   }
 
   /**
    * Returns the current unit of distance for this ultrasonic sensor.
    */
-  public UltrasonicSensorMode UnitAbstract() {
+  public UltrasonicSensorUnit UnitAbstract() {
     return mode;
   }
 
@@ -294,7 +294,7 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
   @SimpleFunction(description = "Measure the distance in centimeters.")
   @Deprecated
   public void SetCmUnit() {
-    setMode(UltrasonicSensorMode.Centimeters);
+    setMode(UltrasonicSensorUnit.Centimeters);
   }
 
   /**
@@ -303,10 +303,10 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
   @SimpleFunction(description = "Measure the distance in inches.")
   @Deprecated
   public void SetInchUnit() {
-    setMode(UltrasonicSensorMode.Inches);
+    setMode(UltrasonicSensorUnit.Inches);
   }
 
-  private void setMode(UltrasonicSensorMode mode) {
+  private void setMode(UltrasonicSensorUnit mode) {
     previousDistance = -1.0;
     mode = mode;
   }

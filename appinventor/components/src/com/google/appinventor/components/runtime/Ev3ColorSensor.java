@@ -382,6 +382,7 @@ public class Ev3ColorSensor extends LegoMindstormsEv3Sensor implements Deleteabl
     if (mode == null) {
       form.dispatchErrorOccurredEvent(
           this, "Mode", ErrorMessages.ERROR_EV3_ILLEGAL_ARGUMENT, modeName);
+      return;
     }
     setMode(mode);
   }

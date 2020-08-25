@@ -39,17 +39,10 @@ import android.os.Handler;
 public class Ev3GyroSensor extends LegoMindstormsEv3Sensor implements Deleteable {
   private static final int DELAY_MILLISECONDS = 50;
   private static final int SENSOR_TYPE = 32;
-  //private static final int SENSOR_MODE_ANGLE = 0;
-  //private static final int SENSOR_MODE_RATE = 1;
-  //private static final String SENSOR_MODE_ANGLE_STRING = "angle";
-  //private static final String SENSOR_MODE_RATE_STRING = "rate";
-  //private static final String DEFAULT_SENSOR_MODE_STRING = SENSOR_MODE_ANGLE_STRING;
 
   private Handler eventHandler;
   private final Runnable sensorValueChecker;
   private GyroSensorMode mode = GyroSensorMode.Angle;
-  //private int mode = SENSOR_MODE_ANGLE;
-  //private String modeString = SENSOR_MODE_ANGLE_STRING;
   private double previousValue = -1.0;
   private boolean sensorValueChangedEventEnabled = false;
 
@@ -114,6 +107,7 @@ public class Ev3GyroSensor extends LegoMindstormsEv3Sensor implements Deleteable
     if (gyroMode == null) {
       form.dispatchErrorOccurredEvent(
           this, "Mode", ErrorMessages.ERROR_EV3_ILLEGAL_ARGUMENT, modeName);
+      return;
     }
     setMode(gyroMode);
   }
@@ -196,8 +190,8 @@ public class Ev3GyroSensor extends LegoMindstormsEv3Sensor implements Deleteable
   }
 
   private void setMode(GyroSensorMode newMode) {
-    // TODO: I imagine this function should reset the previousValue, similar to how the ColorSensor
-    //   works. But I don't have an Ev3 so I can't test.
+    // TODO (#2291): I imagine this function should reset the previousValue, similar to how the
+    //   ColorSensor works. But I don't have an Ev3 so I can't test.
     mode = newMode;
   }
 

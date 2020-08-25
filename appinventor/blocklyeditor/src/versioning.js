@@ -1037,11 +1037,9 @@ Blockly.Versioning.makeSetterUseDropdown =
 Blockly.Versioning.methodToSetterWithValue =
   function(componentType, methodName, propertyName, value) {
     return function(blocksRep) {
-      console.log('running');
       var dom = Blockly.Versioning.ensureDom(blocksRep);
       var methods = Blockly.Versioning.findAllMethodCalls(
           dom, componentType, methodName);
-      console.log('found methods: ', methods);
       for (var i = 0, method; method = methods[i]; i++) {
         method.setAttribute('type', 'component_set_get');
         var mutation = Blockly.Versioning.firstChildWithTagName(method, 'mutation');
@@ -1062,10 +1060,8 @@ Blockly.Versioning.methodToSetterWithValue =
               '</block>' +
             '</value>';
         }
-        console.log('child text:', childText);
         var childXml = Blockly.Versioning.xmlBlockTextToDom(childText);
         method.appendChild(childXml);
-        console.log('new method xml:', method);
       }
       return dom;
     }
@@ -2376,7 +2372,7 @@ Blockly.Versioning.AllUpgradeMaps =
         Blockly.Versioning.methodToSetterWithValue(
           'Ev3UltrasonicSensor', 'SetInchUnit', 'Unit', 'inch'),
         Blockly.Versioning.makeSetterUseDropdown(
-          'Ev3UltrasonicSensor', 'Unit', 'UltrasonicSensorMode')]
+          'Ev3UltrasonicSensor', 'Unit', 'UltrasonicSensorUnit')]
 
   }, // End Ev3UltrasonicSensor upgraders
 
