@@ -1277,7 +1277,7 @@ public class Form extends AppInventorCompatActivity
   @SimpleProperty(
       category = PropertyCategory.APPEARANCE,
       description = "The screen background image.")
-  public void BackgroundImage(@Asset({".jpg", ".jpeg", ".png", ".gif"}) String path) {
+  public void BackgroundImage(@Asset String path) {
     backgroundImagePath = (path == null) ? "" : path;
 
     try {

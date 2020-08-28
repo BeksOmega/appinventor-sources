@@ -195,7 +195,7 @@ public final class VideoPlayer extends AndroidViewComponent implements
           + "name of the video file, which should be added in the Designer.",
       category = PropertyCategory.BEHAVIOR)
   @UsesPermissions(READ_EXTERNAL_STORAGE)
-  public void Source(@Asset({".mp4", ".3gp"}) String path) {
+  public void Source(@Asset String path) {
     final String tempPath = (path == null) ? "" : path;
     if (MediaUtil.isExternalFile(tempPath)
         && container.$form().isDeniedPermission(READ_EXTERNAL_STORAGE)) {

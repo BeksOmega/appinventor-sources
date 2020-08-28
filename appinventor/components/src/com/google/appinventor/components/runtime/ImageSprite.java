@@ -138,7 +138,7 @@ public class ImageSprite extends Sprite {
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET,
       defaultValue = "")
   @SimpleProperty
-  public void Picture(@Asset({".jpg", ".jpeg", ".png", ".gif"}) String path) {
+  public void Picture(@Asset String path) {
     picturePath = (path == null) ? "" : path;
     try {
       drawable = MediaUtil.getBitmapDrawable(form, picturePath);

@@ -276,7 +276,7 @@ public class Marker extends MapFeatureBaseWithFill implements MapMarker {
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET)
   @SimpleProperty
-  public void ImageAsset(@Asset({".jpg", ".jpeg", ".png", ".gif", ".svg"}) String path) {
+  public void ImageAsset(@Asset String path) {
     Log.d(TAG, "ImageAsset");
     this.imagePath = path;
     map.getController().updateFeatureImage(this);
