@@ -146,8 +146,7 @@ public final class YandexTranslate extends AndroidNonvisibleComponent {
    */
   public void RequestTranslationAbstract(
     YandexLang languageToTranslateTo,
-    String textToTranslate
-  ) {
+    String textToTranslate) {
     // Usually when we are upgrading components to use dropdown blocks we make the Abstract function
     // the "true" function. But in this case I think it makes more sense to use the concret one.
     RequestTranslation(languageToTranslateTo.toUnderlyingValue(), textToTranslate);
