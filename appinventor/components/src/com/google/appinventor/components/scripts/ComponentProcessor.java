@@ -210,11 +210,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   protected final Map<String, OptionList> optionLists = Maps.newTreeMap();
 
   /**
-   * A list of asset filters, which are in fact lists of strings. Initialized with an empty filter.
+   * A list of asset filters, which are in fact lists of strings. This gets intialized with an empty
+   * filter by the ComponentProcessor constructor.
    */
-  protected final List<List<String>> filters = new ArrayList<List<String>>() {{
-    add(new ArrayList<String>(0));
-  }};
+  protected List<List<String>> filters;
 
   private final List<String> componentTypes = Lists.newArrayList();
 
@@ -224,6 +223,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * from O(n^2) to O(n) by tracking visited nodes to prevent repeat explorations of the class tree.
    */
   private final Set<String> visitedTypes = new HashSet<>();
+
+  public ComponentProcessor() {
+    filters = new ArrayList<List<String>>();
+    filters.add(new ArrayList<String>());
+  }
 
   /**
    * Represents a parameter consisting of a name and a type.
@@ -247,7 +251,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The helper key associated with this parameter, if any.
      */
-    protected HelperKey<?> helper;
+    protected HelperKey helper;
 
     /**
      * Constructs a Parameter.
@@ -270,7 +274,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns the HelperKey associated with this parameter, if one exists. Null otherwise.
      * @return the HelperKey associated with this parameter.
      */
-    protected HelperKey<?> getHelperKey() {
+    protected HelperKey getHelperKey() {
       return helper;
     }
 
@@ -521,7 +525,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * The helper key associated with this method's return type.
      */
-    private HelperKey<?> returnHelperKey;
+    private HelperKey returnHelperKey;
     /**
      * Is this method's return type an integer which represents a color?
      */
@@ -557,7 +561,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * 
      * @return the helper key associated with the return type of this method.
      */
-    protected HelperKey<?> getReturnHelperKey() {
+    protected HelperKey getReturnHelperKey() {
       return returnHelperKey;
     }
 
@@ -599,7 +603,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private boolean writable;
     private String componentInfoName;
     private boolean color;
-    private HelperKey<?> helper;
+    private HelperKey helper;
 
     protected Property(
       String name,
@@ -699,7 +703,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * Returns the HelperKey associated with this property, if one exists. Null otherwise.
      * @return the HelperKey associated with this property, if one exists.
      */
-    protected HelperKey<?> getHelperKey() {
+    protected HelperKey getHelperKey() {
       return helper;
     }
 
@@ -739,19 +743,18 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   /**
    * A key that allows you to access info about a helper block.
    * 
-   * Currently HelperKeys are only used to define OptionList style helper blocks. Aka dropdown
-   * blocks for the current UI implementation in the blocks editor. In the future helper keys could
-   * be used to define other kinds of helper blocks like range blocks, default color blocks, etc.
+   * This class could be generic, and we could use subtyping to define the different HelperTypes
+   * but I (Beka) think it makes more sense to make this closely match the JavaScript implementation.
    */
-  protected final class HelperKey<T> {
+  protected final class HelperKey {
     private HelperType helperType;
 
-    private T key;
+    private Object key;
 
     /**
      * Creates a HelperKey which can be used to access data about a helper block.
      */
-    protected HelperKey(HelperType type, T key) {
+    protected HelperKey(HelperType type, Object key) {
       this.helperType = type;
       this.key = key;
     }
@@ -770,7 +773,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
      * If the helper block doesn't need any special data, this can just return null.
      * @return key to the helper data.
      */
-    protected T getKey() {
+    protected Object getKey() {
       return key;
     }
   }
@@ -1733,8 +1736,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return The created HelperKey if the element does indeed define a helper, null otherwise.
    */
-  private HelperKey<?> elementToHelperKey(Element elem, TypeMirror type) {
-    HelperKey<?> key;
+  private HelperKey elementToHelperKey(Element elem, TypeMirror type) {
+    HelperKey key;
     key = hasOptionListHelper(elem, type);
     if (key != null) {
       return key;
@@ -1755,7 +1758,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return the associated helper key if the element has an OptionList assciated with it.
    */
-  private HelperKey<?> hasOptionListHelper(Element elem, TypeMirror type) {
+  private HelperKey hasOptionListHelper(Element elem, TypeMirror type) {
     // Check if the elem type is an OptionList
     if (isOptionList(type)) {
       throw new RuntimeException("Using OptionLists as parameter types is not yet supported. Please " +
@@ -1808,7 +1811,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param element the Element describing a class which implements the OptionList interface.
    * @return the HelperKey associated with the given element.
    */
-  private HelperKey<String> optionListToHelperKey(Element optionList) {
+  private HelperKey optionListToHelperKey(Element optionList) {
     String name = optionList.getSimpleName().toString();
     // We haven't seen this type of option list before, so add it.
     if (optionLists.get(name) == null) {
@@ -1818,7 +1821,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       }
     }
     // This helper key is storing info about an OptionList.
-    return new HelperKey<String>(HelperType.OPTION_LIST, name);
+    return new HelperKey(HelperType.OPTION_LIST, name);
   }
 
   /**
@@ -1963,7 +1966,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * @param type the TypeMirror representing the type of that element.
    * @return the associated helper key if the element has an @Asset annotation.
    */
-  private HelperKey<Integer> hasAssetsHelper(Element elem, TypeMirror type) {
+  private HelperKey hasAssetsHelper(Element elem, TypeMirror type) {
     for (AnnotationMirror mirror : elem.getAnnotationMirrors()) {
       if (mirror.getAnnotationType().asElement().getSimpleName().contentEquals("Asset")) {
         int index = 0;  // Index 0 is the empty filter.
@@ -1984,7 +1987,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
           }
           index = filters.indexOf(filter);
         }
-        return new HelperKey<Integer>(HelperType.ASSET, index);
+        return new HelperKey(HelperType.ASSET, index);
       }
     }
     return null;

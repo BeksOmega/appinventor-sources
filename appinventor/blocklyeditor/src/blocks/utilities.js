@@ -103,7 +103,7 @@ Blockly.Blocks.Utilities.optionListKeyToBlocklyType = function(key, block) {
  * connection to filter their dropdowns.
  * @param {number=} key The key associated with a filter.
  * @param {!Blockly.Block} block The block to apply the filter to.
- * @return {Array<!string>} An array of filters for use in filtering an
+ * @return {Array<!string>=} An array of filters for use in filtering an
  *     attached assets block.
  */
 Blockly.Blocks.Utilities.assetKeyToBlocklyType = function(key, block) {
