@@ -306,9 +306,9 @@ public class Ev3UltrasonicSensor extends LegoMindstormsEv3Sensor implements Dele
     setMode(UltrasonicSensorUnit.Inches);
   }
 
-  private void setMode(UltrasonicSensorUnit mode) {
+  private void setMode(UltrasonicSensorUnit newMode) {
     previousDistance = -1.0;
-    mode = mode;
+    mode = newMode;
   }
 
   // Deleteable implementation
