@@ -1905,6 +1905,7 @@ public final class YoungAndroidFormUpgrader {
       // Add UnltrasonicSensorMode dropdown block.
       srcCompVersion = 2;
     }
+    return srcCompVersion;
   }
 
   private static int upgradeNxtDirectCommandsProperties(
