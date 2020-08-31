@@ -38,7 +38,7 @@ public enum NxtRegulationMode implements OptionList<Integer> {
   private static final Map<Integer, NxtRegulationMode> lookup = new HashMap<>();
 
   static {
-    for(NxtRegulationMode mode : NxtRegulationMode.values()) {
+    for (NxtRegulationMode mode : NxtRegulationMode.values()) {
       lookup.put(mode.toUnderlyingValue(), mode);
     }
   }

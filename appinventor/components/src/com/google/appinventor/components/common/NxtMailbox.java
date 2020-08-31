@@ -46,7 +46,7 @@ public enum NxtMailbox implements OptionList<Integer> {
   private static final Map<Integer, NxtMailbox> lookup = new HashMap<>();
 
   static {
-    for(NxtMailbox box : NxtMailbox.values()) {
+    for (NxtMailbox box : NxtMailbox.values()) {
       lookup.put(box.toUnderlyingValue(), box);
     }
   }

@@ -49,7 +49,7 @@ public enum NxtSensorType implements OptionList<Integer> {
   private static final Map<Integer, NxtSensorType> lookup = new HashMap<>();
 
   static {
-    for(NxtSensorType type : NxtSensorType.values()) {
+    for (NxtSensorType type : NxtSensorType.values()) {
       lookup.put(type.toUnderlyingValue(), type);
     }
   }

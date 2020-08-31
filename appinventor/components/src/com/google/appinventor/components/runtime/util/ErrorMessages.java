@@ -390,13 +390,13 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_NXT_INVALID_GENERATE_COLOR,
         "The GenerateColor property is limited to None, Red, Green, or Blue.");
     errorMessages.put(ERROR_NXT_INVALID_MOTOR_MODE,
-        "%s is an invalid NXT motor mode.");
+        "%d is an invalid NXT motor mode.");
     errorMessages.put(ERROR_NXT_INVALID_REGULATION_MODE,
-        "%s is an invalid NXT motor regulation mode.");
+        "%d is an invalid NXT motor regulation mode.");
     errorMessages.put(ERROR_NXT_INVALID_SENSOR_TYPE,
-        "%s is an invalid NXT sensor type.");
+        "%d is an invalid NXT sensor type.");
     errorMessages.put(ERROR_NXT_INVALID_SENSOR_MODE,
-        "%s is an invalid NXT sensor mode.");
+        "%d is an invalid NXT sensor mode.");
     // LegoMindstormsEv3 errors
     errorMessages.put(ERROR_EV3_BLUETOOTH_NOT_SET,
         "The Bluetooth property has not been set.");

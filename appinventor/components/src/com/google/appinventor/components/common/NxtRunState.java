@@ -37,7 +37,7 @@ public enum NxtRunState implements OptionList<Integer> {
   private static final Map<Integer, NxtRunState> lookup = new HashMap<>();
 
   static {
-    for(NxtRunState state : NxtRunState.values()) {
+    for (NxtRunState state : NxtRunState.values()) {
       lookup.put(state.toUnderlyingValue(), state);
     }
   }

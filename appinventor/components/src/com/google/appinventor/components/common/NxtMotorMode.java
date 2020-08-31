@@ -37,7 +37,7 @@ public enum NxtMotorMode implements OptionList<Integer> {
   private static final Map<Integer, NxtMotorMode> lookup = new HashMap<>();
 
   static {
-    for(NxtMotorMode mode : NxtMotorMode.values()) {
+    for (NxtMotorMode mode : NxtMotorMode.values()) {
       lookup.put(mode.toUnderlyingValue(), mode);
     }
   }

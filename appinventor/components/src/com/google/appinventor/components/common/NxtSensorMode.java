@@ -40,7 +40,7 @@ public enum NxtSensorMode implements OptionList<Integer> {
   private static final Map<Integer, NxtSensorMode> lookup = new HashMap<>();
 
   static {
-    for(NxtSensorMode mode : NxtSensorMode.values()) {
+    for (NxtSensorMode mode : NxtSensorMode.values()) {
       lookup.put(mode.toUnderlyingValue(), mode);
     }
   }
