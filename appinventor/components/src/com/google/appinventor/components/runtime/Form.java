@@ -1059,8 +1059,7 @@ public class Form extends AppInventorCompatActivity
   public void PermissionDenied(
       Component component,
       String functionName,
-      @Options(Permission.class) String permissionName
-  ) {
+      @Options(Permission.class) String permissionName) {
     if (permissionName.startsWith("android.permission.")) {
       // Forward compatibility with iOS so that we don't have to pass around Android-specific names
       permissionName = permissionName.replace("android.permission.", "");
@@ -1119,7 +1118,7 @@ public class Form extends AppInventorCompatActivity
   }
 
   /**
-   * Asks the user to grant access toa sensitive permission.
+   * Asks the user to grant access to a sensitive permission.
    */
   public void AskForPermissionAbstract(Permission permission) {
     // Usually when we are upgrading components to use dropdown blocks we make the Abstract function
