@@ -1433,7 +1433,7 @@ public class Form extends AppInventorCompatActivity
    * Returns the requested screen orientation.
    */
   public ScreenOrientation ScreenOrientationAbstract() {
-    switch(getRequestedOrientation()) {
+    switch (getRequestedOrientation()) {
       case ActivityInfo.SCREEN_ORIENTATION_BEHIND:
         return ScreenOrientation.Behind;
       case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:

@@ -44,7 +44,7 @@ public enum ScreenOrientation implements OptionList<String> {
   private static final Map<String, ScreenOrientation> lookup = new HashMap<>();
 
   static {
-    for(ScreenOrientation orientation : ScreenOrientation.values()) {
+    for (ScreenOrientation orientation : ScreenOrientation.values()) {
       lookup.put(orientation.toUnderlyingValue().toLowerCase(), orientation);
     }
   }
